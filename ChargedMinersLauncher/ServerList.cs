@@ -33,6 +33,22 @@ namespace ChargedMinersLauncher {
 
             dgvServerList.Sort( dgvServerList.Columns[1], ListSortDirection.Descending );
             dgvServerList.Columns[1].HeaderCell.SortGlyphDirection = SortOrder.Descending;
+            dgvServerList.CellFormatting += dgvServerList_CellFormatting;
+        }
+
+        void dgvServerList_CellFormatting( object sender, DataGridViewCellFormattingEventArgs e ) {
+            if( e.ColumnIndex == 3 ) {
+                TimeSpan val = (TimeSpan)e.Value;
+                if( val.TotalSeconds < 60 ) {
+                    e.Value = String.Format( "{0} sec", (int)Math.Round( val.TotalSeconds ) );
+                } else if( val.TotalMinutes < 60 ) {
+                    e.Value = String.Format( "{0} min", (int)Math.Round( val.TotalMinutes ) );
+                } else if( val.TotalHours < 24 ) {
+                    e.Value = String.Format( "{0} hours", (int)Math.Round( val.TotalHours ) );
+                } else if( val.TotalDays < 15 ) {
+                    e.Value = String.Format( "{0} days", (int)Math.Round( val.TotalDays ) );
+                }
+            }
         }
 
 

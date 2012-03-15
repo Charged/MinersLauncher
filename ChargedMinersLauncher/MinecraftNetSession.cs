@@ -63,22 +63,31 @@ namespace ChargedMinersLauncher {
             if( Status != LoginResult.Success ) throw new InvalidOperationException( "Not logged in" );
             string serverPage = DownloadString( ServerListUri, RefererUri );
             List<ServerInfo> list = new List<ServerInfo>();
+            int matchNumber = 0;
             foreach( Match match in ServerListEntry.Matches( serverPage ) ) {
                 string hash = match.Groups[1].Value;
+
+                // minecraft.net escaping bug workaround
                 string name = HttpUtility.HtmlDecode( match.Groups[2].Value ).Replace( "&hellip;", "…" );
+
                 int players;
                 if( !Int32.TryParse( match.Groups[3].Value, out players ) ) {
                     continue;
                 }
+
                 int maxPlayers;
                 if( !Int32.TryParse( match.Groups[4].Value, out maxPlayers ) ) {
                     continue;
                 }
+
                 TimeSpan uptime;
                 if( !Util.TryParseMiniTimespan( match.Groups[5].Value, out uptime ) ) {
                     continue;
                 }
+                uptime = uptime.Subtract( new TimeSpan( matchNumber ) ); // to preserve sort order
+
                 list.Add( new ServerInfo( hash, name, players, maxPlayers, uptime ) );
+                matchNumber++;
             }
 
             return list.ToArray();

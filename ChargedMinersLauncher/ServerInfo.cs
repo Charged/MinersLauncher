@@ -11,6 +11,7 @@ namespace ChargedMinersLauncher {
         }
 
         internal string Hash { get; private set; }
+
         public string Name { get; private set; }
         public int Players { get; private set; }
         public int MaxPlayers { get; private set; }
