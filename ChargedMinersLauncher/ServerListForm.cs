@@ -9,7 +9,7 @@ using System.Text.RegularExpressions;
 
 
 namespace ChargedMinersLauncher {
-    partial class ServerList : Form {
+    partial class ServerListForm : Form {
         static readonly Regex PlayIP = new Regex( @"^http://www.minecraft.net/classic/play/([0-9a-fA-F]{28,32})/?$" );
 
         SortableBindingList<ServerInfo> boundList = new SortableBindingList<ServerInfo>();
@@ -18,7 +18,7 @@ namespace ChargedMinersLauncher {
         string activeHash;
 
 
-        public ServerList( ServerInfo[] list ) {
+        public ServerListForm( ServerInfo[] list ) {
             InitializeComponent();
             originalList = list;
             foreach( ServerInfo listItem in list ) {
@@ -27,12 +27,15 @@ namespace ChargedMinersLauncher {
             }
             dgvServerList.DataSource = boundList;
 
+            dgvServerList.Columns[1].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight;
+            dgvServerList.Columns[2].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight;
+            dgvServerList.Columns[3].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight;
+
+            dgvServerList.Sort( dgvServerList.Columns[1], ListSortDirection.Descending );
             foreach( DataGridViewColumn column in dgvServerList.Columns ) {
                 column.SortMode = DataGridViewColumnSortMode.Automatic;
             }
 
-            dgvServerList.Sort( dgvServerList.Columns[1], ListSortDirection.Descending );
-            dgvServerList.Columns[1].HeaderCell.SortGlyphDirection = SortOrder.Descending;
             dgvServerList.CellFormatting += dgvServerList_CellFormatting;
         }
 
@@ -98,7 +101,7 @@ namespace ChargedMinersLauncher {
         void StartLoadingInfo( string hash ) {
             activeHash = hash;
 
-            LoadingBox progressBox = new LoadingBox( "Fetching server info..." );
+            LoadingForm progressBox = new LoadingForm( "Fetching server info..." );
             progressBox.Shown += delegate( object s2, EventArgs e2 ) {
                 ThreadPool.QueueUserWorkItem( FetchInfo, progressBox );
             };
@@ -107,7 +110,7 @@ namespace ChargedMinersLauncher {
 
 
         private void FetchInfo( object param ) {
-            LoadingBox progressBox = (LoadingBox)param;
+            LoadingForm progressBox = (LoadingForm)param;
             ServerLoginInfo info = MinecraftNetSession.Instance.GetServerInfo( activeHash );
             if( info == null ) {
                 MessageBox.Show( "Could not fetch server data! Maybe it's offline?" );
@@ -135,7 +138,17 @@ namespace ChargedMinersLauncher {
                     boundList.Remove( info );
                 }
             }
+            ListSortDirection order = (dgvServerList.SortOrder == SortOrder.Ascending ? ListSortDirection.Ascending : ListSortDirection.Descending);
+            if( dgvServerList.SortedColumn == null ) {
+                dgvServerList.Sort( dgvServerList.Columns[1], order );
+            } else {
+                dgvServerList.Sort( dgvServerList.SortedColumn, order );
+            }
             dgvServerList.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.AllCells;
+        }
+
+        private void bSettings_Click( object sender, EventArgs e ) {
+            new SettingsForm().ShowDialog();
         }
     }
 }

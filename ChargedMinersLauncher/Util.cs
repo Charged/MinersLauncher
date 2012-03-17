@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 
 namespace ChargedMinersLauncher {
     static class Util {
@@ -57,6 +58,23 @@ namespace ChargedMinersLauncher {
                 }
             }
             return result;
+        }
+
+
+        public static void MoveOrReplace( string source, string destination ) {
+            if( source == null ) throw new ArgumentNullException( "source" );
+            if( destination == null ) throw new ArgumentNullException( "destination" );
+            if( File.Exists( destination ) ) {
+                if( Path.GetPathRoot( Path.GetFullPath( source ) ) == Path.GetPathRoot( Path.GetFullPath( destination ) ) ) {
+                    string backupFileName = destination + ".bak";
+                    File.Replace( source, destination, backupFileName, true );
+                    File.Delete( backupFileName );
+                } else {
+                    File.Copy( source, destination, true );
+                }
+            } else {
+                File.Move( source, destination );
+            }
         }
     }
 }

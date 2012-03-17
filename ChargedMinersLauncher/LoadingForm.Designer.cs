@@ -1,5 +1,5 @@
 ﻿namespace ChargedMinersLauncher {
-    partial class LoadingBox {
+    partial class LoadingForm {
         /// <summary>
         /// Required designer variable.
         /// </summary>
@@ -35,7 +35,7 @@
             this.pbProgress.Style = System.Windows.Forms.ProgressBarStyle.Marquee;
             this.pbProgress.TabIndex = 0;
             // 
-            // LoadingBox
+            // LoadingForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF( 6F, 13F );
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
@@ -43,7 +43,8 @@
             this.ControlBox = false;
             this.Controls.Add( this.pbProgress );
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedToolWindow;
-            this.Name = "LoadingBox";
+            this.Name = "LoadingForm";
+            this.ShowInTaskbar = false;
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
             this.Text = "LoadingBox";
             this.ResumeLayout( false );

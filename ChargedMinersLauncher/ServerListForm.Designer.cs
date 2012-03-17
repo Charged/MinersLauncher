@@ -1,5 +1,5 @@
 ﻿namespace ChargedMinersLauncher {
-    partial class ServerList {
+    partial class ServerListForm {
         /// <summary>
         /// Required designer variable.
         /// </summary>
@@ -30,6 +30,7 @@
             this.label1 = new System.Windows.Forms.Label();
             this.xHideEmpty = new System.Windows.Forms.CheckBox();
             this.xHideFull = new System.Windows.Forms.CheckBox();
+            this.bSettings = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.dgvServerList)).BeginInit();
             this.SuspendLayout();
             // 
@@ -59,16 +60,16 @@
             // 
             this.tURL.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)
                         | System.Windows.Forms.AnchorStyles.Right)));
-            this.tURL.Location = new System.Drawing.Point( 3, 414 );
+            this.tURL.Location = new System.Drawing.Point( 87, 416 );
             this.tURL.Name = "tURL";
-            this.tURL.Size = new System.Drawing.Size( 423, 20 );
+            this.tURL.Size = new System.Drawing.Size( 337, 20 );
             this.tURL.TabIndex = 1;
             this.tURL.TextChanged += new System.EventHandler( this.tURL_TextChanged );
             // 
             // bConnect
             // 
             this.bConnect.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.bConnect.Location = new System.Drawing.Point( 433, 411 );
+            this.bConnect.Location = new System.Drawing.Point( 430, 414 );
             this.bConnect.Name = "bConnect";
             this.bConnect.Size = new System.Drawing.Size( 75, 23 );
             this.bConnect.TabIndex = 2;
@@ -119,11 +120,23 @@
             this.xHideFull.UseVisualStyleBackColor = true;
             this.xHideFull.CheckedChanged += new System.EventHandler( this.UpdateFilters );
             // 
-            // ServerList
+            // bSettings
+            // 
+            this.bSettings.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.bSettings.Location = new System.Drawing.Point( 6, 414 );
+            this.bSettings.Name = "bSettings";
+            this.bSettings.Size = new System.Drawing.Size( 75, 23 );
+            this.bSettings.TabIndex = 7;
+            this.bSettings.Text = "Settings";
+            this.bSettings.UseVisualStyleBackColor = true;
+            this.bSettings.Click += new System.EventHandler( this.bSettings_Click );
+            // 
+            // ServerListForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF( 6F, 13F );
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size( 511, 446 );
+            this.Controls.Add( this.bSettings );
             this.Controls.Add( this.xHideFull );
             this.Controls.Add( this.xHideEmpty );
             this.Controls.Add( this.label1 );
@@ -131,10 +144,10 @@
             this.Controls.Add( this.bConnect );
             this.Controls.Add( this.tURL );
             this.Controls.Add( this.dgvServerList );
-            this.Name = "ServerList";
+            this.Name = "ServerListForm";
             this.Padding = new System.Windows.Forms.Padding( 3, 0, 3, 0 );
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
-            this.Text = "Charged Miners Launcher: Servers";
+            this.Text = "Charged-Miners: Servers";
             ((System.ComponentModel.ISupportInitialize)(this.dgvServerList)).EndInit();
             this.ResumeLayout( false );
             this.PerformLayout();
@@ -150,6 +163,7 @@
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.CheckBox xHideEmpty;
         private System.Windows.Forms.CheckBox xHideFull;
+        private System.Windows.Forms.Button bSettings;
 
     }
 }

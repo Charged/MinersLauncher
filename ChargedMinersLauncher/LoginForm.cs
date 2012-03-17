@@ -69,14 +69,14 @@ namespace ChargedMinersLauncher {
             }
 
             MinecraftNetSession.Instance = new MinecraftNetSession( tUsername.Text, tPassword.Text );
-            LoadingBox progressBox = new LoadingBox( "Signing into minecraft.net" );
+            LoadingForm progressBox = new LoadingForm( "Signing into minecraft.net" );
             progressBox.Shown += delegate( object s2, EventArgs e2 ) {
                 ThreadPool.QueueUserWorkItem( SignIn, progressBox );
             };
             progressBox.ShowDialog();
             if( servers != null ) {
                 Hide();
-                new ServerList( servers ).ShowDialog();
+                new ServerListForm( servers ).ShowDialog();
                 Application.Exit();
             } else {
                 MessageBox.Show( MinecraftNetSession.Instance.Status.ToString() );
@@ -85,7 +85,7 @@ namespace ChargedMinersLauncher {
 
 
         private void SignIn( object param ) {
-            LoadingBox progressBox = (LoadingBox)param;
+            LoadingForm progressBox = (LoadingForm)param;
             MinecraftNetSession.Instance.Login();
             if( MinecraftNetSession.Instance.Status != LoginResult.Success ) {
                 progressBox.Invoke( (Action)progressBox.Close );
