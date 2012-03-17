@@ -1,31 +1,26 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
 using System.Linq;
-using System.Text;
 using System.Windows.Forms;
 using System.IO;
 
 namespace ChargedMinersLauncher {
-    public partial class SettingsForm : Form {
+    public sealed partial class SettingsForm : Form {
         const string ConfigFileName = "settings.ini";
-        readonly string ConfigFullFileName;
-        ChargedMinersSettings settings;
-        ChargedMinersSettings defaults = new ChargedMinersSettings();
-        ScreenResolution[] resolutions;
+        readonly string configFullFileName;
+        readonly ChargedMinersSettings settings;
+        readonly ChargedMinersSettings defaults = new ChargedMinersSettings();
+        readonly ScreenResolution[] resolutions;
 
         readonly int defaultResolution;
 
         public SettingsForm() {
             InitializeComponent();
-            ConfigFullFileName = Path.Combine(
+            configFullFileName = Path.Combine(
                 Path.Combine( Environment.GetFolderPath( Environment.SpecialFolder.ApplicationData ), "charge" ),
                 ConfigFileName );
 
-            if( File.Exists( ConfigFullFileName ) ) {
-                settings = new ChargedMinersSettings( File.ReadAllLines( ConfigFullFileName ) );
+            if( File.Exists( configFullFileName ) ) {
+                settings = new ChargedMinersSettings( File.ReadAllLines( configFullFileName ) );
             } else {
                 settings = new ChargedMinersSettings();
             }
@@ -42,11 +37,19 @@ namespace ChargedMinersLauncher {
                 }
             }
 
-            ResetDefaults( null, null );
+            ApplySettings();
         }
 
 
         private void ResetDefaults( object sender, EventArgs e ) {
+            xFullscreen.Checked = defaults.Fullscreen;
+            nWinWidth.Value = defaults.Width;
+            nWinHeight.Value = defaults.Height;
+            xResizableWindow.Checked = defaults.ForceResizeEnable;
+            cResolutions.SelectedIndex = defaultResolution;
+        }
+
+        private void ApplySettings() {
             xFullscreen.Checked = settings.Fullscreen;
             nWinWidth.Value = settings.Width;
             nWinHeight.Value = settings.Height;
@@ -73,9 +76,9 @@ namespace ChargedMinersLauncher {
             }
             settings.ForceResizeEnable = xResizableWindow.Checked;
 
-            string tempFileName = ConfigFullFileName + ".tmp";
+            string tempFileName = configFullFileName + ".tmp";
             File.WriteAllLines( tempFileName, settings.Serialize() );
-            Util.MoveOrReplace( tempFileName, ConfigFullFileName );
+            Util.MoveOrReplace( tempFileName, configFullFileName );
             Close();
         }
 

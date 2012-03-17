@@ -9,12 +9,12 @@ using System.Text.RegularExpressions;
 
 
 namespace ChargedMinersLauncher {
-    partial class ServerListForm : Form {
+    sealed partial class ServerListForm : Form {
         static readonly Regex PlayIP = new Regex( @"^http://www.minecraft.net/classic/play/([0-9a-fA-F]{28,32})/?$" );
 
-        SortableBindingList<ServerInfo> boundList = new SortableBindingList<ServerInfo>();
-        ServerInfo[] originalList;
-        HashSet<ServerInfo> listedServers = new HashSet<ServerInfo>();
+        readonly SortableBindingList<ServerInfo> boundList = new SortableBindingList<ServerInfo>();
+        readonly ServerInfo[] originalList;
+        readonly HashSet<ServerInfo> listedServers = new HashSet<ServerInfo>();
         string activeHash;
 
 
@@ -39,18 +39,18 @@ namespace ChargedMinersLauncher {
             dgvServerList.CellFormatting += dgvServerList_CellFormatting;
         }
 
-        void dgvServerList_CellFormatting( object sender, DataGridViewCellFormattingEventArgs e ) {
-            if( e.ColumnIndex == 3 ) {
-                TimeSpan val = (TimeSpan)e.Value;
-                if( val.TotalSeconds < 60 ) {
-                    e.Value = String.Format( "{0} sec", (int)Math.Round( val.TotalSeconds ) );
-                } else if( val.TotalMinutes < 60 ) {
-                    e.Value = String.Format( "{0} min", (int)Math.Round( val.TotalMinutes ) );
-                } else if( val.TotalHours < 24 ) {
-                    e.Value = String.Format( "{0} hours", (int)Math.Round( val.TotalHours ) );
-                } else if( val.TotalDays < 15 ) {
-                    e.Value = String.Format( "{0} days", (int)Math.Round( val.TotalDays ) );
-                }
+
+        static void dgvServerList_CellFormatting( object sender, DataGridViewCellFormattingEventArgs e ) {
+            if( e.ColumnIndex != 3 ) return;
+            TimeSpan val = (TimeSpan)e.Value;
+            if( val.TotalSeconds < 60 ) {
+                e.Value = String.Format( "{0} sec", (int)Math.Round( val.TotalSeconds ) );
+            } else if( val.TotalMinutes < 60 ) {
+                e.Value = String.Format( "{0} min", (int)Math.Round( val.TotalMinutes ) );
+            } else if( val.TotalHours < 24 ) {
+                e.Value = String.Format( "{0} hours", (int)Math.Round( val.TotalHours ) );
+            } else if( val.TotalDays < 15 ) {
+                e.Value = String.Format( "{0} days", (int)Math.Round( val.TotalDays ) );
             }
         }
 
@@ -102,9 +102,7 @@ namespace ChargedMinersLauncher {
             activeHash = hash;
 
             LoadingForm progressBox = new LoadingForm( "Fetching server info..." );
-            progressBox.Shown += delegate( object s2, EventArgs e2 ) {
-                ThreadPool.QueueUserWorkItem( FetchInfo, progressBox );
-            };
+            progressBox.Shown += ( s2, e2 ) => ThreadPool.QueueUserWorkItem( FetchInfo, progressBox );
             progressBox.ShowDialog();
         }
 
@@ -139,11 +137,7 @@ namespace ChargedMinersLauncher {
                 }
             }
             ListSortDirection order = (dgvServerList.SortOrder == SortOrder.Ascending ? ListSortDirection.Ascending : ListSortDirection.Descending);
-            if( dgvServerList.SortedColumn == null ) {
-                dgvServerList.Sort( dgvServerList.Columns[1], order );
-            } else {
-                dgvServerList.Sort( dgvServerList.SortedColumn, order );
-            }
+            dgvServerList.Sort( dgvServerList.SortedColumn ?? dgvServerList.Columns[1], order );
             dgvServerList.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.AllCells;
         }
 

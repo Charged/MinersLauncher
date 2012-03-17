@@ -1,16 +1,15 @@
 ﻿using System;
 using System.Drawing;
+using System.Linq;
 using System.Windows.Forms;
 using System.Threading;
 using System.IO;
 
 namespace ChargedMinersLauncher {
-    public partial class LoginForm : Form {
+    public sealed partial class LoginForm : Form {
         ServerInfo[] servers;
         public const string ChargeBinary = "Charge.exe";
         const string PasswordSaveFile = "saved-login.dat";
-
-        public static LoginForm Instance { get; private set; }
 
         public LoginForm() {
             if( !File.Exists( ChargeBinary ) ) {
@@ -18,7 +17,6 @@ namespace ChargedMinersLauncher {
                 Application.Exit();
             }
             InitializeComponent();
-            Instance = this;
             try {
                 if( File.Exists( PasswordSaveFile ) ) {
                     string[] loginData = File.ReadAllLines( PasswordSaveFile );
@@ -32,16 +30,12 @@ namespace ChargedMinersLauncher {
         }
 
 
-        public static bool IsValidName( string name ) {
+        static bool IsValidName( string name ) {
             if( name == null ) throw new ArgumentNullException( "name" );
             if( name.Length < 2 || name.Length > 16 ) return false;
-            for( int i = 0; i < name.Length; i++ ) {
-                char ch = name[i];
-                if( (ch < '0' && ch != '.') || (ch > '9' && ch < 'A') || (ch > 'Z' && ch < '_') || (ch > '_' && ch < 'a') || ch > 'z' ) {
-                    return false;
-                }
-            }
-            return true;
+            return name.All( ch => ( ch >= '0' || ch == '.' ) &&
+                                   ( ch <= '9' || ch >= 'A' ) && ( ch <= 'Z' || ch >= '_' ) &&
+                                   ( ch <= '_' || ch >= 'a' ) && ch <= 'z' );
         }
 
 
@@ -70,9 +64,7 @@ namespace ChargedMinersLauncher {
 
             MinecraftNetSession.Instance = new MinecraftNetSession( tUsername.Text, tPassword.Text );
             LoadingForm progressBox = new LoadingForm( "Signing into minecraft.net" );
-            progressBox.Shown += delegate( object s2, EventArgs e2 ) {
-                ThreadPool.QueueUserWorkItem( SignIn, progressBox );
-            };
+            progressBox.Shown += ( s2, e2 ) => ThreadPool.QueueUserWorkItem( SignIn, progressBox );
             progressBox.ShowDialog();
             if( servers != null ) {
                 Hide();
@@ -86,8 +78,7 @@ namespace ChargedMinersLauncher {
 
         private void SignIn( object param ) {
             LoadingForm progressBox = (LoadingForm)param;
-            MinecraftNetSession.Instance.Login();
-            if( MinecraftNetSession.Instance.Status != LoginResult.Success ) {
+            if( MinecraftNetSession.Instance.Login() != LoginResult.Success ) {
                 progressBox.Invoke( (Action)progressBox.Close );
                 return;
             }

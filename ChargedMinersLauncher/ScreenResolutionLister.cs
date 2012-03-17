@@ -1,11 +1,10 @@
 ﻿using System;
-using System.Linq;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
 using System.Collections.Generic;
 
 namespace ChargedMinersLauncher {
-    public class ScreenResolutionLister {
+    public static class ScreenResolutionLister {
         [DllImport( "user32.dll" )]
         static extern bool EnumDisplaySettings( string deviceName, int modeNum, ref DEVMODE devMode );
         const int ENUM_CURRENT_SETTINGS = -1;
@@ -84,30 +83,6 @@ namespace ChargedMinersLauncher {
             } else {
                 return a.Width - b.Width;
             }
-        }
-    }
-
-    public struct ScreenResolution : IEquatable<ScreenResolution> {
-        public int Width, Height;
-
-        public bool Equals( ScreenResolution other ) {
-            return other.Width == Width && other.Height == Height;
-        }
-        public static bool operator ==( ScreenResolution a, ScreenResolution b ) {
-            return a.Equals( b );
-        }
-        public static bool operator !=( ScreenResolution a, ScreenResolution b ) {
-            return !a.Equals( b );
-        }
-        public override bool Equals( object obj ) {
-            if( obj is ScreenResolution ) {
-                return Equals( (ScreenResolution)obj );
-            } else {
-                return base.Equals( obj );
-            }
-        }
-        public override int GetHashCode() {
-            return (Width << 16) | Height;
         }
     }
 }

@@ -1,12 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Text.RegularExpressions;
-using System.IO;
 
 namespace ChargedMinersLauncher {
-    class ChargedMinersSettings {
+    sealed class ChargedMinersSettings {
         public int Width { get; set; }
         public int Height { get; set; }
         public string Title { get; set; }
@@ -61,13 +58,13 @@ namespace ChargedMinersLauncher {
         }
 
         public string[] Serialize() {
-            List<string> output = new List<string>();
-            output.Add( "w:" + Width );
-            output.Add( "h:" + Height );
-            output.Add( "fullscreen:" + Fullscreen );
-            output.Add( "title:" + Title );
-            output.Add( "forceResizeEnable:" + ForceResizeEnable );
-            return output.ToArray();
+            return new[]{
+                "w:" + Width,
+                "h:" + Height,
+                "fullscreen:" + Fullscreen,
+                "title:" + Title,
+                "forceResizeEnable:" + ForceResizeEnable
+            };
         }
     }
 }

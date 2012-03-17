@@ -1,5 +1,5 @@
 ﻿namespace ChargedMinersLauncher {
-    partial class LoginForm {
+    sealed partial class LoginForm {
         /// <summary>
         /// Required designer variable.
         /// </summary>

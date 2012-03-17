@@ -2,7 +2,7 @@
 using System.Windows.Forms;
 
 namespace ChargedMinersLauncher {
-    public partial class LoadingForm : Form {
+    public sealed partial class LoadingForm : Form {
         public LoadingForm( string msg ) {
             InitializeComponent();
             Text = msg;

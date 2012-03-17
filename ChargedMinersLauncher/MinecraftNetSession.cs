@@ -50,7 +50,7 @@ namespace ChargedMinersLauncher {
             string loginResponse = UploadString( LoginSecureUri, LoginUri, loginString );
             if( loginResponse.Contains( "Oops, unknown username or password." ) ) {
                 Status = LoginResult.WrongUsernameOrPass;
-            } else if( loginResponse.IndexOf( "Logged in as " + Username ) != -1 ) {
+            } else if( loginResponse.IndexOf("Logged in as " + Username, StringComparison.Ordinal) != -1 ) {
                 Status = LoginResult.Success;
             } else {
                 Status = LoginResult.Error;
@@ -136,7 +136,7 @@ namespace ChargedMinersLauncher {
         }
 
 
-        public string DownloadString( string uri, string referer ) {
+        string DownloadString( string uri, string referer ) {
             var response = MakeRequest( uri, referer, null );
             using( Stream stream = response.GetResponseStream() ) {
                 if( stream == null ) throw new IOException();
@@ -147,7 +147,7 @@ namespace ChargedMinersLauncher {
         }
 
 
-        public string UploadString( string uri, string referer, string dataToPost ) {
+        string UploadString( string uri, string referer, string dataToPost ) {
             var response = MakeRequest( uri, referer, dataToPost );
             using( Stream stream = response.GetResponseStream() ) {
                 if( stream == null ) throw new IOException();

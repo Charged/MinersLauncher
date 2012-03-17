@@ -1,5 +1,5 @@
 ﻿namespace ChargedMinersLauncher {
-    partial class ServerListForm {
+    sealed partial class ServerListForm {
         /// <summary>
         /// Required designer variable.
         /// </summary>
