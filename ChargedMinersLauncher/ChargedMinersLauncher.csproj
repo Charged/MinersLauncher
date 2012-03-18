@@ -129,7 +129,7 @@
       <DependentUpon>ServerListForm.cs</DependentUpon>
     </Compile>
     <Compile Include="ServerLoginInfo.cs" />
-    <Compile Include="SettingsFile.cs" />
+    <Compile Include="ChargedMinersSettings.cs" />
     <Compile Include="SortableBindingList.cs" />
     <Compile Include="Util.cs" />
   </ItemGroup>

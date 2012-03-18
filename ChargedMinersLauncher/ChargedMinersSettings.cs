@@ -14,6 +14,7 @@ namespace ChargedMinersLauncher {
         static readonly Regex SettingRegex = new Regex( @"^\s*(\S*)\s*=\s*(\S*)" );
         static readonly Regex SettingLiteralRegex = new Regex( @"\s*(\S*)\s*=?\s*:(.*)" );
 
+
         public ChargedMinersSettings() {
             Width = 800;
             Height = 600;
@@ -22,7 +23,9 @@ namespace ChargedMinersLauncher {
             Fullscreen = false;
         }
 
-        public ChargedMinersSettings( IEnumerable<string> lines ) : this() {
+
+        public ChargedMinersSettings( IEnumerable<string> lines )
+            : this() {
             foreach( string line in lines ) {
                 if( line == null ) break;
                 if( line.Length == 0 || CommentRegex.IsMatch( line ) ) continue;
@@ -36,6 +39,7 @@ namespace ChargedMinersLauncher {
                 }
             }
         }
+
 
         void Set( string key, string value ) {
             switch( key ) {
@@ -57,13 +61,14 @@ namespace ChargedMinersLauncher {
             }
         }
 
+
         public string[] Serialize() {
-            return new[]{
+            return new[] {
                 "w:" + Width,
                 "h:" + Height,
-                "fullscreen:" + Fullscreen,
+                "fullscreen:" + ( Fullscreen ? "true" : "false" ),
                 "title:" + Title,
-                "forceResizeEnable:" + ForceResizeEnable
+                "forceResizeEnable:" + ( ForceResizeEnable ? "true" : "false" )
             };
         }
     }
