@@ -25,6 +25,7 @@ namespace ChargedMinersLauncher {
                 boundList.Add( listItem );
                 listedServers.Add( listItem );
             }
+            boundList.PreSortProperty = "Uptime";
             dgvServerList.DataSource = boundList;
 
             dgvServerList.Columns[1].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight;

@@ -13,6 +13,9 @@ namespace ChargedMinersLauncher {
         [NonSerialized]
         private PropertyDescriptor sort;
 
+        public string PreSortProperty { get; set; }
+
+
         #region BindingList<T> Public Sorting API
 
         public void Sort() {
@@ -52,7 +55,12 @@ namespace ChargedMinersLauncher {
             List<T> items = Items as List<T>;
 
             if( null != items ) {
-                PropertyComparer<T> pc = new PropertyComparer<T>( prop, direction );
+                PropertyComparer<T> pc;
+                if( PreSortProperty != null ) {
+                    pc = new PropertyComparer<T>( direction, new[]{ prop, FindPropertyDescriptor(PreSortProperty) } );
+                } else {
+                    pc = new PropertyComparer<T>( direction, prop );
+                }
                 items.Sort( pc );
 
                 /* Set sorted */
@@ -94,25 +102,30 @@ namespace ChargedMinersLauncher {
             * //msdn.microsoft.com/library/default.asp?url=/library/en-us/dnadvnet/html/vbnet01272004.asp" href="http://msdn.microsoft.com/library/default.asp?url=/library/en-us/dnadvnet/html/vbnet01272004.asp">http://msdn.microsoft.com/library/default.asp?url=/library/en-us/dnadvnet/html/vbnet01272004.asp
             */
 
-            private readonly PropertyDescriptor property;
+            private readonly PropertyDescriptor[] properties;
             private readonly ListSortDirection direction;
 
-            public PropertyComparer( PropertyDescriptor property, ListSortDirection direction ) {
-                this.property = property;
+            public PropertyComparer( ListSortDirection direction, params PropertyDescriptor[] properties ) {
+                this.properties = properties;
                 this.direction = direction;
             }
 
             public int Compare( TKey xVal, TKey yVal ) {
-                /* Get property values */
-                object xValue = GetPropertyValue( xVal, property.Name );
-                object yValue = GetPropertyValue( yVal, property.Name );
+                foreach( PropertyDescriptor property in properties ) {
+                    /* Get property values */
+                    object xValue = GetPropertyValue( xVal, property.Name );
+                    object yValue = GetPropertyValue( yVal, property.Name );
 
-                /* Determine sort order */
-                if( direction == ListSortDirection.Ascending ) {
-                    return CompareAscending( xValue, yValue );
-                } else {
-                    return CompareDescending( xValue, yValue );
+                    /* Determine sort order */
+                    int result;
+                    if( direction == ListSortDirection.Ascending ) {
+                        result = CompareAscending( xValue, yValue );
+                    } else {
+                        result = CompareDescending( xValue, yValue );
+                    }
+                    if( result != 0 ) return result;
                 }
+                return 0;
             }
 
             public bool Equals( TKey xVal, TKey yVal ) {
