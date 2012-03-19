@@ -6,6 +6,7 @@ using System.Windows.Forms;
 using System.Threading;
 using System.Diagnostics;
 using System.Text.RegularExpressions;
+using System.Linq;
 
 
 namespace ChargedMinersLauncher {
@@ -32,14 +33,31 @@ namespace ChargedMinersLauncher {
             dgvServerList.Columns[2].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight;
             dgvServerList.Columns[3].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight;
 
+
             dgvServerList.Sort( dgvServerList.Columns[1], ListSortDirection.Descending );
             foreach( DataGridViewColumn column in dgvServerList.Columns ) {
                 column.SortMode = DataGridViewColumnSortMode.Automatic;
             }
 
             dgvServerList.CellFormatting += dgvServerList_CellFormatting;
+            KeyPreview = true;
         }
 
+
+        protected override bool ProcessCmdKey( ref Message msg, Keys keyData ) {
+            if( keyData == ( Keys.Control | Keys.F ) ) {
+                tFilter.Focus();
+                return true;
+            }
+
+            return base.ProcessCmdKey( ref msg, keyData );
+        }
+
+
+        protected override void OnShown( EventArgs e ) {
+            base.OnShown( e );
+            dgvServerList.Focus();
+        }
 
         static void dgvServerList_CellFormatting( object sender, DataGridViewCellFormattingEventArgs e ) {
             if( e.ColumnIndex != 3 ) return;
@@ -63,8 +81,19 @@ namespace ChargedMinersLauncher {
 
 
         private void dgvServerList_KeyDown( object sender, KeyEventArgs e ) {
-            if( e.KeyCode == Keys.Enter && dgvServerList.SelectedRows.Count > 0 && dgvServerList.SelectedRows[0].Index != -1 ) {
+            if( e.KeyCode == Keys.Enter && dgvServerList.SelectedRows.Count > 0 &&
+                dgvServerList.SelectedRows[0].Index != -1 ) {
                 StartLoadingInfo( boundList[dgvServerList.SelectedRows[0].Index].Hash );
+                e.Handled = true;
+            } else if( e.KeyCode == Keys.Tab ) {
+                int i = Controls.IndexOf( dgvServerList );
+                if( e.Shift ) {
+                    Controls[( i - 1 ) % Controls.Count].Focus();
+                } else {
+                    Controls[( i + 1 ) % Controls.Count].Focus();
+                }
+                e.Handled = true;
+            } else if( e.KeyCode == Keys.Left || e.KeyCode == Keys.Right ) {
                 e.Handled = true;
             }
         }
