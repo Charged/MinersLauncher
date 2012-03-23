@@ -6,7 +6,6 @@ using System.Windows.Forms;
 using System.Threading;
 using System.Diagnostics;
 using System.Text.RegularExpressions;
-using System.Linq;
 
 
 namespace ChargedMinersLauncher {
@@ -58,6 +57,7 @@ namespace ChargedMinersLauncher {
             base.OnShown( e );
             dgvServerList.Focus();
         }
+
 
         static void dgvServerList_CellFormatting( object sender, DataGridViewCellFormattingEventArgs e ) {
             if( e.ColumnIndex != 3 ) return;
@@ -170,6 +170,7 @@ namespace ChargedMinersLauncher {
             dgvServerList.Sort( dgvServerList.SortedColumn ?? dgvServerList.Columns[1], order );
             dgvServerList.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.AllCells;
         }
+
 
         private void bSettings_Click( object sender, EventArgs e ) {
             new SettingsForm().ShowDialog();

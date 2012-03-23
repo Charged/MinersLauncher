@@ -27,7 +27,7 @@ namespace ChargedMinersLauncher {
 
         public string Username { get; private set; }
         public string Password { get; private set; }
-        public LoginResult Status { get; private set; }
+        public LoginResult Status { get; set; }
 
         public MinecraftNetSession( string username, string password ) {
             if( username == null ) throw new ArgumentNullException( "username" );

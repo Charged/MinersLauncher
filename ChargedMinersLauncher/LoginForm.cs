@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Drawing;
 using System.Linq;
+using System.Net;
 using System.Windows.Forms;
 using System.Threading;
 using System.IO;
@@ -78,13 +79,20 @@ namespace ChargedMinersLauncher {
 
         private void SignIn( object param ) {
             LoadingForm progressBox = (LoadingForm)param;
-            if( MinecraftNetSession.Instance.Login() != LoginResult.Success ) {
+            try {
+                if( MinecraftNetSession.Instance.Login() != LoginResult.Success ) {
+                    progressBox.Invoke( (Action)progressBox.Close );
+                    return;
+                }
+                progressBox.SetText( "Loading server list" );
+                servers = MinecraftNetSession.Instance.GetServerList();
+            } catch( WebException ex ) {
+                MessageBox.Show( "Could not log into Minecraft.net:" + Environment.NewLine + ex.Message,
+                                 "Error" );
+            } finally {
+                MinecraftNetSession.Instance.Status = LoginResult.Error;
                 progressBox.Invoke( (Action)progressBox.Close );
-                return;
             }
-            progressBox.SetText( "Loading server list" );
-            servers = MinecraftNetSession.Instance.GetServerList();
-            progressBox.Invoke( (Action)progressBox.Close );
         }
     }
 }
