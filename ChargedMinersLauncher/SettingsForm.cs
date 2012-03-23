@@ -5,6 +5,7 @@ using System.IO;
 
 namespace ChargedMinersLauncher {
     public sealed partial class SettingsForm : Form {
+        string ConfigDirName;
         const string ConfigFileName = "settings.ini";
         readonly string configFullFileName;
         readonly ChargedMinersSettings settings;
@@ -15,9 +16,8 @@ namespace ChargedMinersLauncher {
 
         public SettingsForm() {
             InitializeComponent();
-            configFullFileName = Path.Combine(
-                Path.Combine( Environment.GetFolderPath( Environment.SpecialFolder.ApplicationData ), "charge" ),
-                ConfigFileName );
+            ConfigDirName = Path.Combine( Environment.GetFolderPath( Environment.SpecialFolder.ApplicationData ), "charge" );
+            configFullFileName = Path.Combine( ConfigDirName, ConfigFileName );
 
             if( File.Exists( configFullFileName ) ) {
                 settings = new ChargedMinersSettings( File.ReadAllLines( configFullFileName ) );
@@ -77,6 +77,10 @@ namespace ChargedMinersLauncher {
             settings.ForceResizeEnable = xResizableWindow.Checked;
 
             string tempFileName = configFullFileName + ".tmp";
+
+            if( !Directory.Exists( ConfigDirName ) ) {
+                Directory.CreateDirectory( ConfigDirName );
+            }
             File.WriteAllLines( tempFileName, settings.Serialize() );
             Util.MoveOrReplace( tempFileName, configFullFileName );
             Close();
