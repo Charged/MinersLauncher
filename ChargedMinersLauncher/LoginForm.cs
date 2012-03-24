@@ -15,7 +15,6 @@ namespace ChargedMinersLauncher {
         public LoginForm() {
             if( !File.Exists( ChargeBinary ) ) {
                 MessageBox.Show( "Charge.exe not found!" );
-                Application.Exit();
             }
             InitializeComponent();
             try {
@@ -67,12 +66,10 @@ namespace ChargedMinersLauncher {
             LoadingForm progressBox = new LoadingForm( "Signing into minecraft.net" );
             progressBox.Shown += ( s2, e2 ) => ThreadPool.QueueUserWorkItem( SignIn, progressBox );
             progressBox.ShowDialog();
-            if( servers != null ) {
+            if( MinecraftNetSession.Instance.Status == LoginResult.Success ) {
                 Hide();
                 new ServerListForm( servers ).ShowDialog();
                 Application.Exit();
-            } else {
-                MessageBox.Show( MinecraftNetSession.Instance.Status.ToString() );
             }
         }
 
@@ -80,17 +77,23 @@ namespace ChargedMinersLauncher {
         private void SignIn( object param ) {
             LoadingForm progressBox = (LoadingForm)param;
             try {
-                if( MinecraftNetSession.Instance.Login() != LoginResult.Success ) {
-                    progressBox.Invoke( (Action)progressBox.Close );
-                    return;
+                switch( MinecraftNetSession.Instance.Login() ) {
+                    case LoginResult.Success:
+                        progressBox.SetText( "Loading server list" );
+                        servers = MinecraftNetSession.Instance.GetServerList();
+                        break;
+                    case LoginResult.WrongUsernameOrPass:
+                        MessageBox.Show( "Wrong username or password.", "Could not sign in" );
+                        break;
+                    case LoginResult.Error:
+                        MessageBox.Show( "An unknown error occured.", "Could not sign in" );
+                        break;
                 }
-                progressBox.SetText( "Loading server list" );
-                servers = MinecraftNetSession.Instance.GetServerList();
             } catch( WebException ex ) {
-                MessageBox.Show( "Could not log into Minecraft.net:" + Environment.NewLine + ex.Message,
-                                 "Error" );
-            } finally {
                 MinecraftNetSession.Instance.Status = LoginResult.Error;
+                MessageBox.Show( ex.Message,
+                                 "Could not sign in" );
+            } finally {
                 progressBox.Invoke( (Action)progressBox.Close );
             }
         }

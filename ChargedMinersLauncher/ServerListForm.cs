@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
+using System.IO;
 using System.Windows.Forms;
 using System.Threading;
 using System.Diagnostics;
@@ -129,6 +130,10 @@ namespace ChargedMinersLauncher {
 
 
         void StartLoadingInfo( string hash ) {
+            if( !File.Exists( LoginForm.ChargeBinary ) ) {
+                MessageBox.Show( "Charge.exe not found!" );
+                return;
+            }
             activeHash = hash;
 
             LoadingForm progressBox = new LoadingForm( "Fetching server info..." );
