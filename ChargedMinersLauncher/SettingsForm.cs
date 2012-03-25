@@ -5,22 +5,17 @@ using System.IO;
 
 namespace ChargedMinersLauncher {
     public sealed partial class SettingsForm : Form {
-        string ConfigDirName;
-        const string ConfigFileName = "settings.ini";
-        readonly string configFullFileName;
         readonly ChargedMinersSettings settings;
         readonly ChargedMinersSettings defaults = new ChargedMinersSettings();
         readonly ScreenResolution[] resolutions;
 
         readonly int defaultResolution;
 
+
         public SettingsForm() {
             InitializeComponent();
-            ConfigDirName = Path.Combine( Environment.GetFolderPath( Environment.SpecialFolder.ApplicationData ), "charge" );
-            configFullFileName = Path.Combine( ConfigDirName, ConfigFileName );
-
-            if( File.Exists( configFullFileName ) ) {
-                settings = new ChargedMinersSettings( File.ReadAllLines( configFullFileName ) );
+            if( File.Exists( ChargedMinersSettings.ConfigFileFullName ) ) {
+                settings = new ChargedMinersSettings( File.ReadAllLines( ChargedMinersSettings.ConfigFileFullName ) );
             } else {
                 settings = new ChargedMinersSettings();
             }
@@ -76,13 +71,13 @@ namespace ChargedMinersLauncher {
             }
             settings.ForceResizeEnable = xResizableWindow.Checked;
 
-            string tempFileName = configFullFileName + ".tmp";
+            string tempFileName = ChargedMinersSettings.ConfigFileFullName + ".tmp";
 
-            if( !Directory.Exists( ConfigDirName ) ) {
-                Directory.CreateDirectory( ConfigDirName );
+            if( !Directory.Exists( ChargedMinersSettings.ConfigPath ) ) {
+                Directory.CreateDirectory( ChargedMinersSettings.ConfigPath );
             }
             File.WriteAllLines( tempFileName, settings.Serialize() );
-            Util.MoveOrReplace( tempFileName, configFullFileName );
+            Util.MoveOrReplace( tempFileName, ChargedMinersSettings.ConfigFileFullName );
             Close();
         }
 

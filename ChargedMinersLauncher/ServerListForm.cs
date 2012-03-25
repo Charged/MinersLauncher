@@ -130,7 +130,7 @@ namespace ChargedMinersLauncher {
 
 
         void StartLoadingInfo( string hash ) {
-            if( !File.Exists( LoginForm.ChargeBinary ) ) {
+            if( !File.Exists( SignInForm.ChargeBinary ) ) {
                 MessageBox.Show( "Charge.exe not found!" );
                 return;
             }
@@ -151,7 +151,7 @@ namespace ChargedMinersLauncher {
                 return;
             }
             string url = String.Format( "mc://{0}:{1}/{2}/{3}", info.IP, info.Port, info.User, info.AuthToken );
-            Process.Start( LoginForm.ChargeBinary, url );
+            Process.Start( SignInForm.ChargeBinary, url );
             Application.Exit();
         }
 

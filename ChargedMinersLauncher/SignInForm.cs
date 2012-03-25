@@ -7,19 +7,20 @@ using System.Threading;
 using System.IO;
 
 namespace ChargedMinersLauncher {
-    public sealed partial class LoginForm : Form {
+    public sealed partial class SignInForm : Form {
         ServerInfo[] servers;
         public const string ChargeBinary = "Charge.exe";
         const string PasswordSaveFile = "saved-login.dat";
 
-        public LoginForm() {
+        public SignInForm() {
             if( !File.Exists( ChargeBinary ) ) {
                 MessageBox.Show( "Charge.exe not found!" );
             }
             InitializeComponent();
+            string passwordFileFullName = Path.Combine( ChargedMinersSettings.ConfigPath, PasswordSaveFile );
             try {
-                if( File.Exists( PasswordSaveFile ) ) {
-                    string[] loginData = File.ReadAllLines( PasswordSaveFile );
+                if( File.Exists( passwordFileFullName ) ) {
+                    string[] loginData = File.ReadAllLines( passwordFileFullName );
                     tUsername.Text = loginData[0];
                     tPassword.Text = loginData[1];
                     xRemember.Checked = true;
@@ -54,11 +55,15 @@ namespace ChargedMinersLauncher {
         }
 
         private void bSignIn_Click( object sender, EventArgs e ) {
+            string passwordFileFullName = Path.Combine( ChargedMinersSettings.ConfigPath, PasswordSaveFile );
             if( xRemember.Checked ) {
-                File.WriteAllLines( PasswordSaveFile, new[] { tUsername.Text, tPassword.Text } );
+                if( !Directory.Exists( ChargedMinersSettings.ConfigPath ) ) {
+                    Directory.CreateDirectory( ChargedMinersSettings.ConfigPath );
+                }
+                File.WriteAllLines( passwordFileFullName, new[] { tUsername.Text, tPassword.Text } );
             }else{
-                if( File.Exists( PasswordSaveFile ) ) {
-                    File.Delete( PasswordSaveFile );
+                if( File.Exists( passwordFileFullName ) ) {
+                    File.Delete( passwordFileFullName );
                 }
             }
 

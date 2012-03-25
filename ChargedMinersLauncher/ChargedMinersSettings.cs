@@ -1,9 +1,21 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Text.RegularExpressions;
 
 namespace ChargedMinersLauncher {
     sealed class ChargedMinersSettings {
+        public const string ConfigFileName = "settings.ini";
+
+        public static string ConfigPath {
+            get { return Path.Combine( Environment.GetFolderPath( Environment.SpecialFolder.ApplicationData ), "charge" ); }
+        }
+
+        public static string ConfigFileFullName {
+            get { return Path.Combine( ConfigPath, ConfigFileName ); }
+        }
+
+
         public int Width { get; set; }
         public int Height { get; set; }
         public string Title { get; set; }
