@@ -11,7 +11,8 @@ using System.Text.RegularExpressions;
 
 namespace ChargedMinersLauncher {
     sealed partial class ServerListForm : Form {
-        static readonly Regex PlayIP = new Regex( @"^http://www.minecraft.net/classic/play/([0-9a-fA-F]{28,32})/?$" );
+        static readonly Regex PlayLinkHash = new Regex( @"^http://www.minecraft.net/classic/play/([0-9a-fA-F]{28,32})/?$" );
+        static readonly Regex PlayLinkDirect = new Regex( @"^mc://(\d{1,3}\.){3}\d{1,3}:\d{1,5}/[a-zA-Z0-9_\.]{2,16}/.*$" );
 
         readonly SortableBindingList<ServerInfo> boundList = new SortableBindingList<ServerInfo>();
         readonly ServerInfo[] originalList;
@@ -110,21 +111,23 @@ namespace ChargedMinersLauncher {
 
 
         private void tURL_TextChanged( object sender, EventArgs e ) {
-            Match match = PlayIP.Match( tURL.Text );
+            Match match = PlayLinkHash.Match( tURL.Text );
             if( match.Success ) {
                 tURL.BackColor = SystemColors.Window;
                 activeHash = match.Groups[1].Value;
                 bConnect.Enabled = true;
-            } else {
+            } else if( PlayLinkDirect.IsMatch( tURL.Text ) ) {
+                tURL.BackColor = SystemColors.Window;
+                activeHash = null;
+                bConnect.Enabled = true;
+            }else{
                 tURL.BackColor = Color.Yellow;
                 activeHash = null;
                 bConnect.Enabled = false;
             }
         }
 
-
         private void bConnect_Click( object sender, EventArgs e ) {
-            if( activeHash == null ) return;
             StartLoadingInfo( activeHash );
         }
 
@@ -134,15 +137,18 @@ namespace ChargedMinersLauncher {
                 MessageBox.Show( "Charge.exe not found!" );
                 return;
             }
-            activeHash = hash;
-
-            LoadingForm progressBox = new LoadingForm( "Fetching server info..." );
-            progressBox.Shown += ( s2, e2 ) => ThreadPool.QueueUserWorkItem( FetchInfo, progressBox );
-            progressBox.ShowDialog();
+            if( hash != null ) {
+                activeHash = hash;
+                LoadingForm progressBox = new LoadingForm( "Fetching server info..." );
+                progressBox.Shown += ( s2, e2 ) => ThreadPool.QueueUserWorkItem( FetchInfo, progressBox );
+                progressBox.ShowDialog();
+            } else if( PlayLinkDirect.IsMatch( tURL.Text ) ) {
+                Launch( tURL.Text );
+            }
         }
 
 
-        private void FetchInfo( object param ) {
+        void FetchInfo( object param ) {
             LoadingForm progressBox = (LoadingForm)param;
             ServerLoginInfo info = MinecraftNetSession.Instance.GetServerInfo( activeHash );
             if( info == null ) {
@@ -151,12 +157,17 @@ namespace ChargedMinersLauncher {
                 return;
             }
             string url = String.Format( "mc://{0}:{1}/{2}/{3}", info.IP, info.Port, info.User, info.AuthToken );
+            Launch( url );
+        }
+
+        
+        void Launch( string url ) {
             Process.Start( SignInForm.ChargeBinary, url );
             Application.Exit();
         }
 
 
-        private void UpdateFilters( object sender, EventArgs e ) {
+        void UpdateFilters( object sender, EventArgs e ) {
             dgvServerList.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.None;
             foreach( ServerInfo info in originalList ) {
                 bool pass = (tFilter.Text.Length == 0 || info.Name.IndexOf( tFilter.Text, StringComparison.OrdinalIgnoreCase ) > -1) &&
@@ -177,7 +188,7 @@ namespace ChargedMinersLauncher {
         }
 
 
-        private void bSettings_Click( object sender, EventArgs e ) {
+        void bSettings_Click( object sender, EventArgs e ) {
             new SettingsForm().ShowDialog();
         }
     }
