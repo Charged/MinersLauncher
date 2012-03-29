@@ -14,13 +14,13 @@ namespace ChargedMinersLauncher {
     sealed partial class ServerListForm : Form {
         static readonly Regex PlayLinkHash = new Regex( @"^http://www.minecraft.net/classic/play/([0-9a-fA-F]{28,32})/?(\?override=(true|1))?$" );
         static readonly Regex PlayLinkDirect = new Regex( @"^mc://(\d{1,3}\.){3}\d{1,3}:\d{1,5}/[a-zA-Z0-9_\.]{2,16}/.*$" );
+        static readonly Regex PlayLinkIPPort = new Regex( @"^http://www.minecraft.net/classic/play/?\?ip=(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})&port=(\d{1,5})$" );
         static readonly Regex PlayLinkOverride = new Regex( @"\?override=(true|1)$" );
 
         readonly SortableBindingList<ServerInfo> boundList = new SortableBindingList<ServerInfo>();
         readonly ServerInfo[] originalList;
         readonly HashSet<ServerInfo> listedServers = new HashSet<ServerInfo>();
         string activeHash;
-        bool overrideIP;
 
 
         public ServerListForm( ServerInfo[] list ) {
@@ -119,10 +119,11 @@ namespace ChargedMinersLauncher {
                 tURL.BackColor = SystemColors.Window;
                 activeHash = match.Groups[1].Value;
                 bConnect.Enabled = true;
-            } else if( PlayLinkDirect.IsMatch( tURL.Text ) ) {
+            } else if( PlayLinkDirect.IsMatch( tURL.Text ) || PlayLinkIPPort.IsMatch(tURL.Text) ) {
                 tURL.BackColor = SystemColors.Window;
                 activeHash = null;
                 bConnect.Enabled = true;
+
             }else{
                 tURL.BackColor = Color.Yellow;
                 activeHash = null;
@@ -147,6 +148,14 @@ namespace ChargedMinersLauncher {
                 progressBox.ShowDialog();
             } else if( PlayLinkDirect.IsMatch( tURL.Text ) ) {
                 Launch( tURL.Text );
+            } else if( PlayLinkIPPort.IsMatch( tURL.Text ) ) {
+                Match match = PlayLinkIPPort.Match( tURL.Text );
+                string url = String.Format( "mc://{0}:{1}/{2}/{3}",
+                                            match.Groups[1].Value,
+                                            match.Groups[2].Value,
+                                            MinecraftNetSession.Instance.Username,
+                                            new String( '0', 32 ) );
+                Launch( url );
             }
         }
 
@@ -162,7 +171,11 @@ namespace ChargedMinersLauncher {
             if( PlayLinkOverride.IsMatch( tURL.Text ) ) {
                 info.IP = IPAddress.Loopback;
             }
-            string url = String.Format( "mc://{0}:{1}/{2}/{3}", info.IP, info.Port, info.User, info.AuthToken );
+            string url = String.Format( "mc://{0}:{1}/{2}/{3}",
+                                        info.IP,
+                                        info.Port,
+                                        info.User,
+                                        info.AuthToken );
             Launch( url );
         }
 
