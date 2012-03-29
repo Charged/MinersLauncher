@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
 using System.IO;
+using System.Net;
 using System.Windows.Forms;
 using System.Threading;
 using System.Diagnostics;
@@ -11,13 +12,15 @@ using System.Text.RegularExpressions;
 
 namespace ChargedMinersLauncher {
     sealed partial class ServerListForm : Form {
-        static readonly Regex PlayLinkHash = new Regex( @"^http://www.minecraft.net/classic/play/([0-9a-fA-F]{28,32})/?$" );
+        static readonly Regex PlayLinkHash = new Regex( @"^http://www.minecraft.net/classic/play/([0-9a-fA-F]{28,32})/?(\?override=(true|1))?$" );
         static readonly Regex PlayLinkDirect = new Regex( @"^mc://(\d{1,3}\.){3}\d{1,3}:\d{1,5}/[a-zA-Z0-9_\.]{2,16}/.*$" );
+        static readonly Regex PlayLinkOverride = new Regex( @"\?override=(true|1)$" );
 
         readonly SortableBindingList<ServerInfo> boundList = new SortableBindingList<ServerInfo>();
         readonly ServerInfo[] originalList;
         readonly HashSet<ServerInfo> listedServers = new HashSet<ServerInfo>();
         string activeHash;
+        bool overrideIP;
 
 
         public ServerListForm( ServerInfo[] list ) {
@@ -155,6 +158,9 @@ namespace ChargedMinersLauncher {
                 MessageBox.Show( "Could not fetch server data! Maybe it's offline?" );
                 progressBox.Invoke( (Action)progressBox.Close );
                 return;
+            }
+            if( PlayLinkOverride.IsMatch( tURL.Text ) ) {
+                info.IP = IPAddress.Loopback;
             }
             string url = String.Format( "mc://{0}:{1}/{2}/{3}", info.IP, info.Port, info.User, info.AuthToken );
             Launch( url );

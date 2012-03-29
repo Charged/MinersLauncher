@@ -9,9 +9,9 @@ namespace ChargedMinersLauncher {
             AuthToken = authToken;
         }
 
-        public IPAddress IP { get; private set; }
-        public int Port { get; private set; }
-        public string User { get; private set; }
-        public string AuthToken { get; private set; }
+        public IPAddress IP { get; set; }
+        public int Port { get; set; }
+        public string User { get; set; }
+        public string AuthToken { get; set; }
     }
 }
