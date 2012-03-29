@@ -82,7 +82,7 @@ namespace ChargedMinersLauncher {
         private void SignIn( object param ) {
             LoadingForm progressBox = (LoadingForm)param;
             try {
-                switch( MinecraftNetSession.Instance.Login() ) {
+                switch( MinecraftNetSession.Instance.Login( xRemember.Checked ) ) {
                     case LoginResult.Success:
                         progressBox.SetText( "Loading server list" );
                         servers = MinecraftNetSession.Instance.GetServerList();

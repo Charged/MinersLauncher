@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Net;
+using System.Runtime.Serialization.Formatters.Binary;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Web;
@@ -14,7 +15,8 @@ namespace ChargedMinersLauncher {
                             LoginUri = "http://www.minecraft.net/login",
                             LoginSecureUri = "https://www.minecraft.net/login",
                             PlayUri = "http://www.minecraft.net/classic/play/",
-                            ServerListUri = "http://www.minecraft.net/classic/list";
+                            ServerListUri = "http://www.minecraft.net/classic/list",
+                            CookieContainerFile = "saved-session.dat";
 
         static readonly Regex PlayIP = new Regex( @"name=""server"" value=""([^""]+)""" ),
                               PlayPort = new Regex( @"name=""port"" value=""(\d+)""" ),
@@ -37,8 +39,15 @@ namespace ChargedMinersLauncher {
         }
 
 
-        public LoginResult Login() {
+        public LoginResult Login( bool remember ) {
+            LoadCookie( remember );
+
             string loginPage = DownloadString( LoginUri, RefererUri );
+            if( loginPage.IndexOf( "Logged in as " + Username, StringComparison.Ordinal ) != -1 ) {
+                Status = LoginResult.Success;
+                SaveCookie();
+                return Status;
+            }
 
             string authToken = LoginAuthToken.Match( loginPage ).Groups[1].Value;
 
@@ -46,16 +55,64 @@ namespace ChargedMinersLauncher {
                                                 Uri.EscapeDataString( Username ),
                                                 Uri.EscapeDataString( Password ),
                                                 Uri.EscapeDataString( authToken ) );
+            if( remember ) {
+                loginString += "&remember=true";
+            }
 
             string loginResponse = UploadString( LoginSecureUri, LoginUri, loginString );
             if( loginResponse.Contains( "Oops, unknown username or password." ) ) {
                 Status = LoginResult.WrongUsernameOrPass;
-            } else if( loginResponse.IndexOf("Logged in as " + Username, StringComparison.Ordinal) != -1 ) {
+
+            } else if( loginResponse.IndexOf( "Logged in as " + Username, StringComparison.Ordinal ) != -1 ) {
                 Status = LoginResult.Success;
+                SaveCookie();
+
             } else {
                 Status = LoginResult.Error;
             }
             return Status;
+        }
+
+
+        void LoadCookie( bool remember ) {
+            string cookieFile = Path.Combine( ChargedMinersSettings.ConfigPath, CookieContainerFile );
+            if( File.Exists( cookieFile ) ) {
+                if( remember ) {
+                    if( File.Exists( cookieFile ) ) {
+                        BinaryFormatter formatter = new BinaryFormatter();
+                        using( Stream s = File.OpenRead( cookieFile ) ) {
+                            cookieJar = (CookieContainer)formatter.Deserialize( s );
+                        }
+                        CookieCollection cookies = cookieJar.GetCookies( new Uri( "http://www.minecraft.net/" ) );
+                        bool found = false;
+                        foreach( Cookie c in cookies ) {
+                            if( c.Value.Contains( "username%3A" + Username ) ) {
+                                found = true;
+                                break;
+                            }
+                        }
+                        if( !found ) {
+                            cookieJar = new CookieContainer();
+                        }
+                    } else {
+                        cookieJar = new CookieContainer();
+                    }
+                } else {
+                    File.Delete( cookieFile );
+                }
+            }
+        }
+
+
+        void SaveCookie() {
+            if( Directory.Exists( ChargedMinersSettings.ConfigPath ) ) {
+                Directory.CreateDirectory( ChargedMinersSettings.ConfigPath );
+            }
+            string cookieFile = Path.Combine( ChargedMinersSettings.ConfigPath, CookieContainerFile );
+            BinaryFormatter formatter = new BinaryFormatter();
+            using( Stream s = File.Create( cookieFile ) ) {
+                formatter.Serialize( s, cookieJar );
+            }
         }
 
 
@@ -112,7 +169,7 @@ namespace ChargedMinersLauncher {
         const string UserAgent = "Mozilla/5.0 (Windows; U; Windows NT 6.1; en-US; rv:1.9.2.22) Gecko/20110902 Firefox/3.6.22";
         const int Timeout = 15000;
 
-        readonly CookieContainer cookieJar = new CookieContainer();
+        CookieContainer cookieJar;
 
 
         HttpWebResponse MakeRequest( string uri, string referer, string dataToPost ) {
