@@ -78,28 +78,26 @@ namespace ChargedMinersLauncher {
             string cookieFile = Path.Combine( ChargedMinersSettings.ConfigPath, CookieContainerFile );
             if( File.Exists( cookieFile ) ) {
                 if( remember ) {
-                    if( File.Exists( cookieFile ) ) {
-                        BinaryFormatter formatter = new BinaryFormatter();
-                        using( Stream s = File.OpenRead( cookieFile ) ) {
-                            cookieJar = (CookieContainer)formatter.Deserialize( s );
+                    BinaryFormatter formatter = new BinaryFormatter();
+                    using( Stream s = File.OpenRead( cookieFile ) ) {
+                        cookieJar = (CookieContainer)formatter.Deserialize( s );
+                    }
+                    CookieCollection cookies = cookieJar.GetCookies( new Uri( "http://www.minecraft.net/" ) );
+                    bool found = false;
+                    foreach( Cookie c in cookies ) {
+                        if( c.Value.Contains( "username%3A" + Username ) ) {
+                            found = true;
+                            break;
                         }
-                        CookieCollection cookies = cookieJar.GetCookies( new Uri( "http://www.minecraft.net/" ) );
-                        bool found = false;
-                        foreach( Cookie c in cookies ) {
-                            if( c.Value.Contains( "username%3A" + Username ) ) {
-                                found = true;
-                                break;
-                            }
-                        }
-                        if( !found ) {
-                            cookieJar = new CookieContainer();
-                        }
-                    } else {
+                    }
+                    if( !found ) {
                         cookieJar = new CookieContainer();
                     }
                 } else {
                     File.Delete( cookieFile );
                 }
+            } else {
+                cookieJar = new CookieContainer();
             }
         }
 
