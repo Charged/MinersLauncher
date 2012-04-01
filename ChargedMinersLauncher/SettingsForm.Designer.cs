@@ -37,7 +37,7 @@
             this.xFullscreen = new System.Windows.Forms.CheckBox();
             this.gWindowed = new System.Windows.Forms.GroupBox();
             this.lWindowSize = new System.Windows.Forms.Label();
-            this.nX = new System.Windows.Forms.Label();
+            this.lX = new System.Windows.Forms.Label();
             this.nWinHeight = new System.Windows.Forms.NumericUpDown();
             this.nWinWidth = new System.Windows.Forms.NumericUpDown();
             this.gGraphics.SuspendLayout();
@@ -191,7 +191,7 @@
             this.gWindowed.Controls.Add(this.cResolutions);
             this.gWindowed.Controls.Add(this.xFullscreen);
             this.gWindowed.Controls.Add(this.lWindowSize);
-            this.gWindowed.Controls.Add(this.nX);
+            this.gWindowed.Controls.Add(this.lX);
             this.gWindowed.Controls.Add(this.nWinHeight);
             this.gWindowed.Controls.Add(this.nWinWidth);
             this.gWindowed.Controls.Add(this.xResizableWindow);
@@ -213,15 +213,15 @@
             this.lWindowSize.TabIndex = 1;
             this.lWindowSize.Text = "Window size";
             // 
-            // nX
+            // lX
             // 
-            this.nX.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.nX.AutoSize = true;
-            this.nX.Location = new System.Drawing.Point(194, 71);
-            this.nX.Name = "nX";
-            this.nX.Size = new System.Drawing.Size(12, 13);
-            this.nX.TabIndex = 3;
-            this.nX.Text = "x";
+            this.lX.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.lX.AutoSize = true;
+            this.lX.Location = new System.Drawing.Point(194, 71);
+            this.lX.Name = "lX";
+            this.lX.Size = new System.Drawing.Size(12, 13);
+            this.lX.TabIndex = 3;
+            this.lX.Text = "x";
             // 
             // nWinHeight
             // 
@@ -285,7 +285,7 @@
         private System.Windows.Forms.CheckBox xResizableWindow;
         private System.Windows.Forms.GroupBox gGraphics;
         private System.Windows.Forms.GroupBox gWindowed;
-        private System.Windows.Forms.Label nX;
+        private System.Windows.Forms.Label lX;
         private System.Windows.Forms.NumericUpDown nWinHeight;
         private System.Windows.Forms.NumericUpDown nWinWidth;
         private System.Windows.Forms.Label lWindowSize;

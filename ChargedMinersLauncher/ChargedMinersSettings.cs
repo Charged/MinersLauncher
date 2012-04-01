@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text.RegularExpressions;
 
 namespace ChargedMinersLauncher {
@@ -15,17 +16,17 @@ namespace ChargedMinersLauncher {
             get { return Path.Combine( ConfigPath, ConfigFileName ); }
         }
 
+        readonly Dictionary<string, string> unrecognizedValues = new Dictionary<string, string>();
+
 
         public int Width { get; set; }
         public int Height { get; set; }
-        public string Title { get; set; }
         public bool ForceResizeEnable { get; set; }
         public bool Fullscreen { get; set; }
         public bool AntiAliasEnabled { get; set; }
         public bool FogEnabled { get; set; }
         public bool ShadowsEnabled { get; set; }
         public int ViewDistance { get; set; }
-        public bool UseCmdPrefix { get; set; }
 
         static readonly Regex CommentRegex = new Regex( @"^\s*#" );
         static readonly Regex SettingRegex = new Regex( @"^\s*(\S*)\s*=\s*(\S*)" );
@@ -35,14 +36,12 @@ namespace ChargedMinersLauncher {
         public ChargedMinersSettings() {
             Width = 800;
             Height = 600;
-            Title = "Charged Miners";
             ForceResizeEnable = false;
             Fullscreen = false;
             AntiAliasEnabled = true;
             FogEnabled = true;
             ShadowsEnabled = true;
             ViewDistance = 256;
-            UseCmdPrefix = true;
         }
 
 
@@ -71,9 +70,6 @@ namespace ChargedMinersLauncher {
                 case "h":
                     Height = Int32.Parse( value );
                     break;
-                case "title":
-                    Title = value;
-                    break;
                 case "forceResizeEnable":
                     ForceResizeEnable = Boolean.Parse( value );
                     break;
@@ -92,23 +88,26 @@ namespace ChargedMinersLauncher {
                 case "mc.viewDistance":
                     ViewDistance = Int32.Parse( value );
                     break;
+                default:
+                    unrecognizedValues.Add( key, value );
+                    break;
             }
         }
 
 
         public string[] Serialize() {
-            return new[] {
+            List<string> result = new List<string> {
                 "w:" + Width,
                 "h:" + Height,
                 "fullscreen:" + ( Fullscreen ? "true" : "false" ),
-                "title:" + Title,
                 "forceResizeEnable:" + ( ForceResizeEnable ? "true" : "false" ),
                 "mc.aa:" + ( AntiAliasEnabled ? "true" : "false" ),
                 "mc.fog:" + ( FogEnabled ? "true" : "false" ),
                 "mc.shadow:" + ( ShadowsEnabled ? "true" : "false" ),
-                "mc.viewDistance:" + ViewDistance,
-                "mc.useCmdPrefix:" + ( UseCmdPrefix ? "true" : "false" )
+                "mc.viewDistance:" + ViewDistance
             };
+            result.AddRange( unrecognizedValues.Select( kvp => ( kvp.Key + ':' + kvp.Value ) ) );
+            return result.ToArray();
         }
     }
 }

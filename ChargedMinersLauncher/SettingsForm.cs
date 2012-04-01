@@ -42,6 +42,11 @@ namespace ChargedMinersLauncher {
             nWinHeight.Value = defaults.Height;
             xResizableWindow.Checked = defaults.ForceResizeEnable;
             cResolutions.SelectedIndex = defaultResolution;
+            xAntiAlias.Checked = defaults.AntiAliasEnabled;
+            xFog.Checked = defaults.FogEnabled;
+            xShadows.Checked = defaults.ShadowsEnabled;
+            tbViewDistance.Value = Math.Max( tbViewDistance.Minimum, Math.Min( defaults.ViewDistance / 32, tbViewDistance.Maximum ) );
+            lViewDistance.Text = String.Format( "View distance: {0}", tbViewDistance.Value * 32 );
         }
 
         private void ApplySettings() {
@@ -59,8 +64,12 @@ namespace ChargedMinersLauncher {
 
 
         private void xFullscreen_CheckedChanged( object sender, EventArgs e ) {
-            gWindowed.Enabled = !xFullscreen.Checked;
             cResolutions.Enabled = xFullscreen.Checked;
+            xResizableWindow.Enabled = !xFullscreen.Checked;
+            lWindowSize.Enabled = !xFullscreen.Checked;
+            nWinWidth.Enabled = !xFullscreen.Checked;
+            lX.Enabled = !xFullscreen.Checked;
+            nWinHeight.Enabled = !xFullscreen.Checked;
         }
 
 
