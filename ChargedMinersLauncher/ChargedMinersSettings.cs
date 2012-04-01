@@ -21,6 +21,11 @@ namespace ChargedMinersLauncher {
         public string Title { get; set; }
         public bool ForceResizeEnable { get; set; }
         public bool Fullscreen { get; set; }
+        public bool AntiAliasEnabled { get; set; }
+        public bool FogEnabled { get; set; }
+        public bool ShadowsEnabled { get; set; }
+        public int ViewDistance { get; set; }
+        public bool UseCmdPrefix { get; set; }
 
         static readonly Regex CommentRegex = new Regex( @"^\s*#" );
         static readonly Regex SettingRegex = new Regex( @"^\s*(\S*)\s*=\s*(\S*)" );
@@ -33,6 +38,11 @@ namespace ChargedMinersLauncher {
             Title = "Charged Miners";
             ForceResizeEnable = false;
             Fullscreen = false;
+            AntiAliasEnabled = true;
+            FogEnabled = true;
+            ShadowsEnabled = true;
+            ViewDistance = 256;
+            UseCmdPrefix = true;
         }
 
 
@@ -61,14 +71,26 @@ namespace ChargedMinersLauncher {
                 case "h":
                     Height = Int32.Parse( value );
                     break;
-                case "fullscreen":
-                    Fullscreen = Boolean.Parse( value );
-                    break;
                 case "title":
                     Title = value;
                     break;
                 case "forceResizeEnable":
                     ForceResizeEnable = Boolean.Parse( value );
+                    break;
+                case "fullscreen":
+                    Fullscreen = Boolean.Parse( value );
+                    break;
+                case "mc.aa":
+                    AntiAliasEnabled = Boolean.Parse( value );
+                    break;
+                case "mc.fog":
+                    FogEnabled = Boolean.Parse( value );
+                    break;
+                case "mc.shadow":
+                    ShadowsEnabled = Boolean.Parse( value );
+                    break;
+                case "mc.viewDistance":
+                    ViewDistance = Int32.Parse( value );
                     break;
             }
         }
@@ -80,7 +102,12 @@ namespace ChargedMinersLauncher {
                 "h:" + Height,
                 "fullscreen:" + ( Fullscreen ? "true" : "false" ),
                 "title:" + Title,
-                "forceResizeEnable:" + ( ForceResizeEnable ? "true" : "false" )
+                "forceResizeEnable:" + ( ForceResizeEnable ? "true" : "false" ),
+                "mc.aa:" + ( AntiAliasEnabled ? "true" : "false" ),
+                "mc.fog:" + ( FogEnabled ? "true" : "false" ),
+                "mc.shadow:" + ( ShadowsEnabled ? "true" : "false" ),
+                "mc.viewDistance:" + ViewDistance,
+                "mc.useCmdPrefix:" + ( UseCmdPrefix ? "true" : "false" )
             };
         }
     }

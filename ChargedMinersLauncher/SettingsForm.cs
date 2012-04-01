@@ -50,6 +50,11 @@ namespace ChargedMinersLauncher {
             nWinHeight.Value = settings.Height;
             xResizableWindow.Checked = settings.ForceResizeEnable;
             cResolutions.SelectedIndex = defaultResolution;
+            xAntiAlias.Checked = settings.AntiAliasEnabled;
+            xFog.Checked = settings.FogEnabled;
+            xShadows.Checked = settings.ShadowsEnabled;
+            tbViewDistance.Value = Math.Max( tbViewDistance.Minimum, Math.Min( settings.ViewDistance / 32, tbViewDistance.Maximum ) );
+            lViewDistance.Text = String.Format( "View distance: {0}", tbViewDistance.Value * 32 );
         }
 
 
@@ -70,6 +75,10 @@ namespace ChargedMinersLauncher {
                 settings.Height = (int)nWinHeight.Value;
             }
             settings.ForceResizeEnable = xResizableWindow.Checked;
+            settings.AntiAliasEnabled = xAntiAlias.Checked;
+            settings.FogEnabled = xFog.Checked;
+            settings.ShadowsEnabled = xShadows.Checked;
+            settings.ViewDistance = tbViewDistance.Value;
 
             string tempFileName = ChargedMinersSettings.ConfigFileFullName + ".tmp";
 
@@ -84,6 +93,10 @@ namespace ChargedMinersLauncher {
 
         private void bCancel_Click( object sender, EventArgs e ) {
             Close();
+        }
+
+        private void tbViewDistance_Scroll( object sender, EventArgs e ) {
+            lViewDistance.Text = String.Format( "View distance: {0}", tbViewDistance.Value * 32 );
         }
     }
 }
