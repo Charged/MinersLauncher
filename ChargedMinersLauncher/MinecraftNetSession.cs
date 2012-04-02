@@ -26,18 +26,18 @@ namespace ChargedMinersLauncher {
 
         static readonly Regex ServerListEntry = new Regex( @"<a href=""/classic/play/([0-9a-f]+)"">([^<]+)</a>\s+</td>\s+<td>(\d+)</td>\s+<td>(\d+)</td>\s+<td>(\d+\w)</td>" );
 
+        static readonly Regex LoggedInAs = new Regex( @"<span class=""logged-in"">\s*Logged in as ([a-zA-Z0-9_\.]{2,16})" );
 
         public string UsernameForLogin { get; set; }
         public string Username { get; private set; }
         public string Password { get; private set; }
         public LoginResult Status { get; set; }
 
-        public MinecraftNetSession( string usernameForLogin, string username, string password ) {
+        public MinecraftNetSession( string usernameForLogin, string password ) {
             if( usernameForLogin == null ) throw new ArgumentNullException( "usernameForLogin" );
-            if( username == null ) throw new ArgumentNullException( "username" );
             if( password == null ) throw new ArgumentNullException( "password" );
             UsernameForLogin = usernameForLogin;
-            Username = username;
+            Username = usernameForLogin;
             Password = password;
         }
 
@@ -46,7 +46,8 @@ namespace ChargedMinersLauncher {
             LoadCookie( remember );
 
             string loginPage = DownloadString( LoginUri, RefererUri );
-            if( loginPage.IndexOf( "Logged in as " + Username, StringComparison.Ordinal ) != -1 ) {
+            if( LoggedInAs.IsMatch(loginPage)) {
+                Username = LoggedInAs.Match( loginPage ).Groups[1].Value;
                 Status = LoginResult.Success;
                 SaveCookie();
                 return Status;
@@ -66,7 +67,8 @@ namespace ChargedMinersLauncher {
             if( loginResponse.Contains( "Oops, unknown username or password." ) ) {
                 Status = LoginResult.WrongUsernameOrPass;
 
-            } else if( loginResponse.IndexOf( "Logged in as " + Username, StringComparison.Ordinal ) != -1 ) {
+            } else if( LoggedInAs.IsMatch( loginResponse ) ) {
+                Username = LoggedInAs.Match( loginResponse ).Groups[1].Value;
                 Status = LoginResult.Success;
                 SaveCookie();
 

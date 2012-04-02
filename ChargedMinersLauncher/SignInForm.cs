@@ -17,7 +17,7 @@ namespace ChargedMinersLauncher {
 
         static readonly Regex EmailRegex =
             new Regex(
-                @"^([a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*)@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?$" );
+                @"^[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?$" );
 
 
         public SignInForm() {
@@ -39,17 +39,11 @@ namespace ChargedMinersLauncher {
         }
 
 
-        string username;
-
-
         void OnTextChanged( object sender, EventArgs e ) {
             bool valid = true;
             if( UsernameRegex.IsMatch( tUsername.Text ) ) {
-                username = tUsername.Text;
                 tUsername.BackColor = SystemColors.Window;
             } else if( EmailRegex.IsMatch( tUsername.Text ) ) {
-                Match emailMatch = EmailRegex.Match( tUsername.Text );
-                username = emailMatch.Groups[1].Value;
                 tUsername.BackColor = SystemColors.Window;
             } else {
                 tUsername.BackColor = Color.Yellow;
@@ -75,7 +69,7 @@ namespace ChargedMinersLauncher {
                 }
             }
 
-            MinecraftNetSession.Instance = new MinecraftNetSession( tUsername.Text, username, tPassword.Text );
+            MinecraftNetSession.Instance = new MinecraftNetSession( tUsername.Text, tPassword.Text );
             LoadingForm progressBox = new LoadingForm( "Signing into minecraft.net" );
             progressBox.Shown += ( s2, e2 ) => ThreadPool.QueueUserWorkItem( SignIn, progressBox );
             progressBox.ShowDialog();
