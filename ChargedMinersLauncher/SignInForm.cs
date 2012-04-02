@@ -16,8 +16,8 @@ namespace ChargedMinersLauncher {
         static readonly Regex UsernameRegex = new Regex( @"^[a-zA-Z0-9_\.]{2,16}$" );
 
         static readonly Regex EmailRegex =
-            new Regex(
-                @"^[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?$" );
+            new Regex( @"^[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?$",
+                       RegexOptions.IgnoreCase );
 
 
         public SignInForm() {
@@ -41,9 +41,7 @@ namespace ChargedMinersLauncher {
 
         void OnTextChanged( object sender, EventArgs e ) {
             bool valid = true;
-            if( UsernameRegex.IsMatch( tUsername.Text ) ) {
-                tUsername.BackColor = SystemColors.Window;
-            } else if( EmailRegex.IsMatch( tUsername.Text ) ) {
+            if( UsernameRegex.IsMatch( tUsername.Text ) || EmailRegex.IsMatch( tUsername.Text ) ) {
                 tUsername.BackColor = SystemColors.Window;
             } else {
                 tUsername.BackColor = Color.Yellow;
