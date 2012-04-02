@@ -36,7 +36,7 @@ namespace ChargedMinersLauncher {
         }
 
 
-        private void ResetDefaults( object sender, EventArgs e ) {
+        void ResetDefaults( object sender, EventArgs e ) {
             xFullscreen.Checked = defaults.Fullscreen;
             nWinWidth.Value = defaults.Width;
             nWinHeight.Value = defaults.Height;
@@ -49,7 +49,8 @@ namespace ChargedMinersLauncher {
             lViewDistance.Text = String.Format( "View distance: {0}", tbViewDistance.Value * 32 );
         }
 
-        private void ApplySettings() {
+
+        void ApplySettings() {
             xFullscreen.Checked = settings.Fullscreen;
             nWinWidth.Value = settings.Width;
             nWinHeight.Value = settings.Height;
@@ -63,7 +64,7 @@ namespace ChargedMinersLauncher {
         }
 
 
-        private void xFullscreen_CheckedChanged( object sender, EventArgs e ) {
+        void xFullscreen_CheckedChanged( object sender, EventArgs e ) {
             cResolutions.Enabled = xFullscreen.Checked;
             xResizableWindow.Enabled = !xFullscreen.Checked;
             lWindowSize.Enabled = !xFullscreen.Checked;
@@ -73,7 +74,7 @@ namespace ChargedMinersLauncher {
         }
 
 
-        private void bOK_Click( object sender, EventArgs e ) {
+        void bOK_Click( object sender, EventArgs e ) {
             settings.Fullscreen = xFullscreen.Checked;
             if( settings.Fullscreen ) {
                 ScreenResolution selectedResolution = resolutions[cResolutions.SelectedIndex];
@@ -100,11 +101,12 @@ namespace ChargedMinersLauncher {
         }
 
 
-        private void bCancel_Click( object sender, EventArgs e ) {
+        void bCancel_Click( object sender, EventArgs e ) {
             Close();
         }
 
-        private void tbViewDistance_Scroll( object sender, EventArgs e ) {
+
+        void tbViewDistance_Scroll( object sender, EventArgs e ) {
             lViewDistance.Text = String.Format( "View distance: {0}", tbViewDistance.Value * 32 );
         }
     }

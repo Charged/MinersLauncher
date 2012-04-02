@@ -201,7 +201,7 @@
             this.gWindowed.Size = new System.Drawing.Size(280, 97);
             this.gWindowed.TabIndex = 0;
             this.gWindowed.TabStop = false;
-            this.gWindowed.Text = "Windowed Mode Settings";
+            this.gWindowed.Text = "Resolution";
             // 
             // lWindowSize
             // 
