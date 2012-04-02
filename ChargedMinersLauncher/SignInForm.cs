@@ -2,6 +2,7 @@
 using System.Drawing;
 using System.Linq;
 using System.Net;
+using System.Text.RegularExpressions;
 using System.Windows.Forms;
 using System.Threading;
 using System.IO;
@@ -11,6 +12,13 @@ namespace ChargedMinersLauncher {
         ServerInfo[] servers;
         public const string ChargeBinary = "Charge.exe";
         const string PasswordSaveFile = "saved-login.dat";
+
+        static readonly Regex UsernameRegex = new Regex( @"^[a-zA-Z0-9_\.]{2,16}$" );
+
+        static readonly Regex EmailRegex =
+            new Regex(
+                @"^([a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*)@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?$" );
+
 
         public SignInForm() {
             if( !File.Exists( ChargeBinary ) ) {
@@ -31,18 +39,17 @@ namespace ChargedMinersLauncher {
         }
 
 
-        static bool IsValidName( string name ) {
-            if( name == null ) throw new ArgumentNullException( "name" );
-            if( name.Length < 2 || name.Length > 16 ) return false;
-            return name.All( ch => ( ch >= '0' || ch == '.' ) &&
-                                   ( ch <= '9' || ch >= 'A' ) && ( ch <= 'Z' || ch >= '_' ) &&
-                                   ( ch <= '_' || ch >= 'a' ) && ch <= 'z' );
-        }
+        string username;
 
 
-        private void OnTextChanged( object sender, EventArgs e ) {
+        void OnTextChanged( object sender, EventArgs e ) {
             bool valid = true;
-            if( IsValidName( tUsername.Text ) ) {
+            if( UsernameRegex.IsMatch( tUsername.Text ) ) {
+                username = tUsername.Text;
+                tUsername.BackColor = SystemColors.Window;
+            } else if( EmailRegex.IsMatch( tUsername.Text ) ) {
+                Match emailMatch = EmailRegex.Match( tUsername.Text );
+                username = emailMatch.Groups[1].Value;
                 tUsername.BackColor = SystemColors.Window;
             } else {
                 tUsername.BackColor = Color.Yellow;
@@ -54,20 +61,21 @@ namespace ChargedMinersLauncher {
             bSignIn.Enabled = valid;
         }
 
-        private void bSignIn_Click( object sender, EventArgs e ) {
+
+        void bSignIn_Click( object sender, EventArgs e ) {
             string passwordFileFullName = Path.Combine( ChargedMinersSettings.ConfigPath, PasswordSaveFile );
             if( xRemember.Checked ) {
                 if( !Directory.Exists( ChargedMinersSettings.ConfigPath ) ) {
                     Directory.CreateDirectory( ChargedMinersSettings.ConfigPath );
                 }
                 File.WriteAllLines( passwordFileFullName, new[] { tUsername.Text, tPassword.Text } );
-            }else{
+            } else {
                 if( File.Exists( passwordFileFullName ) ) {
                     File.Delete( passwordFileFullName );
                 }
             }
 
-            MinecraftNetSession.Instance = new MinecraftNetSession( tUsername.Text, tPassword.Text );
+            MinecraftNetSession.Instance = new MinecraftNetSession( tUsername.Text, username, tPassword.Text );
             LoadingForm progressBox = new LoadingForm( "Signing into minecraft.net" );
             progressBox.Shown += ( s2, e2 ) => ThreadPool.QueueUserWorkItem( SignIn, progressBox );
             progressBox.ShowDialog();
@@ -79,7 +87,7 @@ namespace ChargedMinersLauncher {
         }
 
 
-        private void SignIn( object param ) {
+        void SignIn( object param ) {
             LoadingForm progressBox = (LoadingForm)param;
             try {
                 switch( MinecraftNetSession.Instance.Login( xRemember.Checked ) ) {

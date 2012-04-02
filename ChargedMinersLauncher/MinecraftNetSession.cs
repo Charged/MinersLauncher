@@ -27,13 +27,16 @@ namespace ChargedMinersLauncher {
         static readonly Regex ServerListEntry = new Regex( @"<a href=""/classic/play/([0-9a-f]+)"">([^<]+)</a>\s+</td>\s+<td>(\d+)</td>\s+<td>(\d+)</td>\s+<td>(\d+\w)</td>" );
 
 
+        public string UsernameForLogin { get; set; }
         public string Username { get; private set; }
         public string Password { get; private set; }
         public LoginResult Status { get; set; }
 
-        public MinecraftNetSession( string username, string password ) {
+        public MinecraftNetSession( string usernameForLogin, string username, string password ) {
+            if( usernameForLogin == null ) throw new ArgumentNullException( "usernameForLogin" );
             if( username == null ) throw new ArgumentNullException( "username" );
             if( password == null ) throw new ArgumentNullException( "password" );
+            UsernameForLogin = usernameForLogin;
             Username = username;
             Password = password;
         }
@@ -52,7 +55,7 @@ namespace ChargedMinersLauncher {
             string authToken = LoginAuthToken.Match( loginPage ).Groups[1].Value;
 
             string loginString = String.Format( "username={0}&password={1}&authenticityToken={2}",
-                                                Uri.EscapeDataString( Username ),
+                                                Uri.EscapeDataString( UsernameForLogin ),
                                                 Uri.EscapeDataString( Password ),
                                                 Uri.EscapeDataString( authToken ) );
             if( remember ) {
