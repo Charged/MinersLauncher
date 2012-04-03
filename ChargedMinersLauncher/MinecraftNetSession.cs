@@ -28,16 +28,16 @@ namespace ChargedMinersLauncher {
 
         static readonly Regex LoggedInAs = new Regex( @"<span class=""logged-in"">\s*Logged in as ([a-zA-Z0-9_\.]{2,16})" );
 
-        public string UsernameForLogin { get; set; }
+        public string UsernameForLogin { get; private set; }
         public string Username { get; private set; }
         public string Password { get; private set; }
         public LoginResult Status { get; set; }
 
-        public MinecraftNetSession( string usernameForLogin, string password ) {
+        public MinecraftNetSession( string usernameForLogin, string username, string password ) {
             if( usernameForLogin == null ) throw new ArgumentNullException( "usernameForLogin" );
             if( password == null ) throw new ArgumentNullException( "password" );
             UsernameForLogin = usernameForLogin;
-            Username = usernameForLogin;
+            Username = username;
             Password = password;
         }
 

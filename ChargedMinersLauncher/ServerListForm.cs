@@ -73,7 +73,7 @@ namespace ChargedMinersLauncher {
                 e.Value = String.Format( "{0} min", (int)Math.Round( val.TotalMinutes ) );
             } else if( val.TotalHours < 24 ) {
                 e.Value = String.Format( "{0} hours", (int)Math.Round( val.TotalHours ) );
-            } else if( val.TotalDays < 15 ) {
+            } else {
                 e.Value = String.Format( "{0} days", (int)Math.Round( val.TotalDays ) );
             }
         }

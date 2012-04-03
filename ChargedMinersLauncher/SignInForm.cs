@@ -19,6 +19,7 @@ namespace ChargedMinersLauncher {
             new Regex( @"^[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?$",
                        RegexOptions.IgnoreCase );
 
+        string storedUsernameForLogin, storedUsername;
 
         public SignInForm() {
             if( !File.Exists( ChargeBinary ) ) {
@@ -29,8 +30,10 @@ namespace ChargedMinersLauncher {
             try {
                 if( File.Exists( passwordFileFullName ) ) {
                     string[] loginData = File.ReadAllLines( passwordFileFullName );
-                    tUsername.Text = loginData[0];
+                    storedUsernameForLogin = loginData[0];
+                    tUsername.Text = storedUsernameForLogin;
                     tPassword.Text = loginData[1];
+                    storedUsername = loginData.Length > 2 ? loginData[2] : storedUsernameForLogin;
                     xRemember.Checked = true;
                 }
             } catch( Exception ex ) {
@@ -55,23 +58,32 @@ namespace ChargedMinersLauncher {
 
 
         void bSignIn_Click( object sender, EventArgs e ) {
-            string passwordFileFullName = Path.Combine( ChargedMinersSettings.ConfigPath, PasswordSaveFile );
-            if( xRemember.Checked ) {
-                if( !Directory.Exists( ChargedMinersSettings.ConfigPath ) ) {
-                    Directory.CreateDirectory( ChargedMinersSettings.ConfigPath );
-                }
-                File.WriteAllLines( passwordFileFullName, new[] { tUsername.Text, tPassword.Text } );
+            string minecraftUsername;
+            if( tUsername.Text == storedUsernameForLogin ) {
+                minecraftUsername = storedUsername;
             } else {
-                if( File.Exists( passwordFileFullName ) ) {
-                    File.Delete( passwordFileFullName );
-                }
+                minecraftUsername = tUsername.Text;
             }
-
-            MinecraftNetSession.Instance = new MinecraftNetSession( tUsername.Text, tPassword.Text );
+            MinecraftNetSession.Instance = new MinecraftNetSession( tUsername.Text, minecraftUsername, tPassword.Text );
             LoadingForm progressBox = new LoadingForm( "Signing into minecraft.net" );
             progressBox.Shown += ( s2, e2 ) => ThreadPool.QueueUserWorkItem( SignIn, progressBox );
             progressBox.ShowDialog();
             if( MinecraftNetSession.Instance.Status == LoginResult.Success ) {
+                string passwordFileFullName = Path.Combine( ChargedMinersSettings.ConfigPath, PasswordSaveFile );
+                if( xRemember.Checked ) {
+                    if( !Directory.Exists( ChargedMinersSettings.ConfigPath ) ) {
+                        Directory.CreateDirectory( ChargedMinersSettings.ConfigPath );
+                    }
+                    File.WriteAllLines( passwordFileFullName, new[] {
+                        MinecraftNetSession.Instance.UsernameForLogin,
+                        MinecraftNetSession.Instance.Password,
+                        MinecraftNetSession.Instance.Username
+                    } );
+                } else {
+                    if( File.Exists( passwordFileFullName ) ) {
+                        File.Delete( passwordFileFullName );
+                    }
+                }
                 Hide();
                 new ServerListForm( servers ).ShowDialog();
                 Application.Exit();
