@@ -108,7 +108,7 @@ namespace ChargedMinersLauncher {
 
 
         void SaveCookie() {
-            if( Directory.Exists( ChargedMinersSettings.ConfigPath ) ) {
+            if( !Directory.Exists( ChargedMinersSettings.ConfigPath ) ) {
                 Directory.CreateDirectory( ChargedMinersSettings.ConfigPath );
             }
             string cookieFile = Path.Combine( ChargedMinersSettings.ConfigPath, CookieContainerFile );
