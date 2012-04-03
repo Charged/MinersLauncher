@@ -13,61 +13,57 @@ namespace ChargedMinersLauncher {
         public const string ChargeBinary = "Charge.exe";
         const string PasswordSaveFile = "saved-login.dat";
 
-        static readonly Regex UsernameRegex = new Regex( @"^[a-zA-Z0-9_\.]{2,16}$" );
+        static readonly Regex
+            UsernameRegex = new Regex( @"^[a-zA-Z0-9_\.]{2,16}$" ),
+            EmailRegex = new Regex( @"^[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?$",
+                                    RegexOptions.IgnoreCase );
 
-        static readonly Regex EmailRegex =
-            new Regex( @"^[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?$",
-                       RegexOptions.IgnoreCase );
+        readonly string storedLoginUsername,
+                        storedMinecraftUsername;
 
-        string storedUsernameForLogin, storedUsername;
 
         public SignInForm() {
             if( !File.Exists( ChargeBinary ) ) {
-                MessageBox.Show( "Charge.exe not found!" );
+                WarningForm.Show( "Warning", "Charge.exe not found!" );
             }
             InitializeComponent();
             string passwordFileFullName = Path.Combine( ChargedMinersSettings.ConfigPath, PasswordSaveFile );
             try {
                 if( File.Exists( passwordFileFullName ) ) {
                     string[] loginData = File.ReadAllLines( passwordFileFullName );
-                    storedUsernameForLogin = loginData[0];
-                    tUsername.Text = storedUsernameForLogin;
+                    storedLoginUsername = loginData[0];
+                    tUsername.Text = storedLoginUsername;
                     tPassword.Text = loginData[1];
-                    storedUsername = loginData.Length > 2 ? loginData[2] : storedUsernameForLogin;
+                    storedMinecraftUsername = loginData.Length > 2 ? loginData[2] : storedLoginUsername;
                     xRemember.Checked = true;
                 }
             } catch( Exception ex ) {
-                MessageBox.Show( ex.ToString(), "Error loading saved login" );
+                WarningForm.Show( "Error loading saved login",  ex.ToString() );
             }
         }
 
 
         void OnTextChanged( object sender, EventArgs e ) {
-            bool valid = true;
             if( UsernameRegex.IsMatch( tUsername.Text ) || EmailRegex.IsMatch( tUsername.Text ) ) {
                 tUsername.BackColor = SystemColors.Window;
             } else {
                 tUsername.BackColor = Color.Yellow;
-                valid = false;
             }
-            if( tPassword.Text.Length == 0 ) {
-                valid = false;
-            }
-            bSignIn.Enabled = valid;
+            bSignIn.Enabled = (tPassword.Text.Length >0);
         }
 
 
         void bSignIn_Click( object sender, EventArgs e ) {
             string minecraftUsername;
-            if( tUsername.Text == storedUsernameForLogin ) {
-                minecraftUsername = storedUsername;
+            if( tUsername.Text == storedLoginUsername ) {
+                minecraftUsername = storedMinecraftUsername;
             } else {
                 minecraftUsername = tUsername.Text;
             }
             MinecraftNetSession.Instance = new MinecraftNetSession( tUsername.Text, minecraftUsername, tPassword.Text );
-            LoadingForm progressBox = new LoadingForm( "Signing into minecraft.net" );
-            progressBox.Shown += ( s2, e2 ) => ThreadPool.QueueUserWorkItem( SignIn, progressBox );
-            progressBox.ShowDialog();
+            LoadingForm loadingForm = new LoadingForm( "Signing into minecraft.net" );
+            loadingForm.Shown += ( s2, e2 ) => ThreadPool.QueueUserWorkItem( SignIn, loadingForm );
+            loadingForm.ShowDialog();
             if( MinecraftNetSession.Instance.Status == LoginResult.Success ) {
                 string passwordFileFullName = Path.Combine( ChargedMinersSettings.ConfigPath, PasswordSaveFile );
                 if( xRemember.Checked ) {
@@ -75,9 +71,9 @@ namespace ChargedMinersLauncher {
                         Directory.CreateDirectory( ChargedMinersSettings.ConfigPath );
                     }
                     File.WriteAllLines( passwordFileFullName, new[] {
-                        MinecraftNetSession.Instance.UsernameForLogin,
+                        MinecraftNetSession.Instance.LoginUsername,
                         MinecraftNetSession.Instance.Password,
-                        MinecraftNetSession.Instance.Username
+                        MinecraftNetSession.Instance.MinercraftUsername
                     } );
                 } else {
                     if( File.Exists( passwordFileFullName ) ) {
@@ -100,16 +96,15 @@ namespace ChargedMinersLauncher {
                         servers = MinecraftNetSession.Instance.GetServerList();
                         break;
                     case LoginResult.WrongUsernameOrPass:
-                        MessageBox.Show( "Wrong username or password.", "Could not sign in" );
+                        WarningForm.Show( "Could not sign in", "Wrong username or password." );
                         break;
                     case LoginResult.Error:
-                        MessageBox.Show( "An unknown error occured.", "Could not sign in" );
+                        WarningForm.Show( "Could not sign in", "An unknown error occured." );
                         break;
                 }
             } catch( WebException ex ) {
                 MinecraftNetSession.Instance.Status = LoginResult.Error;
-                MessageBox.Show( ex.Message,
-                                 "Could not sign in" );
+                WarningForm.Show( "Could not sign in", ex.Message );
             } finally {
                 progressBox.Invoke( (Action)progressBox.Close );
             }
