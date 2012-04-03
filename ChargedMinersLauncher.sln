@@ -14,6 +14,9 @@ Global
 		{7613117B-A748-42F3-84B6-18048D4A0568}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{7613117B-A748-42F3-84B6-18048D4A0568}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
+	GlobalSection(MonoDevelopProperties) = preSolution
+		StartupItem = ChargedMinersLauncher\ChargedMinersLauncher.csproj
+	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
