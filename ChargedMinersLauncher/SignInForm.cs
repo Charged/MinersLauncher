@@ -109,5 +109,9 @@ namespace ChargedMinersLauncher {
                 progressBox.Invoke( (Action)progressBox.Close );
             }
         }
+
+        private void bSettings_Click( object sender, EventArgs e ) {
+            new SettingsForm().ShowDialog();
+        }
     }
 }

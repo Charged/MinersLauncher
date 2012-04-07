@@ -30,13 +30,14 @@
             this.lPassword = new System.Windows.Forms.Label();
             this.label1 = new System.Windows.Forms.Label();
             this.xRemember = new System.Windows.Forms.CheckBox();
+            this.bSettings = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // bSignIn
             // 
             this.bSignIn.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.bSignIn.Enabled = false;
-            this.bSignIn.Location = new System.Drawing.Point(161, 119);
+            this.bSignIn.Location = new System.Drawing.Point(161, 116);
             this.bSignIn.Name = "bSignIn";
             this.bSignIn.Size = new System.Drawing.Size(75, 23);
             this.bSignIn.TabIndex = 5;
@@ -48,7 +49,7 @@
             // 
             this.tUsername.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.tUsername.Location = new System.Drawing.Point(73, 67);
+            this.tUsername.Location = new System.Drawing.Point(73, 64);
             this.tUsername.Name = "tUsername";
             this.tUsername.Size = new System.Drawing.Size(163, 20);
             this.tUsername.TabIndex = 2;
@@ -58,7 +59,7 @@
             // 
             this.tPassword.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.tPassword.Location = new System.Drawing.Point(73, 93);
+            this.tPassword.Location = new System.Drawing.Point(73, 90);
             this.tPassword.Name = "tPassword";
             this.tPassword.Size = new System.Drawing.Size(163, 20);
             this.tPassword.TabIndex = 4;
@@ -69,7 +70,7 @@
             // 
             this.lUsername.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.lUsername.AutoSize = true;
-            this.lUsername.Location = new System.Drawing.Point(12, 70);
+            this.lUsername.Location = new System.Drawing.Point(12, 67);
             this.lUsername.Name = "lUsername";
             this.lUsername.Size = new System.Drawing.Size(55, 13);
             this.lUsername.TabIndex = 1;
@@ -79,7 +80,7 @@
             // 
             this.lPassword.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.lPassword.AutoSize = true;
-            this.lPassword.Location = new System.Drawing.Point(14, 96);
+            this.lPassword.Location = new System.Drawing.Point(14, 93);
             this.lPassword.Name = "lPassword";
             this.lPassword.Size = new System.Drawing.Size(53, 13);
             this.lPassword.TabIndex = 3;
@@ -101,19 +102,31 @@
             // 
             this.xRemember.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.xRemember.AutoSize = true;
-            this.xRemember.Location = new System.Drawing.Point(73, 123);
+            this.xRemember.Location = new System.Drawing.Point(73, 120);
             this.xRemember.Name = "xRemember";
             this.xRemember.Size = new System.Drawing.Size(77, 17);
             this.xRemember.TabIndex = 6;
             this.xRemember.Text = "Remember";
             this.xRemember.UseVisualStyleBackColor = true;
             // 
-            // LoginForm
+            // bSettings
+            // 
+            this.bSettings.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.bSettings.Location = new System.Drawing.Point(12, 143);
+            this.bSettings.Name = "bSettings";
+            this.bSettings.Size = new System.Drawing.Size(75, 23);
+            this.bSettings.TabIndex = 7;
+            this.bSettings.Text = "Settings";
+            this.bSettings.UseVisualStyleBackColor = true;
+            this.bSettings.Click += new System.EventHandler(this.bSettings_Click);
+            // 
+            // SignInForm
             // 
             this.AcceptButton = this.bSignIn;
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(248, 154);
+            this.ClientSize = new System.Drawing.Size(248, 178);
+            this.Controls.Add(this.bSettings);
             this.Controls.Add(this.xRemember);
             this.Controls.Add(this.label1);
             this.Controls.Add(this.lPassword);
@@ -124,7 +137,7 @@
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
             this.MaximizeBox = false;
             this.MinimizeBox = false;
-            this.Name = "LoginForm";
+            this.Name = "SignInForm";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "Charged-Miners Launcher";
             this.ResumeLayout(false);
@@ -141,6 +154,7 @@
         private System.Windows.Forms.Label lPassword;
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.CheckBox xRemember;
+        private System.Windows.Forms.Button bSettings;
     }
 }
 

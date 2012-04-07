@@ -15,7 +15,13 @@ namespace ChargedMinersLauncher {
         public SettingsForm() {
             InitializeComponent();
             if( File.Exists( ChargedMinersSettings.ConfigFileFullName ) ) {
-                settings = new ChargedMinersSettings( File.ReadAllLines( ChargedMinersSettings.ConfigFileFullName ) );
+                try {
+                    settings = new ChargedMinersSettings( File.ReadAllLines( ChargedMinersSettings.ConfigFileFullName ) );
+                } catch( Exception ex ) {
+                    WarningForm.Show( "Error parsing Charged-Miners settings",
+                                     ex.ToString() );
+                    settings = new ChargedMinersSettings();
+                }
             } else {
                 settings = new ChargedMinersSettings();
             }
