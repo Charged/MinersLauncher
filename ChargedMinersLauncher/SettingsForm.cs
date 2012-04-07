@@ -1,4 +1,5 @@
-﻿using System;
+﻿// Part of ChargedMinersLaunher | Copyright (c) 2012 Matvei Stefarov <me@matvei.org> | BSD-3 | See LICENSE.txt
+using System;
 using System.Linq;
 using System.Windows.Forms;
 using System.IO;
@@ -19,7 +20,7 @@ namespace ChargedMinersLauncher {
                     settings = new ChargedMinersSettings( File.ReadAllLines( ChargedMinersSettings.ConfigFileFullName ) );
                 } catch( Exception ex ) {
                     WarningForm.Show( "Error parsing Charged-Miners settings",
-                                     ex.ToString() );
+                                       ex.ToString() );
                     settings = new ChargedMinersSettings();
                 }
             } else {

@@ -1,4 +1,5 @@
-﻿using System;
+﻿// Part of ChargedMinersLaunher | Copyright (c) 2012 Matvei Stefarov <me@matvei.org> | BSD-3 | See LICENSE.txt
+using System;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
 using System.Collections.Generic;
