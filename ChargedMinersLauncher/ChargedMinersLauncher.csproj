@@ -66,6 +66,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="RuntimeInfo.cs" />
     <Compile Include="ScreenResolutionLister.cs" />
     <Compile Include="ScreenResolution.cs" />
     <Compile Include="SettingsForm.cs">
