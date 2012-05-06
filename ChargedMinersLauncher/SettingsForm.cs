@@ -27,9 +27,21 @@ namespace ChargedMinersLauncher {
                 settings = new ChargedMinersSettings();
             }
 
-            resolutions = ScreenResolutionLister.GetList();
-            ScreenResolution currentRes = ScreenResolutionLister.GetCurrentResolution();
-            cResolutions.Items.AddRange( resolutions.Select( r => String.Format( "{0} x {1}", r.Width, r.Height ) ).ToArray() );
+            // Add a automatic mode
+            ScreenResolution currentRes;
+            resolutions = new ScreenResolution[] { new ScreenResolution { Width = 0, Height = 0 } };
+            cResolutions.Items.Add( "automatic" );
+
+            if (!RuntimeInfo.IsWindows) {
+                currentRes = resolutions[0];
+            } else {
+                var res = ScreenResolutionLister.GetList();
+                currentRes = ScreenResolutionLister.GetCurrentResolution();
+
+                cResolutions.Items.AddRange( res.Select( r => String.Format( "{0} x {1}", r.Width, r.Height ) ).ToArray() );
+                resolutions = resolutions.Concat( res ).ToArray();
+            }
+
             for( int i = 0; i < resolutions.Length; i++ ) {
                 if( settings.Fullscreen && settings.Width == resolutions[i].Width && settings.Height == resolutions[i].Height ||
                     !settings.Fullscreen && resolutions[i] == currentRes ) {
@@ -59,8 +71,8 @@ namespace ChargedMinersLauncher {
 
         void ApplySettings() {
             xFullscreen.Checked = settings.Fullscreen;
-            nWinWidth.Value = settings.Width;
-            nWinHeight.Value = settings.Height;
+            nWinWidth.Value = Math.Max(settings.Width, 640);
+            nWinHeight.Value = Math.Max(settings.Height, 480);
             xResizableWindow.Checked = settings.ForceResizeEnable;
             cResolutions.SelectedIndex = defaultResolution;
             xAntiAlias.Checked = settings.AntiAliasEnabled;
