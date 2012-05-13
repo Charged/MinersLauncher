@@ -28,9 +28,21 @@ namespace ChargedMinersLauncher {
                 settings = new ChargedMinersSettings();
             }
 
-            resolutions = ScreenResolutionLister.GetList();
-            ScreenResolution currentRes = ScreenResolutionLister.GetCurrentResolution();
-            cResolutions.Items.AddRange( resolutions.Select( r => String.Format( "{0} x {1}", r.Width, r.Height ) ).ToArray() );
+            // Add a automatic mode
+            ScreenResolution currentRes;
+            resolutions = new ScreenResolution[] { new ScreenResolution { Width = 0, Height = 0 } };
+            cResolutions.Items.Add( "automatic" );
+
+            if (!RuntimeInfo.IsWindows) {
+                currentRes = resolutions[0];
+            } else {
+                var res = ScreenResolutionLister.GetList();
+                currentRes = ScreenResolutionLister.GetCurrentResolution();
+
+                cResolutions.Items.AddRange( res.Select( r => String.Format( "{0} x {1}", r.Width, r.Height ) ).ToArray() );
+                resolutions = resolutions.Concat( res ).ToArray();
+            }
+
             for( int i = 0; i < resolutions.Length; i++ ) {
                 if( settings.WindowMode == WindowMode.Fullscreen && settings.Width == resolutions[i].Width && settings.Height == resolutions[i].Height ||
                     settings.WindowMode != WindowMode.Fullscreen && resolutions[i] == currentRes ) {
