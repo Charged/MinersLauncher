@@ -1,5 +1,6 @@
 ﻿// Part of ChargedMinersLaunher | Copyright (c) 2012 Matvei Stefarov <me@matvei.org> | BSD-3 | See LICENSE.txt
 using System;
+using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
 using System.IO;
@@ -31,8 +32,8 @@ namespace ChargedMinersLauncher {
             ScreenResolution currentRes = ScreenResolutionLister.GetCurrentResolution();
             cResolutions.Items.AddRange( resolutions.Select( r => String.Format( "{0} x {1}", r.Width, r.Height ) ).ToArray() );
             for( int i = 0; i < resolutions.Length; i++ ) {
-                if( settings.Fullscreen && settings.Width == resolutions[i].Width && settings.Height == resolutions[i].Height ||
-                    !settings.Fullscreen && resolutions[i] == currentRes ) {
+                if( settings.WindowMode == WindowMode.Fullscreen && settings.Width == resolutions[i].Width && settings.Height == resolutions[i].Height ||
+                    settings.WindowMode != WindowMode.Fullscreen && resolutions[i] == currentRes ) {
                     defaultResolution = i;
                     cResolutions.SelectedIndex = i;
                     break;
@@ -44,10 +45,9 @@ namespace ChargedMinersLauncher {
 
 
         void ResetDefaults( object sender, EventArgs e ) {
-            xFullscreen.Checked = defaults.Fullscreen;
+            cWindowMode.SelectedIndex = (int)defaults.WindowMode;
             nWinWidth.Value = defaults.Width;
             nWinHeight.Value = defaults.Height;
-            xResizableWindow.Checked = defaults.ForceResizeEnable;
             cResolutions.SelectedIndex = defaultResolution;
             xAntiAlias.Checked = defaults.AntiAliasEnabled;
             xFog.Checked = defaults.FogEnabled;
@@ -58,10 +58,9 @@ namespace ChargedMinersLauncher {
 
 
         void ApplySettings() {
-            xFullscreen.Checked = settings.Fullscreen;
+            cWindowMode.SelectedIndex = (int)settings.WindowMode;
             nWinWidth.Value = settings.Width;
             nWinHeight.Value = settings.Height;
-            xResizableWindow.Checked = settings.ForceResizeEnable;
             cResolutions.SelectedIndex = defaultResolution;
             xAntiAlias.Checked = settings.AntiAliasEnabled;
             xFog.Checked = settings.FogEnabled;
@@ -71,19 +70,9 @@ namespace ChargedMinersLauncher {
         }
 
 
-        void xFullscreen_CheckedChanged( object sender, EventArgs e ) {
-            cResolutions.Enabled = xFullscreen.Checked;
-            xResizableWindow.Enabled = !xFullscreen.Checked;
-            lWindowSize.Enabled = !xFullscreen.Checked;
-            nWinWidth.Enabled = !xFullscreen.Checked;
-            lX.Enabled = !xFullscreen.Checked;
-            nWinHeight.Enabled = !xFullscreen.Checked;
-        }
-
-
         void bOK_Click( object sender, EventArgs e ) {
-            settings.Fullscreen = xFullscreen.Checked;
-            if( settings.Fullscreen ) {
+            settings.WindowMode = (WindowMode)cWindowMode.SelectedIndex;
+            if( settings.WindowMode == WindowMode.Fullscreen ) {
                 ScreenResolution selectedResolution = resolutions[cResolutions.SelectedIndex];
                 settings.Width = selectedResolution.Width;
                 settings.Height = selectedResolution.Height;
@@ -91,7 +80,6 @@ namespace ChargedMinersLauncher {
                 settings.Width = (int)nWinWidth.Value;
                 settings.Height = (int)nWinHeight.Value;
             }
-            settings.ForceResizeEnable = xResizableWindow.Checked;
             settings.AntiAliasEnabled = xAntiAlias.Checked;
             settings.FogEnabled = xFog.Checked;
             settings.ShadowsEnabled = xShadows.Checked;
@@ -115,6 +103,29 @@ namespace ChargedMinersLauncher {
 
         void tbViewDistance_Scroll( object sender, EventArgs e ) {
             lViewDistance.Text = String.Format( "View distance: {0}", tbViewDistance.Value * 32 );
+        }
+
+        Button activeButton;
+
+        private void KeyBinding_Click( object sender, EventArgs e ) {
+            KeyPreview = true;
+            Enabled = false;
+            activeButton = (Button)sender;
+            activeButton.BackColor = SystemColors.Highlight;
+        }
+
+        protected override bool ProcessCmdKey( ref Message msg, Keys keyData ) {
+            if( activeButton != null ) {
+                if( ( keyData & Keys.Escape ) != Keys.Escape ) {
+                    activeButton.Text = keyData.ToString();
+                }
+                activeButton.BackColor = SystemColors.Control;
+                KeyPreview = false;
+                Enabled = true;
+                activeButton = null;
+                return true;
+            }
+            return base.ProcessCmdKey( ref msg, keyData );
         }
     }
 }

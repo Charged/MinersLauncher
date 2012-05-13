@@ -22,12 +22,11 @@ namespace ChargedMinersLauncher {
 
         public int Width { get; set; }
         public int Height { get; set; }
-        public bool ForceResizeEnable { get; set; }
-        public bool Fullscreen { get; set; }
         public bool AntiAliasEnabled { get; set; }
         public bool FogEnabled { get; set; }
         public bool ShadowsEnabled { get; set; }
         public int ViewDistance { get; set; }
+        public WindowMode WindowMode { get; set; }
 
         static readonly Regex CommentRegex = new Regex( @"^\s*#" );
         static readonly Regex SettingRegex = new Regex( @"^\s*(\S*)\s*=\s*(\S*)" );
@@ -37,8 +36,7 @@ namespace ChargedMinersLauncher {
         public ChargedMinersSettings() {
             Width = 800;
             Height = 600;
-            ForceResizeEnable = false;
-            Fullscreen = false;
+            WindowMode = WindowMode.Fixed;
             AntiAliasEnabled = true;
             FogEnabled = true;
             ShadowsEnabled = true;
@@ -72,10 +70,18 @@ namespace ChargedMinersLauncher {
                     Height = Int32.Parse( value );
                     break;
                 case "forceResizeEnable":
-                    ForceResizeEnable = Boolean.Parse( value );
+                    bool forceResizeEnable = Boolean.Parse( value );
+                    if( WindowMode != WindowMode.Fullscreen ) {
+                        WindowMode = forceResizeEnable ? WindowMode.Resizable : WindowMode.Fixed;
+                    }
                     break;
                 case "fullscreen":
-                    Fullscreen = Boolean.Parse( value );
+                    bool fullscreen = Boolean.Parse( value );
+                    if( fullscreen ) {
+                        WindowMode = WindowMode.Fullscreen;
+                    } else if( WindowMode == WindowMode.Fullscreen ) {
+                        WindowMode = WindowMode.Fixed;
+                    }
                     break;
                 case "mc.aa":
                     AntiAliasEnabled = Boolean.Parse( value );
@@ -100,8 +106,10 @@ namespace ChargedMinersLauncher {
             List<string> result = new List<string> {
                 "w:" + Width,
                 "h:" + Height,
-                "fullscreen:" + ( Fullscreen ? "true" : "false" ),
-                "forceResizeEnable:" + ( ForceResizeEnable ? "true" : "false" ),
+                "fullscreen:" +
+                ( WindowMode == WindowMode.Fullscreen ? "true" : "false" ),
+                "forceResizeEnable:" +
+                ( WindowMode == WindowMode.Resizable ? "true" : "false" ),
                 "mc.aa:" + ( AntiAliasEnabled ? "true" : "false" ),
                 "mc.fog:" + ( FogEnabled ? "true" : "false" ),
                 "mc.shadow:" + ( ShadowsEnabled ? "true" : "false" ),
