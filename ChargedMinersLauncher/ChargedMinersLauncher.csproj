@@ -67,6 +67,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="RuntimeInfo.cs" />
+    <Compile Include="VersionInfo.cs" />
+    <Compile Include="VersionsTxt.cs" />
     <Compile Include="ScreenResolutionLister.cs" />
     <Compile Include="ScreenResolution.cs" />
     <Compile Include="SettingsForm.cs">
