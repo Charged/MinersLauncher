@@ -1,8 +1,6 @@
 ﻿// Part of ChargedMinersLaunher | Copyright (c) 2012 Jakob Bornecrantz <wallbraker@gmail.com> | BSD-3 | See LICENSE.txt
-using System;
+
 using System.Collections.Generic;
-using System.IO;
-using System.Linq;
 using System.Text.RegularExpressions;
 
 namespace ChargedMinersLauncher {
@@ -11,7 +9,8 @@ namespace ChargedMinersLauncher {
         static readonly Regex NameRegex = new Regex( @"^(\S+)\s*$" );
         static readonly Regex Md5AndNameRegex = new Regex( @"\s*([a-fA-F0-9]{32})\s+(\S+)\s*$" );
 
-        private Dictionary<string, VersionInfo> versions = new Dictionary<string, VersionInfo>();
+        readonly Dictionary<string, VersionInfo> versions = new Dictionary<string, VersionInfo>();
+
 
         public VersionsTxt( IEnumerable<string> lines ) {
 
@@ -40,8 +39,9 @@ namespace ChargedMinersLauncher {
             }
         }
 
+
         public VersionInfo Get( string name ) {
-            VersionInfo ret = null;
+            VersionInfo ret;
             versions.TryGetValue( name, out ret );
             return ret;
         }

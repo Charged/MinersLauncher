@@ -10,11 +10,10 @@ namespace ChargedMinersLauncher {
     sealed class MinecraftNetSession {
         public static MinecraftNetSession Instance { get; set; }
 
-        public const string
-            RefererUri = "http://www.minecraft.net/",
-            LoginUri = "http://www.minecraft.net/login",
-            LoginSecureUri = "https://www.minecraft.net/login",
-            CookieContainerFile = "saved-session.dat";
+        const string RefererUri = "http://www.minecraft.net/",
+                     LoginUri = "http://www.minecraft.net/login",
+                     LoginSecureUri = "https://www.minecraft.net/login",
+                     CookieContainerFile = "saved-session.dat";
 
         static readonly Regex
             LoginAuthToken = new Regex( @"<input type=""hidden"" name=""authenticityToken"" value=""([0-9a-f]+)"">" ),

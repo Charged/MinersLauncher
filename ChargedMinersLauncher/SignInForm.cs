@@ -50,7 +50,7 @@ namespace ChargedMinersLauncher {
             } else {
                 tUsername.BackColor = Color.Yellow;
             }
-            bSignIn.Enabled = (tPassword.Text.Length >0);
+            bSignIn.Enabled = ( tPassword.Text.Length > 0 );
         }
 
 

@@ -1,8 +1,5 @@
 // Part of ChargedMinersLaunher | Copyright (c) 2012 Jakob Bornecrantz <wallbraker@gmail.com> | Stolen from SirCmpwn | BSD-3 | See LICENSE.txt
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.IO;
 using System.Diagnostics;
 
@@ -16,25 +13,29 @@ namespace ChargedMinersLauncher {
         public static bool IsLinux { get; private set; }
         public static bool IsMacOSX { get; private set; }
 
+
         internal static void GatherInfo() {
-            IsMono = Type.GetType("Mono.Runtime") != null;
+            IsMono = Type.GetType( "Mono.Runtime" ) != null;
             int p = (int)Environment.OSVersion.Platform;
-            IsUnix = (p == 4) || (p == 6) || (p == 128);
+            IsUnix = ( p == 4 ) || ( p == 6 ) || ( p == 128 );
             IsWindows = Path.DirectorySeparatorChar == '\\';
 
             Is32Bit = IntPtr.Size == 4;
             Is64Bit = IntPtr.Size == 8;
 
-            if (IsUnix) {
-                Process uname = new Process();
-                uname.StartInfo.FileName = "uname";
-                uname.StartInfo.UseShellExecute = false;
-                uname.StartInfo.RedirectStandardOutput = true;
+            if( IsUnix ) {
+                Process uname = new Process {
+                    StartInfo = {
+                        FileName = "uname",
+                        UseShellExecute = false,
+                        RedirectStandardOutput = true
+                    }
+                };
                 uname.Start();
                 string output = uname.StandardOutput.ReadToEnd();
                 uname.WaitForExit();
 
-                output = output.ToUpper().Replace("\n", "").Trim();
+                output = output.ToUpper().Replace( "\n", "" ).Trim();
 
                 IsMacOSX = output == "DARWIN";
                 IsLinux = output == "LINUX";
