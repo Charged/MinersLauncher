@@ -23,6 +23,7 @@ namespace ChargedMinersLauncher {
         public string MinercraftUsername { get; private set; }
         public string Password { get; private set; }
         public LoginResult Status { get; set; }
+        public Exception LoginException { get; set; }
 
 
         public MinecraftNetSession( string loginUsername, string minercraftUsername, string password ) {

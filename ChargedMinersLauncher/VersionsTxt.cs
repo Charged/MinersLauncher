@@ -7,13 +7,12 @@ namespace ChargedMinersLauncher {
     sealed class VersionsTxt {
         static readonly Regex CommentRegex = new Regex( @"^\s*#" );
         static readonly Regex NameRegex = new Regex( @"^(\S+)\s*$" );
-        static readonly Regex Md5AndNameRegex = new Regex( @"\s*([a-fA-F0-9]{32})\s+(\S+)\s*$" );
+        static readonly Regex MD5AndNameRegex = new Regex( @"\s*([a-fA-F0-9]{32})\s+(\S+)\s*$" );
 
         readonly Dictionary<string, VersionInfo> versions = new Dictionary<string, VersionInfo>();
 
 
         public VersionsTxt( IEnumerable<string> lines ) {
-
             string name = "";
             bool nameFound = false;
             foreach( string line in lines ) {
@@ -27,7 +26,7 @@ namespace ChargedMinersLauncher {
                     continue;
                 }
 
-                match = Md5AndNameRegex.Match( line );
+                match = MD5AndNameRegex.Match( line );
                 if( match.Success && nameFound ) {
                     nameFound = false;
 

@@ -21,12 +21,12 @@ namespace ChargedMinersLauncher {
 
         public bool CompareHash( byte[] other ) {
             var str = BitConverter.ToString( other ).Replace( "-", "" ).ToLower();
-            return String.Compare( Md5, str ) == 0;
+            return String.Equals( Md5, str, StringComparison.OrdinalIgnoreCase );
         }
 
 
         public bool CompareHash( string other ) {
-            return String.Compare( Md5, other.ToLower() ) == 0;
+            return String.Equals( Md5, other, StringComparison.OrdinalIgnoreCase );
         }
     }
 }
