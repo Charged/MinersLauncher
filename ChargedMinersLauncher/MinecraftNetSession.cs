@@ -1,12 +1,10 @@
 ﻿// Part of ChargedMinersLaunher | Copyright (c) 2012 Matvei Stefarov <me@matvei.org> | BSD-3 | See LICENSE.txt
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Net;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Text;
 using System.Text.RegularExpressions;
-using System.Web;
 
 namespace ChargedMinersLauncher {
     sealed class MinecraftNetSession {
@@ -16,16 +14,10 @@ namespace ChargedMinersLauncher {
             RefererUri = "http://www.minecraft.net/",
             LoginUri = "http://www.minecraft.net/login",
             LoginSecureUri = "https://www.minecraft.net/login",
-            PlayUri = "http://www.minecraft.net/classic/play/",
-            ServerListUri = "http://www.minecraft.net/classic/list",
             CookieContainerFile = "saved-session.dat";
 
         static readonly Regex
-            PlayIP = new Regex( @"name=""server"" value=""([^""]+)""" ),
-            PlayPort = new Regex( @"name=""port"" value=""(\d+)""" ),
-            PlayAuthToken = new Regex( @"name=""mppass"" value=""([0-9a-f]+)""" ),
             LoginAuthToken = new Regex( @"<input type=""hidden"" name=""authenticityToken"" value=""([0-9a-f]+)"">" ),
-            ServerListEntry = new Regex( @"<a href=""/classic/play/([0-9a-f]+)"">([^<]+)</a>\s+</td>\s+<td>(\d+)</td>\s+<td>(\d+)</td>\s+<td>(\d+\w)</td>" ),
             LoggedInAs = new Regex( @"<span class=""logged-in"">\s*Logged in as ([a-zA-Z0-9_\.]{2,16})" );
 
         public string LoginUsername { get; private set; }
@@ -81,7 +73,7 @@ namespace ChargedMinersLauncher {
 
 
         void LoadCookie( bool remember ) {
-            string cookieFile = Path.Combine( ChargedMinersSettings.ConfigPath, CookieContainerFile );
+            string cookieFile = Path.Combine( Paths.ConfigPath, CookieContainerFile );
             if( File.Exists( cookieFile ) ) {
                 if( remember ) {
                     BinaryFormatter formatter = new BinaryFormatter();
@@ -109,62 +101,11 @@ namespace ChargedMinersLauncher {
 
 
         void SaveCookie() {
-            if( !Directory.Exists( ChargedMinersSettings.ConfigPath ) ) {
-                Directory.CreateDirectory( ChargedMinersSettings.ConfigPath );
-            }
-            string cookieFile = Path.Combine( ChargedMinersSettings.ConfigPath, CookieContainerFile );
+            string cookieFile = Path.Combine( Paths.ConfigPath, CookieContainerFile );
             BinaryFormatter formatter = new BinaryFormatter();
             using( Stream s = File.Create( cookieFile ) ) {
                 formatter.Serialize( s, cookieJar );
             }
-        }
-
-
-        public ServerInfo[] GetServerList() {
-            if( Status != LoginResult.Success ) throw new InvalidOperationException( "Not logged in" );
-            string serverPage = DownloadString( ServerListUri, RefererUri );
-            List<ServerInfo> list = new List<ServerInfo>();
-            int matchNumber = 0;
-            foreach( Match match in ServerListEntry.Matches( serverPage ) ) {
-                string hash = match.Groups[1].Value;
-
-                // minecraft.net escaping bug workaround
-                string name = HttpUtility.HtmlDecode( match.Groups[2].Value ).Replace( "&hellip;", "…" );
-
-                int players;
-                if( !Int32.TryParse( match.Groups[3].Value, out players ) ) {
-                    continue;
-                }
-
-                int maxPlayers;
-                if( !Int32.TryParse( match.Groups[4].Value, out maxPlayers ) ) {
-                    continue;
-                }
-
-                TimeSpan uptime;
-                if( !Util.TryParseMiniTimespan( match.Groups[5].Value, out uptime ) ) {
-                    continue;
-                }
-                uptime = uptime.Subtract( new TimeSpan( matchNumber ) ); // to preserve sort order
-
-                list.Add( new ServerInfo( hash, name, players, maxPlayers, uptime ) );
-                matchNumber++;
-            }
-
-            return list.ToArray();
-        }
-
-
-        public ServerLoginInfo GetServerInfo( string serverHash ) {
-            if( serverHash == null ) throw new ArgumentNullException( "serverHash" );
-            if( Status != LoginResult.Success ) throw new InvalidOperationException( "Not logged in" );
-            string playPage = DownloadString( PlayUri + serverHash, RefererUri );
-            Match ipMatch = PlayIP.Match( playPage );
-            if( !ipMatch.Success ) return null;
-            string rawIP = ipMatch.Groups[1].Value;
-            string rawPort = PlayPort.Match( playPage ).Groups[1].Value;
-            string authToken = PlayAuthToken.Match( playPage ).Groups[1].Value;
-            return new ServerLoginInfo( IPAddress.Parse( rawIP ), Int32.Parse( rawPort ), MinercraftUsername, authToken );
         }
 
 

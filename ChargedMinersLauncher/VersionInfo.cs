@@ -14,7 +14,7 @@ namespace ChargedMinersLauncher {
             Md5 = md5.ToLower();
 
             if( Md5.Length != 32 ) {
-               throw new System.ArgumentException( "Not a valid md5 string array" );
+               throw new ArgumentException( "Not a valid md5 string array" );
             }
         }
 

@@ -9,15 +9,7 @@ using System.IO;
 
 namespace ChargedMinersLauncher {
     public sealed partial class SignInForm : Form {
-        ServerInfo[] servers;
-        public static string ChargeBinary;
-        public static string ChargeBinaryAlt;
-        public const string ChargeBinaryFormatWindows = "Charge.{0}.exe";
-        public const string ChargeBinaryFormatMacOSX = "Charge.{0}.MacOSX";
-        public const string ChargeBinaryFormatLinux = "Charge.{0}.Linux";
-        public const string ChargeBinaryFormat32Bit = "i386";
-        public const string ChargeBinaryFormat64Bit = "x86_64";
-        const string PasswordSaveFile = "saved-login.dat";
+
 
         static readonly Regex
             UsernameRegex = new Regex( @"^[a-zA-Z0-9_\.]{2,16}$" ),
@@ -29,39 +21,14 @@ namespace ChargedMinersLauncher {
 
 
         public SignInForm() {
-
-            string tmp;
-            if( RuntimeInfo.IsWindows ) {
-                tmp = ChargeBinaryFormatWindows;
-            } else if( RuntimeInfo.IsMacOSX ) {
-                tmp = ChargeBinaryFormatMacOSX;
-            } else if( RuntimeInfo.IsLinux ) {
-                tmp = ChargeBinaryFormatLinux;
-            } else {
-                // XXX Something better here.
-                tmp = null;
-            }
-
-            if( RuntimeInfo.Is32Bit ) {
-                ChargeBinary = String.Format( tmp, ChargeBinaryFormat32Bit );
-                ChargeBinaryAlt = "";
-            } else if ( RuntimeInfo.Is64Bit ) {
-                ChargeBinary = String.Format( tmp, ChargeBinaryFormat64Bit );
-                ChargeBinaryAlt = String.Format( tmp, ChargeBinaryFormat32Bit );
-            }
-
-            // XXX This code should be moved into the auto updater.
-            if( !File.Exists( ChargeBinary ) ) {
-                // Look for both.
-                if ( !File.Exists( ChargeBinary ) ) {
-                    WarningForm.Show( "Warning", String.Format( "The binray \"{0}\" not found!", ChargeBinary ) );
-                } else {
-                    ChargeBinary = ChargeBinaryAlt;
-                }
-            }
-
             InitializeComponent();
-            string passwordFileFullName = Path.Combine( ChargedMinersSettings.ConfigPath, PasswordSaveFile );
+            if( !Paths.Init() ) {
+                Environment.ExitCode = 1;
+                Application.Exit();
+                return;
+            }
+
+            string passwordFileFullName = Path.Combine( Paths.ConfigPath, Paths.PasswordSaveFile );
             try {
                 if( File.Exists( passwordFileFullName ) ) {
                     string[] loginData = File.ReadAllLines( passwordFileFullName );
@@ -72,7 +39,7 @@ namespace ChargedMinersLauncher {
                     xRemember.Checked = true;
                 }
             } catch( Exception ex ) {
-                WarningForm.Show( "Error loading saved login",  ex.ToString() );
+                WarningForm.Show( "Error loading saved login", ex.ToString() );
             }
         }
 
@@ -99,11 +66,8 @@ namespace ChargedMinersLauncher {
             loadingForm.Shown += ( s2, e2 ) => ThreadPool.QueueUserWorkItem( SignIn, loadingForm );
             loadingForm.ShowDialog();
             if( MinecraftNetSession.Instance.Status == LoginResult.Success ) {
-                string passwordFileFullName = Path.Combine( ChargedMinersSettings.ConfigPath, PasswordSaveFile );
+                string passwordFileFullName = Path.Combine( Paths.ConfigPath, Paths.PasswordSaveFile );
                 if( xRemember.Checked ) {
-                    if( !Directory.Exists( ChargedMinersSettings.ConfigPath ) ) {
-                        Directory.CreateDirectory( ChargedMinersSettings.ConfigPath );
-                    }
                     File.WriteAllLines( passwordFileFullName, new[] {
                         MinecraftNetSession.Instance.LoginUsername,
                         MinecraftNetSession.Instance.Password,
@@ -115,7 +79,7 @@ namespace ChargedMinersLauncher {
                     }
                 }
                 Hide();
-                new ServerListForm( servers ).ShowDialog();
+                // TODO: launch ChargedMiners
                 Application.Exit();
             }
         }
@@ -126,8 +90,7 @@ namespace ChargedMinersLauncher {
             try {
                 switch( MinecraftNetSession.Instance.Login( xRemember.Checked ) ) {
                     case LoginResult.Success:
-                        progressBox.SetText( "Loading server list" );
-                        servers = MinecraftNetSession.Instance.GetServerList();
+                        // TODO: Launch ChargedMiners
                         break;
                     case LoginResult.WrongUsernameOrPass:
                         WarningForm.Show( "Could not sign in", "Wrong username or password." );
@@ -142,10 +105,6 @@ namespace ChargedMinersLauncher {
             } finally {
                 progressBox.Invoke( (Action)progressBox.Close );
             }
-        }
-
-        private void bSettings_Click( object sender, EventArgs e ) {
-            new SettingsForm().ShowDialog();
         }
     }
 }
