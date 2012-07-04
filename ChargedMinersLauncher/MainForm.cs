@@ -12,29 +12,12 @@ using System.Threading;
 using System.IO;
 
 namespace ChargedMinersLauncher {
-    enum DialogState {
-        Initializing,
-        PlatformNotSupportedError,
-        PromptingToDownload,
-        PromptingToUpdate,
-        DownloadingBinary,
-        AtSignInForm,
-        SigningIn
-    };
-
-
     public sealed partial class MainForm : Form {
         readonly BackgroundWorker signInWorker = new BackgroundWorker(),
                                   versionCheckWorker = new BackgroundWorker();
 
-        WebClient binaryDownloader = new WebClient();
-
-        static readonly Regex
-            UsernameRegex = new Regex( @"^[a-zA-Z0-9_\.]{2,16}$" ),
-            EmailRegex =
-                new Regex(
-                    @"^[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?$",
-                    RegexOptions.IgnoreCase );
+        string localHashString;
+        static readonly Uri UpdateUri = new Uri( "http://cloud.github.com/downloads/Wallbraker/Charged-Miners/" );
 
         string storedLoginUsername,
                storedMinecraftUsername;
@@ -43,7 +26,7 @@ namespace ChargedMinersLauncher {
         public MainForm() {
             InitializeComponent();
 
-            State = DialogState.Initializing;
+            State = FormState.Initializing;
 
             signInWorker.DoWork += SignIn;
             signInWorker.RunWorkerCompleted += OnSignInCompleted;
@@ -62,15 +45,11 @@ namespace ChargedMinersLauncher {
                 LoadLoginInfo();
                 versionCheckWorker.RunWorkerAsync();
             } else {
-                State = DialogState.PlatformNotSupportedError;
+                State = FormState.PlatformNotSupportedError;
                 tabs.SelectedTab = tabProgress;
             }
             base.OnShown( e );
         }
-
-
-        string localHashString;
-        static readonly Uri UpdateUri = new Uri( "http://cloud.github.com/downloads/Wallbraker/Charged-Miners/" );
 
 
         void CheckUpdates( object sender, DoWorkEventArgs e ) {
@@ -93,18 +72,21 @@ namespace ChargedMinersLauncher {
 
         void OnCheckUpdatesCompleted( object sender, RunWorkerCompletedEventArgs e ) {
             if( latestVersion == null ) {
-                State = DialogState.PlatformNotSupportedError;
+                State = FormState.PlatformNotSupportedError;
             } else if( !File.Exists( Paths.ChargeBinary ) ) {
-                State = DialogState.PromptingToDownload;
+                State = FormState.PromptingToDownload;
             } else if( !latestVersion.Md5.Equals( localHashString, StringComparison.OrdinalIgnoreCase ) ) {
-                State = DialogState.PromptingToUpdate;
+                State = FormState.PromptingToUpdate;
             } else {
-                State = DialogState.AtSignInForm;
+                State = FormState.AtSignInForm;
             }
         }
 
 
         #region Download
+
+        readonly WebClient binaryDownloader = new WebClient();
+        VersionInfo latestVersion;
 
         void bDownloadNo_Click( object sender, EventArgs e ) {
             Environment.ExitCode = 1;
@@ -112,11 +94,8 @@ namespace ChargedMinersLauncher {
         }
 
 
-        VersionInfo latestVersion;
-
-
         void DownloadBegin() {
-            State = DialogState.DownloadingBinary;
+            State = FormState.DownloadingBinary;
             binaryDownloader.DownloadFileAsync( new Uri( UpdateUri + latestVersion.HttpName ),
                                                 Paths.ChargeBinary + ".tmp" );
         }
@@ -143,13 +122,18 @@ namespace ChargedMinersLauncher {
             } else {
                 File.Move( Paths.ChargeBinary + ".tmp", Paths.ChargeBinary );
             }
-            State = DialogState.AtSignInForm;
+            State = FormState.AtSignInForm;
         }
 
         #endregion
 
 
         #region SignIn
+
+        static readonly Regex
+            UsernameRegex = new Regex( @"^[a-zA-Z0-9_\.]{2,16}$" ),
+            EmailRegex = new Regex( @"^[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?$",
+                                    RegexOptions.IgnoreCase );
 
         void OnUsernameOrPasswordChanged( object sender, EventArgs e ) {
             if( UsernameRegex.IsMatch( tUsername.Text ) || EmailRegex.IsMatch( tUsername.Text ) ) {
@@ -170,7 +154,7 @@ namespace ChargedMinersLauncher {
             }
             MinecraftNetSession.Instance = new MinecraftNetSession( tUsername.Text, minecraftUsername, tPassword.Text );
 
-            State = DialogState.SigningIn;
+            State = FormState.SigningIn;
             signInWorker.RunWorkerAsync();
         }
 
@@ -187,15 +171,15 @@ namespace ChargedMinersLauncher {
                     Application.Exit();
                     break;
                 case LoginResult.WrongUsernameOrPass:
-                    WarningForm.Show( "Could not sign in", "Wrong username or password." );
+                    lSignInStatus.Text = "Wrong username or password.";
                     tabs.SelectedTab = tabSignIn;
                     break;
                 case LoginResult.Error:
                     Exception ex = MinecraftNetSession.Instance.LoginException;
                     if( ex != null ) {
-                        WarningForm.Show( "Could not sign in", ex.Message );
+                        lSignInStatus.Text = "Error: " + ex.Message;
                     } else {
-                        WarningForm.Show( "Could not sign in", "An unknown error occured." );
+                        lSignInStatus.Text = "An unknown error occured.";
                     }
                     tabs.SelectedTab = tabSignIn;
                     break;
@@ -214,8 +198,8 @@ namespace ChargedMinersLauncher {
                     storedMinecraftUsername = loginData.Length > 2 ? loginData[2] : storedLoginUsername;
                     xRemember.Checked = true;
                 }
-            } catch( Exception ex ) {
-                WarningForm.Show( "Error loading saved login", ex.ToString() );
+            } catch( Exception ) {
+                lSignInStatus.Text = "Could not load saved login information.";
             }
         }
 
@@ -252,11 +236,11 @@ namespace ChargedMinersLauncher {
 
         void bCancel_Click( object sender, EventArgs e ) {
             switch( State ) {
-                case DialogState.SigningIn:
+                case FormState.SigningIn:
                     signInWorker.CancelAsync();
                     lStatus2.Text = "Canceling...";
                     break;
-                case DialogState.PlatformNotSupportedError:
+                case FormState.PlatformNotSupportedError:
                     Environment.ExitCode = 1;
                     Application.Exit();
                     break;
@@ -264,18 +248,19 @@ namespace ChargedMinersLauncher {
         }
 
 
-        DialogState State {
+        FormState State {
             get { return state; }
             set {
                 switch( value ) {
-                    case DialogState.Initializing:
+                    case FormState.Initializing:
+                        lSignInStatus.Text = "";
                         lStatus.Text = "Initializing...";
                         lStatus2.Text = "";
                         pbSigningIn.Style = ProgressBarStyle.Marquee;
                         bCancel.Visible = false;
                         break;
 
-                    case DialogState.PlatformNotSupportedError:
+                    case FormState.PlatformNotSupportedError:
                         lStatus.Text = "Failed to initialize";
                         lStatus2.Text = "No binaries are available for your platform.";
                         pbSigningIn.Style = ProgressBarStyle.Continuous;
@@ -284,15 +269,15 @@ namespace ChargedMinersLauncher {
                         bCancel.Visible = true;
                         break;
 
-                    case DialogState.PromptingToDownload:
+                    case FormState.PromptingToDownload:
                         tabs.SelectedTab = tabDownload;
                         break;
 
-                    case DialogState.PromptingToUpdate:
+                    case FormState.PromptingToUpdate:
                         tabs.SelectedTab = tabUpdate;
                         break;
 
-                    case DialogState.DownloadingBinary:
+                    case FormState.DownloadingBinary:
                         lStatus.Text = String.Format( "Downloading {0} (?/?)", Paths.ChargeBinary );
                         lStatus2.Text = "";
                         pbSigningIn.Style = ProgressBarStyle.Continuous;
@@ -301,11 +286,12 @@ namespace ChargedMinersLauncher {
                         bCancel.Visible = false;
                         break;
 
-                    case DialogState.AtSignInForm:
+                    case FormState.AtSignInForm:
                         tabs.SelectedTab = tabSignIn;
                         break;
 
-                    case DialogState.SigningIn:
+                    case FormState.SigningIn:
+                        lSignInStatus.Text = "";
                         lStatus.Text = String.Format( "Signing in as {0}...",
                                                       MinecraftNetSession.Instance.LoginUsername );
                         lStatus2.Text = "";
@@ -319,9 +305,7 @@ namespace ChargedMinersLauncher {
             }
         }
 
-        DialogState state;
-
-        #endregion
+        FormState state;
 
 
         void bUpdateYes_Click( object sender, EventArgs e ) {
@@ -330,7 +314,9 @@ namespace ChargedMinersLauncher {
 
 
         void bUpdateNo_Click( object sender, EventArgs e ) {
-            State = DialogState.AtSignInForm;
+            State = FormState.AtSignInForm;
         }
+
+        #endregion
     }
 }
