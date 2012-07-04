@@ -31,10 +31,6 @@
             this.bCancel = new System.Windows.Forms.Button();
             this.pbSigningIn = new System.Windows.Forms.ProgressBar();
             this.lStatus = new System.Windows.Forms.Label();
-            this.tabDownload = new System.Windows.Forms.TabPage();
-            this.bDownloadNo = new System.Windows.Forms.Button();
-            this.bDownloadYes = new System.Windows.Forms.Button();
-            this.lDownload = new System.Windows.Forms.Label();
             this.tabUpdate = new System.Windows.Forms.TabPage();
             this.bUpdateNo = new System.Windows.Forms.Button();
             this.bUpdateYes = new System.Windows.Forms.Button();
@@ -48,7 +44,6 @@
             this.tPassword = new System.Windows.Forms.TextBox();
             this.tabs.SuspendLayout();
             this.tabProgress.SuspendLayout();
-            this.tabDownload.SuspendLayout();
             this.tabUpdate.SuspendLayout();
             this.tabSignIn.SuspendLayout();
             this.SuspendLayout();
@@ -79,7 +74,6 @@
             // tabs
             // 
             this.tabs.Controls.Add(this.tabProgress);
-            this.tabs.Controls.Add(this.tabDownload);
             this.tabs.Controls.Add(this.tabUpdate);
             this.tabs.Controls.Add(this.tabSignIn);
             this.tabs.Dock = System.Windows.Forms.DockStyle.Bottom;
@@ -143,51 +137,6 @@
             this.lStatus.Text = "Status";
             this.lStatus.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
-            // tabDownload
-            // 
-            this.tabDownload.BackColor = System.Drawing.SystemColors.Control;
-            this.tabDownload.Controls.Add(this.bDownloadNo);
-            this.tabDownload.Controls.Add(this.bDownloadYes);
-            this.tabDownload.Controls.Add(this.lDownload);
-            this.tabDownload.Location = new System.Drawing.Point(4, 22);
-            this.tabDownload.Name = "tabDownload";
-            this.tabDownload.Padding = new System.Windows.Forms.Padding(3);
-            this.tabDownload.Size = new System.Drawing.Size(294, 101);
-            this.tabDownload.TabIndex = 3;
-            this.tabDownload.Text = "Download";
-            // 
-            // bDownloadNo
-            // 
-            this.bDownloadNo.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.bDownloadNo.Location = new System.Drawing.Point(168, 72);
-            this.bDownloadNo.Name = "bDownloadNo";
-            this.bDownloadNo.Size = new System.Drawing.Size(120, 23);
-            this.bDownloadNo.TabIndex = 3;
-            this.bDownloadNo.Text = "No, Exit";
-            this.bDownloadNo.UseVisualStyleBackColor = true;
-            this.bDownloadNo.Click += new System.EventHandler(this.bDownloadNo_Click);
-            // 
-            // bDownloadYes
-            // 
-            this.bDownloadYes.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.bDownloadYes.Location = new System.Drawing.Point(6, 72);
-            this.bDownloadYes.Name = "bDownloadYes";
-            this.bDownloadYes.Size = new System.Drawing.Size(120, 23);
-            this.bDownloadYes.TabIndex = 2;
-            this.bDownloadYes.Text = "Yes, Download";
-            this.bDownloadYes.UseVisualStyleBackColor = true;
-            this.bDownloadYes.Click += new System.EventHandler(this.bDownloadYes_Click);
-            // 
-            // lDownload
-            // 
-            this.lDownload.Dock = System.Windows.Forms.DockStyle.Top;
-            this.lDownload.Location = new System.Drawing.Point(3, 3);
-            this.lDownload.Name = "lDownload";
-            this.lDownload.Size = new System.Drawing.Size(288, 26);
-            this.lDownload.TabIndex = 1;
-            this.lDownload.Text = "Charged-Miners binaries are missing.\r\nDownload latest version?";
-            this.lDownload.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
-            // 
             // tabUpdate
             // 
             this.tabUpdate.BackColor = System.Drawing.SystemColors.Control;
@@ -197,7 +146,7 @@
             this.tabUpdate.Location = new System.Drawing.Point(4, 22);
             this.tabUpdate.Name = "tabUpdate";
             this.tabUpdate.Padding = new System.Windows.Forms.Padding(3);
-            this.tabUpdate.Size = new System.Drawing.Size(294, 101);
+            this.tabUpdate.Size = new System.Drawing.Size(294, 88);
             this.tabUpdate.TabIndex = 2;
             this.tabUpdate.Text = "Update";
             // 
@@ -247,7 +196,7 @@
             this.tabSignIn.Location = new System.Drawing.Point(4, 22);
             this.tabSignIn.Name = "tabSignIn";
             this.tabSignIn.Padding = new System.Windows.Forms.Padding(3);
-            this.tabSignIn.Size = new System.Drawing.Size(294, 101);
+            this.tabSignIn.Size = new System.Drawing.Size(294, 88);
             this.tabSignIn.TabIndex = 0;
             this.tabSignIn.Text = "Sign In";
             // 
@@ -330,7 +279,6 @@
             this.Text = "Charged-Miners Launcher";
             this.tabs.ResumeLayout(false);
             this.tabProgress.ResumeLayout(false);
-            this.tabDownload.ResumeLayout(false);
             this.tabUpdate.ResumeLayout(false);
             this.tabSignIn.ResumeLayout(false);
             this.tabSignIn.PerformLayout();
@@ -358,10 +306,6 @@
         private System.Windows.Forms.Button bUpdateYes;
         private System.Windows.Forms.Label lUpdatePrompt;
         private System.Windows.Forms.Label lStatus2;
-        private System.Windows.Forms.TabPage tabDownload;
-        private System.Windows.Forms.Button bDownloadNo;
-        private System.Windows.Forms.Button bDownloadYes;
-        private System.Windows.Forms.Label lDownload;
         private System.Windows.Forms.Label lSignInStatus;
     }
 }

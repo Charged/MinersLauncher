@@ -74,7 +74,7 @@ namespace ChargedMinersLauncher {
             if( latestVersion == null ) {
                 State = FormState.PlatformNotSupportedError;
             } else if( !File.Exists( Paths.ChargeBinary ) ) {
-                State = FormState.PromptingToDownload;
+                DownloadBegin();
             } else if( !latestVersion.Md5.Equals( localHashString, StringComparison.OrdinalIgnoreCase ) ) {
                 State = FormState.PromptingToUpdate;
             } else {
@@ -88,21 +88,10 @@ namespace ChargedMinersLauncher {
         readonly WebClient binaryDownloader = new WebClient();
         VersionInfo latestVersion;
 
-        void bDownloadNo_Click( object sender, EventArgs e ) {
-            Environment.ExitCode = 1;
-            Application.Exit();
-        }
-
-
         void DownloadBegin() {
             State = FormState.DownloadingBinary;
             binaryDownloader.DownloadFileAsync( new Uri( UpdateUri + latestVersion.HttpName ),
                                                 Paths.ChargeBinary + ".tmp" );
-        }
-
-
-        void bDownloadYes_Click( object sender, EventArgs e ) {
-            DownloadBegin();
         }
 
 
@@ -267,10 +256,6 @@ namespace ChargedMinersLauncher {
                         pbSigningIn.Value = 100;
                         bCancel.Text = "OK";
                         bCancel.Visible = true;
-                        break;
-
-                    case FormState.PromptingToDownload:
-                        tabs.SelectedTab = tabDownload;
                         break;
 
                     case FormState.PromptingToUpdate:

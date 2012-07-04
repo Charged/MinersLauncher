@@ -4,7 +4,6 @@ namespace ChargedMinersLauncher {
     enum FormState {
         Initializing,
         PlatformNotSupportedError,
-        PromptingToDownload,
         PromptingToUpdate,
         DownloadingBinary,
         AtSignInForm,
