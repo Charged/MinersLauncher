@@ -1,6 +1,7 @@
 ﻿// Part of ChargedMinersLaunher | Copyright (c) 2012 Matvei Stefarov <me@matvei.org> | BSD-3 | See LICENSE.txt
 using System;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Drawing;
 using System.Net;
 using System.Security.Cryptography;
@@ -132,8 +133,7 @@ namespace ChargedMinersLauncher {
             } else {
                 File.Move( Paths.ChargeBinary + ".tmp", Paths.ChargeBinary );
             }
-            State = DialogState.SigningIn;
-            tabs.SelectedTab = tabSignIn;
+            State = DialogState.AtSignInForm;
         }
 
         #endregion
@@ -160,6 +160,7 @@ namespace ChargedMinersLauncher {
             }
             MinecraftNetSession.Instance = new MinecraftNetSession( tUsername.Text, minecraftUsername, tPassword.Text );
 
+            State = DialogState.SigningIn;
             signInWorker.RunWorkerAsync();
         }
 
@@ -172,8 +173,8 @@ namespace ChargedMinersLauncher {
             switch( MinecraftNetSession.Instance.Status ) {
                 case LoginResult.Success:
                     SaveLoginInfo();
-                    // TODO: Check for ChargedMiners update
-                    lStatus.Text = "Checking for ChargedMiners updates...";
+                    Process.Start( Paths.ChargeBinary, "PLAY_SESSION=" + MinecraftNetSession.Instance.PlaySessionCookie );
+                    Application.Exit();
                     break;
                 case LoginResult.WrongUsernameOrPass:
                     WarningForm.Show( "Could not sign in", "Wrong username or password." );
@@ -289,7 +290,8 @@ namespace ChargedMinersLauncher {
                         break;
 
                     case DialogState.SigningIn:
-                        lStatus.Text = String.Format( "Signing in as {0}...", MinecraftNetSession.Instance.LoginUsername );
+                        lStatus.Text = String.Format( "Signing in as {0}...",
+                                                      MinecraftNetSession.Instance.LoginUsername );
                         lStatus2.Text = "";
                         pbSigningIn.Style = ProgressBarStyle.Marquee;
                         bCancel.Text = "Cancel";

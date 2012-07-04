@@ -25,6 +25,13 @@ namespace ChargedMinersLauncher {
         public LoginResult Status { get; set; }
         public Exception LoginException { get; set; }
 
+        public string PlaySessionCookie {
+            get {
+                CookieCollection cookies = cookieJar.GetCookies( new Uri( "http://www.minecraft.net/" ) );
+                return cookies["PLAY_SESSION"].Value;
+            }
+        }
+
 
         public MinecraftNetSession( string loginUsername, string minercraftUsername, string password ) {
             if( loginUsername == null ) throw new ArgumentNullException( "loginUsername" );
