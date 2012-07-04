@@ -12,7 +12,7 @@ sealed class TablessControl : TabControl {
 
     // based on http://dotnetrix.co.uk/tabcontrol.htm
     protected override bool ProcessCmdKey( ref Message msg, Keys keyData ) {
-        if( Convert.ToBoolean( keyData & Keys.Tab | Keys.Control ) )
+        if( keyData == ( Keys.Tab | Keys.Control ) || keyData == ( Keys.Tab | Keys.Control | Keys.Shift) )
             return true;
         return base.ProcessCmdKey( ref msg, keyData );
     }

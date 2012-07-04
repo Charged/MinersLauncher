@@ -26,12 +26,15 @@ namespace ChargedMinersLauncher {
     public sealed partial class MainForm : Form {
         readonly BackgroundWorker signInWorker = new BackgroundWorker(),
                                   versionCheckWorker = new BackgroundWorker();
+
         WebClient binaryDownloader = new WebClient();
 
         static readonly Regex
             UsernameRegex = new Regex( @"^[a-zA-Z0-9_\.]{2,16}$" ),
-            EmailRegex = new Regex( @"^[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?$",
-                                    RegexOptions.IgnoreCase );
+            EmailRegex =
+                new Regex(
+                    @"^[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?$",
+                    RegexOptions.IgnoreCase );
 
         string storedLoginUsername,
                storedMinecraftUsername;
@@ -69,6 +72,7 @@ namespace ChargedMinersLauncher {
         string localHashString;
         static readonly Uri UpdateUri = new Uri( "http://cloud.github.com/downloads/Wallbraker/Charged-Miners/" );
 
+
         void CheckUpdates( object sender, DoWorkEventArgs e ) {
             if( File.Exists( Paths.ChargeBinary ) ) {
                 MD5 hasher = MD5.Create();
@@ -86,6 +90,7 @@ namespace ChargedMinersLauncher {
             latestVersion = versionList.Get( Paths.ChargeBinary );
         }
 
+
         void OnCheckUpdatesCompleted( object sender, RunWorkerCompletedEventArgs e ) {
             if( latestVersion == null ) {
                 State = DialogState.PlatformNotSupportedError;
@@ -101,19 +106,24 @@ namespace ChargedMinersLauncher {
 
         #region Download
 
-        private void bDownloadNo_Click( object sender, EventArgs e ) {
+        void bDownloadNo_Click( object sender, EventArgs e ) {
             Environment.ExitCode = 1;
             Application.Exit();
         }
 
+
         VersionInfo latestVersion;
 
-        private void bDownloadYes_Click( object sender, EventArgs e ) {
 
+        void DownloadBegin() {
             State = DialogState.DownloadingBinary;
-
             binaryDownloader.DownloadFileAsync( new Uri( UpdateUri + latestVersion.HttpName ),
                                                 Paths.ChargeBinary + ".tmp" );
+        }
+
+
+        void bDownloadYes_Click( object sender, EventArgs e ) {
+            DownloadBegin();
         }
 
 
@@ -181,7 +191,12 @@ namespace ChargedMinersLauncher {
                     tabs.SelectedTab = tabSignIn;
                     break;
                 case LoginResult.Error:
-                    WarningForm.Show( "Could not sign in", MinecraftNetSession.Instance.LoginException.Message );
+                    Exception ex = MinecraftNetSession.Instance.LoginException;
+                    if( ex != null ) {
+                        WarningForm.Show( "Could not sign in", ex.Message );
+                    } else {
+                        WarningForm.Show( "Could not sign in", "An unknown error occured." );
+                    }
                     tabs.SelectedTab = tabSignIn;
                     break;
             }
@@ -209,10 +224,10 @@ namespace ChargedMinersLauncher {
             string passwordFileFullName = Path.Combine( Paths.ConfigPath, Paths.PasswordSaveFile );
             if( xRemember.Checked ) {
                 File.WriteAllLines( passwordFileFullName, new[] {
-                    MinecraftNetSession.Instance.LoginUsername,
-                    MinecraftNetSession.Instance.Password,
-                    MinecraftNetSession.Instance.MinercraftUsername
-                } );
+                                                                    MinecraftNetSession.Instance.LoginUsername,
+                                                                    MinecraftNetSession.Instance.Password,
+                                                                    MinecraftNetSession.Instance.MinercraftUsername
+                                                                } );
             } else {
                 if( File.Exists( passwordFileFullName ) ) {
                     File.Delete( passwordFileFullName );
@@ -235,7 +250,7 @@ namespace ChargedMinersLauncher {
 
         #region UI
 
-        private void bCancel_Click( object sender, EventArgs e ) {
+        void bCancel_Click( object sender, EventArgs e ) {
             switch( State ) {
                 case DialogState.SigningIn:
                     signInWorker.CancelAsync();
@@ -247,6 +262,7 @@ namespace ChargedMinersLauncher {
                     break;
             }
         }
+
 
         DialogState State {
             get { return state; }
@@ -302,8 +318,19 @@ namespace ChargedMinersLauncher {
                 state = value;
             }
         }
+
         DialogState state;
 
         #endregion
+
+
+        void bUpdateYes_Click( object sender, EventArgs e ) {
+            DownloadBegin();
+        }
+
+
+        void bUpdateNo_Click( object sender, EventArgs e ) {
+            State = DialogState.AtSignInForm;
+        }
     }
 }

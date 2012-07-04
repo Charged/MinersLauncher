@@ -46,7 +46,7 @@ namespace ChargedMinersLauncher {
                 }
             }
 
-            //ChargeBinary = "Charge.i386.exe"; // TODO: debugging
+            // ChargeBinary = "Charge.i386.exe"; // TODO: debugging
 
             if( !Directory.Exists( ConfigPath ) ) {
                 Directory.CreateDirectory( ConfigPath );
