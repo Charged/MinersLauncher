@@ -8,16 +8,16 @@ namespace ChargedMinersLauncher {
         }
 
         public static string ChargeBinary;
-        public static string ChargeBinaryAlt;
-        public const string ChargeBinaryFormatWindows = "Charge.{0}.exe";
-        public const string ChargeBinaryFormatMacOSX = "Charge.{0}.MacOSX";
-        public const string ChargeBinaryFormatLinux = "Charge.{0}.Linux";
-        public const string ChargeBinaryFormat32Bit = "i386";
-        public const string ChargeBinaryFormat64Bit = "x86_64";
+        const string ChargeBinaryFormatWindows = "Charge.{0}.exe";
+        const string ChargeBinaryFormatMacOSX = "Charge.{0}.MacOSX";
+        const string ChargeBinaryFormatLinux = "Charge.{0}.Linux";
+        const string ChargeBinaryFormat32Bit = "i386";
+        const string ChargeBinaryFormat64Bit = "x86_64";
         public const string PasswordSaveFile = "saved-login.dat";
 
 
         public static bool Init() {
+            string chargeBinaryAlt;
             string tmp;
             if( RuntimeInfo.IsWindows ) {
                 tmp = ChargeBinaryFormatWindows;
@@ -26,25 +26,23 @@ namespace ChargedMinersLauncher {
             } else if( RuntimeInfo.IsLinux ) {
                 tmp = ChargeBinaryFormatLinux;
             } else {
-                WarningForm.Show( "Unsupported platform", "ChargedMinersLauncher is not supported on this platform." );
                 return false;
             }
 
             if( RuntimeInfo.Is32Bit ) {
                 ChargeBinary = String.Format( tmp, ChargeBinaryFormat32Bit );
-                ChargeBinaryAlt = "";
+                chargeBinaryAlt = "";
             } else if( RuntimeInfo.Is64Bit ) {
                 ChargeBinary = String.Format( tmp, ChargeBinaryFormat64Bit );
-                ChargeBinaryAlt = String.Format( tmp, ChargeBinaryFormat32Bit );
+                chargeBinaryAlt = String.Format( tmp, ChargeBinaryFormat32Bit );
+            } else {
+                return false;
             }
 
-            // XXX This code should be moved into the auto updater.
             if( !File.Exists( ChargeBinary ) ) {
                 // Look for both.
-                if( !File.Exists( ChargeBinary ) ) {
-                    WarningForm.Show( "Warning", String.Format( "The binary \"{0}\" not found!", ChargeBinary ) );
-                } else {
-                    ChargeBinary = ChargeBinaryAlt;
+                if( File.Exists( chargeBinaryAlt ) ) {
+                    ChargeBinary = chargeBinaryAlt;
                 }
             }
 

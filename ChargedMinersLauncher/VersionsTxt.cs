@@ -41,8 +41,11 @@ namespace ChargedMinersLauncher {
 
         public VersionInfo Get( string name ) {
             VersionInfo ret;
-            versions.TryGetValue( name, out ret );
-            return ret;
+            if( versions.TryGetValue( name, out ret ) ) {
+                return ret;
+            } else {
+                return null;
+            }
         }
     }
 }

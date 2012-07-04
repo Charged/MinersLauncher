@@ -17,16 +17,5 @@ namespace ChargedMinersLauncher {
                 throw new ArgumentException( "Not a valid md5 string array" );
             }
         }
-
-
-        public bool CompareHash( byte[] other ) {
-            var str = BitConverter.ToString( other ).Replace( "-", "" ).ToLower();
-            return String.Equals( Md5, str, StringComparison.OrdinalIgnoreCase );
-        }
-
-
-        public bool CompareHash( string other ) {
-            return String.Equals( Md5, other, StringComparison.OrdinalIgnoreCase );
-        }
     }
 }
