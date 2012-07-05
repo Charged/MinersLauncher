@@ -26,14 +26,15 @@ namespace ChargedMinersLauncher {
         public MainForm() {
             InitializeComponent();
 
-            State = FormState.Initializing;
+            lSignInStatus.Text = "";
+            State = FormState.AtSignInForm;
 
             signInWorker.DoWork += SignIn;
             signInWorker.RunWorkerCompleted += OnSignInCompleted;
             signInWorker.WorkerSupportsCancellation = true;
 
             versionCheckWorker.DoWork += CheckUpdates;
-            versionCheckWorker.RunWorkerCompleted += OnCheckUpdatesCompleted;
+            versionCheckWorker.RunWorkerCompleted += OnUpdateCheckCompleted;
 
             binaryDownloader.DownloadProgressChanged += OnDownloadProgress;
             binaryDownloader.DownloadFileCompleted += OnDownloadCompleted;
@@ -46,13 +47,13 @@ namespace ChargedMinersLauncher {
                 versionCheckWorker.RunWorkerAsync();
             } else {
                 State = FormState.PlatformNotSupportedError;
-                tabs.SelectedTab = tabProgress;
             }
             base.OnShown( e );
         }
 
 
         void CheckUpdates( object sender, DoWorkEventArgs e ) {
+            Log( "CheckUpdates" );
             if( File.Exists( Paths.ChargeBinary ) ) {
                 MD5 hasher = MD5.Create();
                 using( FileStream fs = File.OpenRead( Paths.ChargeBinary ) ) {
@@ -70,15 +71,37 @@ namespace ChargedMinersLauncher {
         }
 
 
-        void OnCheckUpdatesCompleted( object sender, RunWorkerCompletedEventArgs e ) {
+        bool loginCompleted, updateCheckCompleted;
+
+
+        void OnUpdateCheckCompleted( object sender, RunWorkerCompletedEventArgs e ) {
+            Log( "OnUpdateCheckCompleted" );
+            updateCheckCompleted = true;
+
+            if( latestVersion != null &&
+                (!File.Exists( Paths.ChargeBinary ) ||
+                 !latestVersion.Md5.Equals( localHashString, StringComparison.OrdinalIgnoreCase )) ) {
+                DownloadBegin();
+            }
+
+            if( loginCompleted ) OnSignInAndUpdateCheckCompleted();
+        }
+
+
+        void OnSignInAndUpdateCheckCompleted() {
+            Log( "OnSignInAndUpdateCheckCompleted" );
             if( latestVersion == null ) {
                 State = FormState.PlatformNotSupportedError;
             } else if( !File.Exists( Paths.ChargeBinary ) ) {
-                DownloadBegin();
+                if( downloadComplete ) {
+                    ApplyUpdate();
+                } else {
+                    State = FormState.DownloadingBinary;
+                }
             } else if( !latestVersion.Md5.Equals( localHashString, StringComparison.OrdinalIgnoreCase ) ) {
                 State = FormState.PromptingToUpdate;
             } else {
-                State = FormState.AtSignInForm;
+                StartChargedMiners();
             }
         }
 
@@ -87,9 +110,11 @@ namespace ChargedMinersLauncher {
 
         readonly WebClient binaryDownloader = new WebClient();
         VersionInfo latestVersion;
+        bool downloadComplete;
+
 
         void DownloadBegin() {
-            State = FormState.DownloadingBinary;
+            Log( "DownloadBegin" );
             binaryDownloader.DownloadFileAsync( new Uri( UpdateUri + latestVersion.HttpName ),
                                                 Paths.ChargeBinary + ".tmp" );
         }
@@ -97,21 +122,34 @@ namespace ChargedMinersLauncher {
 
         void OnDownloadProgress( object sender, DownloadProgressChangedEventArgs e ) {
             pbSigningIn.Value = e.ProgressPercentage;
-            lStatus.Text = String.Format( "Downloading {0} ({1}/{2})",
-                                          Paths.ChargeBinary,
-                                          e.BytesReceived,
-                                          e.TotalBytesToReceive );
+            if( State == FormState.DownloadingBinary ) {
+                lStatus.Text = String.Format( "Downloading {0} ({1}/{2})",
+                                              Paths.ChargeBinary,
+                                              e.BytesReceived,
+                                              e.TotalBytesToReceive );
+            }
         }
 
 
         void OnDownloadCompleted( object sender, AsyncCompletedEventArgs e ) {
+            Log( "OnDownloadCompleted" );
+            if( e.Cancelled ) return;
+            downloadComplete = true;
+            if( State == FormState.DownloadingBinary ) {
+                ApplyUpdate();
+            }
+        }
+
+
+        void ApplyUpdate() {
+            Log( "ApplyUpdate" );
             if( File.Exists( Paths.ChargeBinary ) ) {
                 File.Delete( Paths.ChargeBinary + ".old" );
                 File.Replace( Paths.ChargeBinary + ".tmp", Paths.ChargeBinary, Paths.ChargeBinary + ".old", true );
             } else {
                 File.Move( Paths.ChargeBinary + ".tmp", Paths.ChargeBinary );
             }
-            State = FormState.AtSignInForm;
+            StartChargedMiners();
         }
 
         #endregion
@@ -149,20 +187,27 @@ namespace ChargedMinersLauncher {
 
 
         void OnSignInCompleted( object sender, RunWorkerCompletedEventArgs e ) {
+            Log( "OnSignInCompleted" );
             if( e.Cancelled ) {
-                tabs.SelectedTab = tabSignIn;
+                State = FormState.AtSignInForm;
                 return;
             }
             switch( MinecraftNetSession.Instance.Status ) {
                 case LoginResult.Success:
                     SaveLoginInfo();
-                    Process.Start( Paths.ChargeBinary, "PLAY_SESSION=" + MinecraftNetSession.Instance.PlaySessionCookie );
-                    Application.Exit();
+                    loginCompleted = true;
+                    if( updateCheckCompleted ) {
+                        OnSignInAndUpdateCheckCompleted();
+                    } else {
+                        State = FormState.WaitingForUpdater;
+                    }
                     break;
+
                 case LoginResult.WrongUsernameOrPass:
                     lSignInStatus.Text = "Wrong username or password.";
                     tabs.SelectedTab = tabSignIn;
                     break;
+
                 case LoginResult.Error:
                     Exception ex = MinecraftNetSession.Instance.LoginException;
                     if( ex != null ) {
@@ -173,6 +218,13 @@ namespace ChargedMinersLauncher {
                     tabs.SelectedTab = tabSignIn;
                     break;
             }
+        }
+
+
+        void StartChargedMiners() {
+            Log( "StartChargedMiners" );
+            Process.Start( Paths.ChargeBinary, "PLAY_SESSION=" + MinecraftNetSession.Instance.PlaySessionCookie );
+            Application.Exit();
         }
 
 
@@ -233,6 +285,10 @@ namespace ChargedMinersLauncher {
                     Environment.ExitCode = 1;
                     Application.Exit();
                     break;
+                case FormState.DownloadingBinary:
+                    binaryDownloader.CancelAsync();
+                    StartChargedMiners();
+                    break;
             }
         }
 
@@ -240,10 +296,28 @@ namespace ChargedMinersLauncher {
         FormState State {
             get { return state; }
             set {
+                Log( "State = " + value );
                 switch( value ) {
-                    case FormState.Initializing:
+                    case FormState.AtSignInForm:
+                        lStatus.Text = "";
+                        lStatus2.Text = "";
+                        tabs.SelectedTab = tabSignIn;
+                        break;
+
+                    case FormState.SigningIn:
                         lSignInStatus.Text = "";
-                        lStatus.Text = "Initializing...";
+                        lStatus.Text = String.Format( "Signing in as {0}...",
+                                                      MinecraftNetSession.Instance.LoginUsername );
+                        lStatus2.Text = "";
+                        pbSigningIn.Style = ProgressBarStyle.Marquee;
+                        bCancel.Text = "Cancel";
+                        bCancel.Visible = true;
+                        tabs.SelectedTab = tabProgress;
+                        break;
+
+                    case FormState.WaitingForUpdater:
+                        lSignInStatus.Text = "";
+                        lStatus.Text = "Checking for updates...";
                         lStatus2.Text = "";
                         pbSigningIn.Style = ProgressBarStyle.Marquee;
                         bCancel.Visible = false;
@@ -251,7 +325,7 @@ namespace ChargedMinersLauncher {
 
                     case FormState.PlatformNotSupportedError:
                         lStatus.Text = "Failed to initialize";
-                        lStatus2.Text = "No binaries are available for your platform.";
+                        lStatus2.Text = "Charged-Miners is not available for this platform.";
                         pbSigningIn.Style = ProgressBarStyle.Continuous;
                         pbSigningIn.Value = 100;
                         bCancel.Text = "OK";
@@ -268,22 +342,8 @@ namespace ChargedMinersLauncher {
                         pbSigningIn.Style = ProgressBarStyle.Continuous;
                         pbSigningIn.Value = 0;
                         tabs.SelectedTab = tabProgress;
-                        bCancel.Visible = false;
-                        break;
-
-                    case FormState.AtSignInForm:
-                        tabs.SelectedTab = tabSignIn;
-                        break;
-
-                    case FormState.SigningIn:
-                        lSignInStatus.Text = "";
-                        lStatus.Text = String.Format( "Signing in as {0}...",
-                                                      MinecraftNetSession.Instance.LoginUsername );
-                        lStatus2.Text = "";
-                        pbSigningIn.Style = ProgressBarStyle.Marquee;
                         bCancel.Text = "Cancel";
                         bCancel.Visible = true;
-                        tabs.SelectedTab = tabProgress;
                         break;
                 }
                 state = value;
@@ -303,5 +363,14 @@ namespace ChargedMinersLauncher {
         }
 
         #endregion
+
+
+        static void Log( string message ) {
+#if DEBUG
+            string fullMsg = String.Format( "* {0:HH':'mm':'ss'.'ff} {1} {2}",
+                                            DateTime.Now, message, Environment.NewLine );
+            Debugger.Log( 0, "Debug", fullMsg );
+#endif
+        }
     }
 }

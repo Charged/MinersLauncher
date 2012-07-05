@@ -2,11 +2,11 @@
 
 namespace ChargedMinersLauncher {
     enum FormState {
-        Initializing,
+        AtSignInForm,
+        SigningIn,
+        WaitingForUpdater,
         PlatformNotSupportedError,
         PromptingToUpdate,
         DownloadingBinary,
-        AtSignInForm,
-        SigningIn
     };
 }
