@@ -79,7 +79,7 @@ namespace ChargedMinersLauncher {
 
 
         void LoadCookie( bool remember ) {
-            string cookieFile = Path.Combine( Paths.ConfigPath, Paths.CookieContainerFile );
+            string cookieFile = Paths.CookieContainerFile;
             if( File.Exists( cookieFile ) ) {
                 if( remember ) {
                     BinaryFormatter formatter = new BinaryFormatter();
@@ -107,7 +107,7 @@ namespace ChargedMinersLauncher {
 
 
         void SaveCookie() {
-            string cookieFile = Path.Combine( Paths.ConfigPath, Paths.CookieContainerFile );
+            string cookieFile = Paths.CookieContainerFile;
             BinaryFormatter formatter = new BinaryFormatter();
             using( Stream s = File.Create( cookieFile ) ) {
                 formatter.Serialize( s, cookieJar );

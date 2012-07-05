@@ -221,7 +221,7 @@ namespace ChargedMinersLauncher {
 
 
         void LoadLoginInfo() {
-            string passwordFileFullName = Path.Combine( Paths.ConfigPath, Paths.PasswordSaveFile );
+            string passwordFileFullName = Paths.PasswordSaveFile;
             try {
                 if( File.Exists( passwordFileFullName ) ) {
                     string[] loginData = File.ReadAllLines( passwordFileFullName );
@@ -238,7 +238,7 @@ namespace ChargedMinersLauncher {
 
 
         void SaveLoginInfo() {
-            string passwordFileFullName = Path.Combine( Paths.ConfigPath, Paths.PasswordSaveFile );
+            string passwordFileFullName = Paths.PasswordSaveFile;
             if( xRemember.Checked ) {
                 File.WriteAllLines( passwordFileFullName, new[] {
                                                                     MinecraftNetSession.Instance.LoginUsername,

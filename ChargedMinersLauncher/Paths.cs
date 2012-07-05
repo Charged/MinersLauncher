@@ -19,6 +19,11 @@ namespace ChargedMinersLauncher {
 
 
         public static bool Init() {
+            if( !Directory.Exists( ConfigPath ) ) {
+                Directory.CreateDirectory( ConfigPath );
+            }
+            Directory.SetCurrentDirectory( ConfigPath );
+
             string tmp;
             if( RuntimeInfo.IsWindows ) {
                 tmp = ChargeBinaryFormatWindows;
@@ -37,10 +42,6 @@ namespace ChargedMinersLauncher {
                 AlternativeBinary = String.Format( tmp, ChargeBinaryFormat32Bit );
             } else {
                 return false;
-            }
-
-            if( !Directory.Exists( ConfigPath ) ) {
-                Directory.CreateDirectory( ConfigPath );
             }
             return true;
         }
