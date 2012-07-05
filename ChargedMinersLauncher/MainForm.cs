@@ -8,21 +8,10 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Windows.Forms;
-using System.Threading;
 using System.IO;
 
 namespace ChargedMinersLauncher {
     public sealed partial class MainForm : Form {
-        readonly BackgroundWorker signInWorker = new BackgroundWorker(),
-                                  versionCheckWorker = new BackgroundWorker();
-
-        string localHashString;
-        static readonly Uri UpdateUri = new Uri( "http://cloud.github.com/downloads/Wallbraker/Charged-Miners/" );
-
-        string storedLoginUsername,
-               storedMinecraftUsername;
-
-
         public MainForm() {
             InitializeComponent();
 
@@ -41,37 +30,58 @@ namespace ChargedMinersLauncher {
         }
 
 
-        protected override void OnShown( EventArgs e ) {
-            if( Paths.Init() ) {
-                LoadLoginInfo();
-                versionCheckWorker.RunWorkerAsync();
-            } else {
-                State = FormState.PlatformNotSupportedError;
-            }
-            base.OnShown( e );
-        }
+        #region Check Updates / Download
 
+        readonly BackgroundWorker versionCheckWorker = new BackgroundWorker();
+        string localHashString;
+        static readonly Uri UpdateUri = new Uri( "http://cloud.github.com/downloads/Wallbraker/Charged-Miners/" );
+        readonly WebClient binaryDownloader = new WebClient();
+        VersionInfo latestVersion;
 
         void CheckUpdates( object sender, DoWorkEventArgs e ) {
             Log( "CheckUpdates" );
-            if( File.Exists( Paths.ChargeBinary ) ) {
-                MD5 hasher = MD5.Create();
-                using( FileStream fs = File.OpenRead( Paths.ChargeBinary ) ) {
-                    StringBuilder sb = new StringBuilder( 32 );
-                    foreach( byte b in hasher.ComputeHash( fs ) ) {
-                        sb.AppendFormat( "{0:x2}", b );
-                    }
-                    localHashString = sb.ToString();
-                }
-            }
+            // download and parse version.txt
             WebClient updateCheckDownloader = new WebClient();
             string versions = updateCheckDownloader.DownloadString( UpdateUri + "version.txt" );
             VersionsTxt versionList = new VersionsTxt( versions.Split( '\n' ) );
-            latestVersion = versionList.Get( Paths.ChargeBinary );
+
+            // check if primary binary download is available
+            latestVersion = versionList.Get( Paths.PrimaryBinary );
+            if( latestVersion != null ) {
+                // check if local primary binary exists
+                if( File.Exists( Paths.PrimaryBinary ) ) {
+                    localHashString = ComputeLocalHash( Paths.PrimaryBinary );
+                } // else download primary binary
+                return;
+            }
+            
+            // no alternative available, fail
+            if( Paths.AlternativeBinary == null ) return;
+
+            // check if alternative binary download is available
+            latestVersion = versionList.Get( Paths.AlternativeBinary );
+
+            // if not, fail
+            if( latestVersion == null ) return;
+
+            // check if local alt binary exists
+            if( File.Exists( Paths.AlternativeBinary ) ) {
+                localHashString = ComputeLocalHash( Paths.AlternativeBinary );
+            } // else download alt binary
         }
 
 
-        bool loginCompleted, updateCheckCompleted;
+        // returns MD5 of a given file, as a hexadecimal string
+        string ComputeLocalHash( string fileName ) {
+            MD5 hasher = MD5.Create();
+            using( FileStream fs = File.OpenRead( fileName ) ) {
+                StringBuilder sb = new StringBuilder( 32 );
+                foreach( byte b in hasher.ComputeHash( fs ) ) {
+                    sb.AppendFormat( "{0:x2}", b );
+                }
+                return sb.ToString();
+            }
+        }
 
 
         void OnUpdateCheckCompleted( object sender, RunWorkerCompletedEventArgs e ) {
@@ -79,8 +89,8 @@ namespace ChargedMinersLauncher {
             updateCheckCompleted = true;
 
             if( latestVersion != null &&
-                (!File.Exists( Paths.ChargeBinary ) ||
-                 !latestVersion.Md5.Equals( localHashString, StringComparison.OrdinalIgnoreCase )) ) {
+                ( !File.Exists( latestVersion.Name ) ||
+                 !latestVersion.Md5.Equals( localHashString, StringComparison.OrdinalIgnoreCase ) ) ) {
                 DownloadBegin();
             }
 
@@ -88,35 +98,10 @@ namespace ChargedMinersLauncher {
         }
 
 
-        void OnSignInAndUpdateCheckCompleted() {
-            Log( "OnSignInAndUpdateCheckCompleted" );
-            if( latestVersion == null ) {
-                State = FormState.PlatformNotSupportedError;
-            } else if( !File.Exists( Paths.ChargeBinary ) ) {
-                if( downloadComplete ) {
-                    ApplyUpdate();
-                } else {
-                    State = FormState.DownloadingBinary;
-                }
-            } else if( !latestVersion.Md5.Equals( localHashString, StringComparison.OrdinalIgnoreCase ) ) {
-                State = FormState.PromptingToUpdate;
-            } else {
-                StartChargedMiners();
-            }
-        }
-
-
-        #region Download
-
-        readonly WebClient binaryDownloader = new WebClient();
-        VersionInfo latestVersion;
-        bool downloadComplete;
-
-
         void DownloadBegin() {
             Log( "DownloadBegin" );
             binaryDownloader.DownloadFileAsync( new Uri( UpdateUri + latestVersion.HttpName ),
-                                                Paths.ChargeBinary + ".tmp" );
+                                                latestVersion.Name + ".tmp" );
         }
 
 
@@ -124,7 +109,7 @@ namespace ChargedMinersLauncher {
             pbSigningIn.Value = e.ProgressPercentage;
             if( State == FormState.DownloadingBinary ) {
                 lStatus.Text = String.Format( "Downloading {0} ({1}/{2})",
-                                              Paths.ChargeBinary,
+                                              latestVersion.HttpName,
                                               e.BytesReceived,
                                               e.TotalBytesToReceive );
             }
@@ -143,11 +128,11 @@ namespace ChargedMinersLauncher {
 
         void ApplyUpdate() {
             Log( "ApplyUpdate" );
-            if( File.Exists( Paths.ChargeBinary ) ) {
-                File.Delete( Paths.ChargeBinary + ".old" );
-                File.Replace( Paths.ChargeBinary + ".tmp", Paths.ChargeBinary, Paths.ChargeBinary + ".old", true );
+            if( File.Exists( latestVersion.Name ) ) {
+                File.Delete( latestVersion.Name + ".old" );
+                File.Replace( latestVersion.Name + ".tmp", latestVersion.Name, latestVersion.Name + ".old", true );
             } else {
-                File.Move( Paths.ChargeBinary + ".tmp", Paths.ChargeBinary );
+                File.Move( latestVersion.Name + ".tmp", latestVersion.Name );
             }
             StartChargedMiners();
         }
@@ -155,12 +140,16 @@ namespace ChargedMinersLauncher {
         #endregion
 
 
-        #region SignIn
+        #region Sign-In
 
-        static readonly Regex
-            UsernameRegex = new Regex( @"^[a-zA-Z0-9_\.]{2,16}$" ),
-            EmailRegex = new Regex( @"^[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?$",
-                                    RegexOptions.IgnoreCase );
+        string storedLoginUsername,
+               storedMinecraftUsername;
+        readonly BackgroundWorker signInWorker = new BackgroundWorker();
+        static readonly Regex UsernameRegex = new Regex( @"^[a-zA-Z0-9_\.]{2,16}$" ),
+                              EmailRegex = new Regex( @"^[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@" +
+                                                      @"(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?$",
+                                                      RegexOptions.IgnoreCase );
+
 
         void OnUsernameOrPasswordChanged( object sender, EventArgs e ) {
             if( UsernameRegex.IsMatch( tUsername.Text ) || EmailRegex.IsMatch( tUsername.Text ) ) {
@@ -183,6 +172,16 @@ namespace ChargedMinersLauncher {
 
             State = FormState.SigningIn;
             signInWorker.RunWorkerAsync();
+        }
+
+
+        void SignIn( object sender, DoWorkEventArgs e ) {
+            try {
+                MinecraftNetSession.Instance.Login( xRemember.Checked );
+            } catch( WebException ex ) {
+                MinecraftNetSession.Instance.LoginException = ex;
+                MinecraftNetSession.Instance.Status = LoginResult.Error;
+            }
         }
 
 
@@ -221,13 +220,6 @@ namespace ChargedMinersLauncher {
         }
 
 
-        void StartChargedMiners() {
-            Log( "StartChargedMiners" );
-            Process.Start( Paths.ChargeBinary, "PLAY_SESSION=" + MinecraftNetSession.Instance.PlaySessionCookie );
-            Application.Exit();
-        }
-
-
         void LoadLoginInfo() {
             string passwordFileFullName = Path.Combine( Paths.ConfigPath, Paths.PasswordSaveFile );
             try {
@@ -260,35 +252,39 @@ namespace ChargedMinersLauncher {
             }
         }
 
-
-        void SignIn( object sender, DoWorkEventArgs e ) {
-            try {
-                MinecraftNetSession.Instance.Login( xRemember.Checked );
-            } catch( WebException ex ) {
-                MinecraftNetSession.Instance.LoginException = ex;
-                MinecraftNetSession.Instance.Status = LoginResult.Error;
-            }
-        }
-
         #endregion
 
 
-        #region UI
+        #region State Control
 
-        void bCancel_Click( object sender, EventArgs e ) {
-            switch( State ) {
-                case FormState.SigningIn:
-                    signInWorker.CancelAsync();
-                    lStatus2.Text = "Canceling...";
-                    break;
-                case FormState.PlatformNotSupportedError:
-                    Environment.ExitCode = 1;
-                    Application.Exit();
-                    break;
-                case FormState.DownloadingBinary:
-                    binaryDownloader.CancelAsync();
-                    StartChargedMiners();
-                    break;
+        bool loginCompleted, updateCheckCompleted, downloadComplete;
+
+
+        protected override void OnShown( EventArgs e ) {
+            if( Paths.Init() ) {
+                LoadLoginInfo();
+                versionCheckWorker.RunWorkerAsync();
+            } else {
+                State = FormState.PlatformNotSupportedError;
+            }
+            base.OnShown( e );
+        }
+
+
+        void OnSignInAndUpdateCheckCompleted() {
+            Log( "OnSignInAndUpdateCheckCompleted" );
+            if( latestVersion == null ) {
+                State = FormState.PlatformNotSupportedError;
+            } else if( !File.Exists( latestVersion.Name ) ) {
+                if( downloadComplete ) {
+                    ApplyUpdate();
+                } else {
+                    State = FormState.DownloadingBinary;
+                }
+            } else if( !latestVersion.Md5.Equals( localHashString, StringComparison.OrdinalIgnoreCase ) ) {
+                State = FormState.PromptingToUpdate;
+            } else {
+                StartChargedMiners();
             }
         }
 
@@ -337,7 +333,7 @@ namespace ChargedMinersLauncher {
                         break;
 
                     case FormState.DownloadingBinary:
-                        lStatus.Text = String.Format( "Downloading {0} (?/?)", Paths.ChargeBinary );
+                        lStatus.Text = String.Format( "Downloading {0} (?/?)", latestVersion.HttpName );
                         lStatus2.Text = "";
                         pbSigningIn.Style = ProgressBarStyle.Continuous;
                         pbSigningIn.Value = 0;
@@ -349,20 +345,50 @@ namespace ChargedMinersLauncher {
                 state = value;
             }
         }
-
         FormState state;
 
 
         void bUpdateYes_Click( object sender, EventArgs e ) {
-            DownloadBegin();
+            if( downloadComplete ) {
+                ApplyUpdate();
+            } else {
+                State = FormState.DownloadingBinary;
+            }
         }
 
 
         void bUpdateNo_Click( object sender, EventArgs e ) {
-            State = FormState.AtSignInForm;
+            binaryDownloader.CancelAsync();
+            StartChargedMiners();
+        }
+
+
+        void bCancel_Click( object sender, EventArgs e ) {
+            switch( State ) {
+                case FormState.SigningIn:
+                    signInWorker.CancelAsync();
+                    lStatus2.Text = "Canceling...";
+                    break;
+                case FormState.PlatformNotSupportedError:
+                    Environment.ExitCode = 1;
+                    Application.Exit();
+                    break;
+                case FormState.DownloadingBinary:
+                    binaryDownloader.CancelAsync();
+                    StartChargedMiners();
+                    break;
+            }
         }
 
         #endregion
+
+
+        void StartChargedMiners() {
+            Hide();
+            Log( "StartChargedMiners" );
+            Process.Start( latestVersion.Name, "PLAY_SESSION=" + MinecraftNetSession.Instance.PlaySessionCookie );
+            Application.Exit();
+        }
 
 
         static void Log( string message ) {

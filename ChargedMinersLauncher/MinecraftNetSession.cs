@@ -12,8 +12,7 @@ namespace ChargedMinersLauncher {
 
         const string RefererUri = "http://www.minecraft.net/",
                      LoginUri = "http://www.minecraft.net/login",
-                     LoginSecureUri = "https://www.minecraft.net/login",
-                     CookieContainerFile = "saved-session.dat";
+                     LoginSecureUri = "https://www.minecraft.net/login";
 
         static readonly Regex
             LoginAuthToken = new Regex( @"<input type=""hidden"" name=""authenticityToken"" value=""([0-9a-f]+)"">" ),
@@ -80,7 +79,7 @@ namespace ChargedMinersLauncher {
 
 
         void LoadCookie( bool remember ) {
-            string cookieFile = Path.Combine( Paths.ConfigPath, CookieContainerFile );
+            string cookieFile = Path.Combine( Paths.ConfigPath, Paths.CookieContainerFile );
             if( File.Exists( cookieFile ) ) {
                 if( remember ) {
                     BinaryFormatter formatter = new BinaryFormatter();
@@ -108,7 +107,7 @@ namespace ChargedMinersLauncher {
 
 
         void SaveCookie() {
-            string cookieFile = Path.Combine( Paths.ConfigPath, CookieContainerFile );
+            string cookieFile = Path.Combine( Paths.ConfigPath, Paths.CookieContainerFile );
             BinaryFormatter formatter = new BinaryFormatter();
             using( Stream s = File.Create( cookieFile ) ) {
                 formatter.Serialize( s, cookieJar );

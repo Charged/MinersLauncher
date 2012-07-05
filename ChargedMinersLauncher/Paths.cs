@@ -7,17 +7,18 @@ namespace ChargedMinersLauncher {
             get { return Path.Combine( Environment.GetFolderPath( Environment.SpecialFolder.ApplicationData ), "charge" ); }
         }
 
-        public static string ChargeBinary;
+        public static string PrimaryBinary,
+                             AlternativeBinary;
         const string ChargeBinaryFormatWindows = "Charge.{0}.exe";
         const string ChargeBinaryFormatMacOSX = "Charge.{0}.MacOSX";
         const string ChargeBinaryFormatLinux = "Charge.{0}.Linux";
         const string ChargeBinaryFormat32Bit = "i386";
         const string ChargeBinaryFormat64Bit = "x86_64";
         public const string PasswordSaveFile = "saved-login.dat";
+        public const string CookieContainerFile = "saved-session.dat";
 
 
         public static bool Init() {
-            string chargeBinaryAlt;
             string tmp;
             if( RuntimeInfo.IsWindows ) {
                 tmp = ChargeBinaryFormatWindows;
@@ -30,23 +31,13 @@ namespace ChargedMinersLauncher {
             }
 
             if( RuntimeInfo.Is32Bit ) {
-                ChargeBinary = String.Format( tmp, ChargeBinaryFormat32Bit );
-                chargeBinaryAlt = "";
+                PrimaryBinary = String.Format( tmp, ChargeBinaryFormat32Bit );
             } else if( RuntimeInfo.Is64Bit ) {
-                ChargeBinary = String.Format( tmp, ChargeBinaryFormat64Bit );
-                chargeBinaryAlt = String.Format( tmp, ChargeBinaryFormat32Bit );
+                PrimaryBinary = String.Format( tmp, ChargeBinaryFormat64Bit );
+                AlternativeBinary = String.Format( tmp, ChargeBinaryFormat32Bit );
             } else {
                 return false;
             }
-
-            if( !File.Exists( ChargeBinary ) ) {
-                // Look for both.
-                if( File.Exists( chargeBinaryAlt ) ) {
-                    ChargeBinary = chargeBinaryAlt;
-                }
-            }
-
-            ChargeBinary = "Charge.i386.exe"; // TODO: debugging
 
             if( !Directory.Exists( ConfigPath ) ) {
                 Directory.CreateDirectory( ConfigPath );
