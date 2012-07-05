@@ -27,6 +27,15 @@
             this.lChargedMiners = new System.Windows.Forms.Label();
             this.bSignIn = new System.Windows.Forms.Button();
             this.tabs = new TablessControl();
+            this.tabUpdate = new System.Windows.Forms.TabPage();
+            this.bUpdateNo = new System.Windows.Forms.Button();
+            this.bUpdateYes = new System.Windows.Forms.Button();
+            this.lUpdatePrompt = new System.Windows.Forms.Label();
+            this.tabProgress = new System.Windows.Forms.TabPage();
+            this.lStatus2 = new System.Windows.Forms.Label();
+            this.bCancel = new System.Windows.Forms.Button();
+            this.pbSigningIn = new System.Windows.Forms.ProgressBar();
+            this.lStatus = new System.Windows.Forms.Label();
             this.tabSignIn = new System.Windows.Forms.TabPage();
             this.lSignInStatus = new System.Windows.Forms.Label();
             this.xRemember = new System.Windows.Forms.CheckBox();
@@ -34,19 +43,10 @@
             this.tUsername = new System.Windows.Forms.TextBox();
             this.lUsername = new System.Windows.Forms.Label();
             this.tPassword = new System.Windows.Forms.TextBox();
-            this.tabProgress = new System.Windows.Forms.TabPage();
-            this.lStatus2 = new System.Windows.Forms.Label();
-            this.bCancel = new System.Windows.Forms.Button();
-            this.pbSigningIn = new System.Windows.Forms.ProgressBar();
-            this.lStatus = new System.Windows.Forms.Label();
-            this.tabUpdate = new System.Windows.Forms.TabPage();
-            this.bUpdateNo = new System.Windows.Forms.Button();
-            this.bUpdateYes = new System.Windows.Forms.Button();
-            this.lUpdatePrompt = new System.Windows.Forms.Label();
             this.tabs.SuspendLayout();
-            this.tabSignIn.SuspendLayout();
-            this.tabProgress.SuspendLayout();
             this.tabUpdate.SuspendLayout();
+            this.tabProgress.SuspendLayout();
+            this.tabSignIn.SuspendLayout();
             this.SuspendLayout();
             // 
             // lChargedMiners
@@ -74,15 +74,117 @@
             // 
             // tabs
             // 
-            this.tabs.Controls.Add(this.tabSignIn);
-            this.tabs.Controls.Add(this.tabProgress);
+            this.tabs.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.tabs.Controls.Add(this.tabUpdate);
-            this.tabs.Dock = System.Windows.Forms.DockStyle.Bottom;
+            this.tabs.Controls.Add(this.tabProgress);
+            this.tabs.Controls.Add(this.tabSignIn);
             this.tabs.Location = new System.Drawing.Point(0, 40);
             this.tabs.Name = "tabs";
             this.tabs.SelectedIndex = 0;
             this.tabs.Size = new System.Drawing.Size(294, 117);
             this.tabs.TabIndex = 7;
+            // 
+            // tabUpdate
+            // 
+            this.tabUpdate.BackColor = System.Drawing.SystemColors.Control;
+            this.tabUpdate.Controls.Add(this.bUpdateNo);
+            this.tabUpdate.Controls.Add(this.bUpdateYes);
+            this.tabUpdate.Controls.Add(this.lUpdatePrompt);
+            this.tabUpdate.Location = new System.Drawing.Point(0, 0);
+            this.tabUpdate.Name = "tabUpdate";
+            this.tabUpdate.Padding = new System.Windows.Forms.Padding(3);
+            this.tabUpdate.Size = new System.Drawing.Size(294, 117);
+            this.tabUpdate.TabIndex = 2;
+            this.tabUpdate.Text = "UpdatePrompt";
+            // 
+            // bUpdateNo
+            // 
+            this.bUpdateNo.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.bUpdateNo.Location = new System.Drawing.Point(168, 88);
+            this.bUpdateNo.Name = "bUpdateNo";
+            this.bUpdateNo.Size = new System.Drawing.Size(120, 23);
+            this.bUpdateNo.TabIndex = 3;
+            this.bUpdateNo.Text = "No";
+            this.bUpdateNo.UseVisualStyleBackColor = true;
+            this.bUpdateNo.Click += new System.EventHandler(this.bUpdateNo_Click);
+            // 
+            // bUpdateYes
+            // 
+            this.bUpdateYes.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.bUpdateYes.Location = new System.Drawing.Point(6, 88);
+            this.bUpdateYes.Name = "bUpdateYes";
+            this.bUpdateYes.Size = new System.Drawing.Size(120, 23);
+            this.bUpdateYes.TabIndex = 1;
+            this.bUpdateYes.Text = "Yes, Update";
+            this.bUpdateYes.UseVisualStyleBackColor = true;
+            this.bUpdateYes.Click += new System.EventHandler(this.bUpdateYes_Click);
+            // 
+            // lUpdatePrompt
+            // 
+            this.lUpdatePrompt.Dock = System.Windows.Forms.DockStyle.Top;
+            this.lUpdatePrompt.Location = new System.Drawing.Point(3, 3);
+            this.lUpdatePrompt.Name = "lUpdatePrompt";
+            this.lUpdatePrompt.Size = new System.Drawing.Size(288, 26);
+            this.lUpdatePrompt.TabIndex = 0;
+            this.lUpdatePrompt.Text = "An update for ChargedMiners is available.\r\nWould you like to download and apply i" +
+    "t?";
+            this.lUpdatePrompt.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            // 
+            // tabProgress
+            // 
+            this.tabProgress.BackColor = System.Drawing.SystemColors.Control;
+            this.tabProgress.Controls.Add(this.lStatus2);
+            this.tabProgress.Controls.Add(this.bCancel);
+            this.tabProgress.Controls.Add(this.pbSigningIn);
+            this.tabProgress.Controls.Add(this.lStatus);
+            this.tabProgress.Location = new System.Drawing.Point(0, 0);
+            this.tabProgress.Name = "tabProgress";
+            this.tabProgress.Padding = new System.Windows.Forms.Padding(3);
+            this.tabProgress.Size = new System.Drawing.Size(294, 117);
+            this.tabProgress.TabIndex = 1;
+            this.tabProgress.Text = "Progress";
+            // 
+            // lStatus2
+            // 
+            this.lStatus2.Dock = System.Windows.Forms.DockStyle.Top;
+            this.lStatus2.Location = new System.Drawing.Point(3, 46);
+            this.lStatus2.Name = "lStatus2";
+            this.lStatus2.Size = new System.Drawing.Size(288, 20);
+            this.lStatus2.TabIndex = 3;
+            this.lStatus2.Text = "Status2";
+            this.lStatus2.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            // 
+            // bCancel
+            // 
+            this.bCancel.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.bCancel.Location = new System.Drawing.Point(93, 82);
+            this.bCancel.Name = "bCancel";
+            this.bCancel.Size = new System.Drawing.Size(108, 23);
+            this.bCancel.TabIndex = 2;
+            this.bCancel.Text = "Cancel";
+            this.bCancel.UseVisualStyleBackColor = true;
+            this.bCancel.Click += new System.EventHandler(this.bCancel_Click);
+            // 
+            // pbSigningIn
+            // 
+            this.pbSigningIn.Dock = System.Windows.Forms.DockStyle.Top;
+            this.pbSigningIn.Location = new System.Drawing.Point(3, 23);
+            this.pbSigningIn.Name = "pbSigningIn";
+            this.pbSigningIn.Size = new System.Drawing.Size(288, 23);
+            this.pbSigningIn.TabIndex = 1;
+            // 
+            // lStatus
+            // 
+            this.lStatus.Dock = System.Windows.Forms.DockStyle.Top;
+            this.lStatus.Location = new System.Drawing.Point(3, 3);
+            this.lStatus.Name = "lStatus";
+            this.lStatus.Size = new System.Drawing.Size(288, 20);
+            this.lStatus.TabIndex = 0;
+            this.lStatus.Text = "Status";
+            this.lStatus.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
             // tabSignIn
             // 
@@ -164,106 +266,6 @@
             this.tPassword.UseSystemPasswordChar = true;
             this.tPassword.TextChanged += new System.EventHandler(this.OnUsernameOrPasswordChanged);
             // 
-            // tabProgress
-            // 
-            this.tabProgress.BackColor = System.Drawing.SystemColors.Control;
-            this.tabProgress.Controls.Add(this.lStatus2);
-            this.tabProgress.Controls.Add(this.bCancel);
-            this.tabProgress.Controls.Add(this.pbSigningIn);
-            this.tabProgress.Controls.Add(this.lStatus);
-            this.tabProgress.Location = new System.Drawing.Point(0, 0);
-            this.tabProgress.Name = "tabProgress";
-            this.tabProgress.Padding = new System.Windows.Forms.Padding(3);
-            this.tabProgress.Size = new System.Drawing.Size(294, 132);
-            this.tabProgress.TabIndex = 1;
-            this.tabProgress.Text = "Progress";
-            // 
-            // lStatus2
-            // 
-            this.lStatus2.Dock = System.Windows.Forms.DockStyle.Top;
-            this.lStatus2.Location = new System.Drawing.Point(3, 46);
-            this.lStatus2.Name = "lStatus2";
-            this.lStatus2.Size = new System.Drawing.Size(288, 20);
-            this.lStatus2.TabIndex = 3;
-            this.lStatus2.Text = "Status2";
-            this.lStatus2.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
-            // 
-            // bCancel
-            // 
-            this.bCancel.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.bCancel.Location = new System.Drawing.Point(93, 97);
-            this.bCancel.Name = "bCancel";
-            this.bCancel.Size = new System.Drawing.Size(108, 23);
-            this.bCancel.TabIndex = 2;
-            this.bCancel.Text = "Cancel";
-            this.bCancel.UseVisualStyleBackColor = true;
-            this.bCancel.Click += new System.EventHandler(this.bCancel_Click);
-            // 
-            // pbSigningIn
-            // 
-            this.pbSigningIn.Dock = System.Windows.Forms.DockStyle.Top;
-            this.pbSigningIn.Location = new System.Drawing.Point(3, 23);
-            this.pbSigningIn.Name = "pbSigningIn";
-            this.pbSigningIn.Size = new System.Drawing.Size(288, 23);
-            this.pbSigningIn.TabIndex = 1;
-            // 
-            // lStatus
-            // 
-            this.lStatus.Dock = System.Windows.Forms.DockStyle.Top;
-            this.lStatus.Location = new System.Drawing.Point(3, 3);
-            this.lStatus.Name = "lStatus";
-            this.lStatus.Size = new System.Drawing.Size(288, 20);
-            this.lStatus.TabIndex = 0;
-            this.lStatus.Text = "Status";
-            this.lStatus.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
-            // 
-            // tabUpdate
-            // 
-            this.tabUpdate.BackColor = System.Drawing.SystemColors.Control;
-            this.tabUpdate.Controls.Add(this.bUpdateNo);
-            this.tabUpdate.Controls.Add(this.bUpdateYes);
-            this.tabUpdate.Controls.Add(this.lUpdatePrompt);
-            this.tabUpdate.Location = new System.Drawing.Point(0, 0);
-            this.tabUpdate.Name = "tabUpdate";
-            this.tabUpdate.Padding = new System.Windows.Forms.Padding(3);
-            this.tabUpdate.Size = new System.Drawing.Size(294, 132);
-            this.tabUpdate.TabIndex = 2;
-            this.tabUpdate.Text = "UpdatePrompt";
-            // 
-            // bUpdateNo
-            // 
-            this.bUpdateNo.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.bUpdateNo.Location = new System.Drawing.Point(168, 103);
-            this.bUpdateNo.Name = "bUpdateNo";
-            this.bUpdateNo.Size = new System.Drawing.Size(120, 23);
-            this.bUpdateNo.TabIndex = 3;
-            this.bUpdateNo.Text = "No";
-            this.bUpdateNo.UseVisualStyleBackColor = true;
-            this.bUpdateNo.Click += new System.EventHandler(this.bUpdateNo_Click);
-            // 
-            // bUpdateYes
-            // 
-            this.bUpdateYes.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.bUpdateYes.Location = new System.Drawing.Point(6, 103);
-            this.bUpdateYes.Name = "bUpdateYes";
-            this.bUpdateYes.Size = new System.Drawing.Size(120, 23);
-            this.bUpdateYes.TabIndex = 1;
-            this.bUpdateYes.Text = "Yes, Update";
-            this.bUpdateYes.UseVisualStyleBackColor = true;
-            this.bUpdateYes.Click += new System.EventHandler(this.bUpdateYes_Click);
-            // 
-            // lUpdatePrompt
-            // 
-            this.lUpdatePrompt.Dock = System.Windows.Forms.DockStyle.Top;
-            this.lUpdatePrompt.Location = new System.Drawing.Point(3, 3);
-            this.lUpdatePrompt.Name = "lUpdatePrompt";
-            this.lUpdatePrompt.Size = new System.Drawing.Size(288, 26);
-            this.lUpdatePrompt.TabIndex = 0;
-            this.lUpdatePrompt.Text = "An update for ChargedMiners is available.\r\nWould you like to download and apply i" +
-    "t?";
-            this.lUpdatePrompt.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
-            // 
             // MainForm
             // 
             this.AcceptButton = this.bSignIn;
@@ -280,10 +282,10 @@
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "Charged-Miners Launcher";
             this.tabs.ResumeLayout(false);
+            this.tabUpdate.ResumeLayout(false);
+            this.tabProgress.ResumeLayout(false);
             this.tabSignIn.ResumeLayout(false);
             this.tabSignIn.PerformLayout();
-            this.tabProgress.ResumeLayout(false);
-            this.tabUpdate.ResumeLayout(false);
             this.ResumeLayout(false);
 
         }
