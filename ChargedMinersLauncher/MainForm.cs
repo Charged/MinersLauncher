@@ -406,8 +406,21 @@ namespace ChargedMinersLauncher {
 
 
         void StartChargedMiners() {
-            Hide();
+            lStatus.Text = "Launching Charged-Miners...";
+            bCancel.Visible = false;
             Log( "StartChargedMiners" );
+            if( RuntimeInfo.IsUnix ) {
+                Process chmod = new Process {
+                    StartInfo = {
+                        FileName = "chmod",
+                        Arguments = "a+x " + latestVersion.Name,
+                        UseShellExecute = true
+                    }
+                };
+                chmod.Start();
+                chmod.WaitForExit();
+            }
+            Hide();
             Process.Start( latestVersion.Name, "PLAY_SESSION=" + MinecraftNetSession.Instance.PlaySessionCookie );
             Application.Exit();
         }
