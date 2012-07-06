@@ -71,9 +71,6 @@
     <Compile Include="FormState.cs" />
     <Compile Include="Paths.cs" />
     <Compile Include="RuntimeInfo.cs" />
-    <Compile Include="TablessControl.cs">
-      <SubType>Component</SubType>
-    </Compile>
     <Compile Include="VersionInfo.cs" />
     <Compile Include="VersionsTxt.cs" />
     <Compile Include="MainForm.cs">

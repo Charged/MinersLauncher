@@ -12,6 +12,28 @@ using System.IO;
 
 namespace ChargedMinersLauncher {
     public sealed partial class MainForm : Form {
+
+        Panel SelectedPanel {
+            get { return selectedPanel; }
+            set {
+                if( value == panelSignIn ) {
+                    panelStatus.Visible = false;
+                    panelUpdatePrompt.Visible = false;
+                    panelSignIn.Visible = true;
+                } else if( value == panelStatus ) {
+                    panelUpdatePrompt.Visible = false;
+                    panelSignIn.Visible = false;
+                    panelStatus.Visible = true;
+                } else {
+                    panelSignIn.Visible = false;
+                    panelStatus.Visible = false;
+                    panelUpdatePrompt.Visible = true;
+                }
+                selectedPanel = value;
+            }
+        }
+        Panel selectedPanel;
+
         public MainForm() {
             InitializeComponent();
 
@@ -204,7 +226,7 @@ namespace ChargedMinersLauncher {
 
                 case LoginResult.WrongUsernameOrPass:
                     lSignInStatus.Text = "Wrong username or password.";
-                    tabs.SelectedTab = tabSignIn;
+                    SelectedPanel = panelSignIn;
                     break;
 
                 case LoginResult.Error:
@@ -214,7 +236,7 @@ namespace ChargedMinersLauncher {
                     } else {
                         lSignInStatus.Text = "An unknown error occured.";
                     }
-                    tabs.SelectedTab = tabSignIn;
+                    SelectedPanel = panelSignIn;
                     break;
             }
         }
@@ -297,7 +319,7 @@ namespace ChargedMinersLauncher {
                     case FormState.AtSignInForm:
                         lStatus.Text = "";
                         lStatus2.Text = "";
-                        tabs.SelectedTab = tabSignIn;
+                        SelectedPanel = panelSignIn;
                         break;
 
                     case FormState.SigningIn:
@@ -308,7 +330,7 @@ namespace ChargedMinersLauncher {
                         pbSigningIn.Style = ProgressBarStyle.Marquee;
                         bCancel.Text = "Cancel";
                         bCancel.Visible = true;
-                        tabs.SelectedTab = tabProgress;
+                        SelectedPanel = panelStatus;
                         break;
 
                     case FormState.WaitingForUpdater:
@@ -329,7 +351,7 @@ namespace ChargedMinersLauncher {
                         break;
 
                     case FormState.PromptingToUpdate:
-                        tabs.SelectedTab = tabUpdate;
+                        SelectedPanel = panelUpdatePrompt;
                         break;
 
                     case FormState.DownloadingBinary:
@@ -337,7 +359,7 @@ namespace ChargedMinersLauncher {
                         lStatus2.Text = "";
                         pbSigningIn.Style = ProgressBarStyle.Continuous;
                         pbSigningIn.Value = 0;
-                        tabs.SelectedTab = tabProgress;
+                        SelectedPanel = panelStatus;
                         bCancel.Text = "Cancel";
                         bCancel.Visible = true;
                         break;
