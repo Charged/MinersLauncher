@@ -3,12 +3,13 @@ using System;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Drawing;
+using System.IO;
 using System.Net;
+using System.Reflection;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Windows.Forms;
-using System.IO;
 
 namespace ChargedMinersLauncher {
     public sealed partial class MainForm : Form {
@@ -32,10 +33,14 @@ namespace ChargedMinersLauncher {
                 selectedPanel = value;
             }
         }
+
         Panel selectedPanel;
+
 
         public MainForm() {
             InitializeComponent();
+
+            SetToolTips();
 
             lSignInStatus.Text = "";
             State = FormState.AtSignInForm;
@@ -60,6 +65,7 @@ namespace ChargedMinersLauncher {
         readonly WebClient binaryDownloader = new WebClient();
         VersionInfo latestVersion;
 
+
         void CheckUpdates( object sender, DoWorkEventArgs e ) {
             Log( "CheckUpdates" );
             // download and parse version.txt
@@ -76,7 +82,7 @@ namespace ChargedMinersLauncher {
                 } // else download primary binary
                 return;
             }
-            
+
             // no alternative available, fail
             if( Paths.AlternativeBinary == null ) return;
 
@@ -112,7 +118,7 @@ namespace ChargedMinersLauncher {
 
             if( latestVersion != null &&
                 ( !File.Exists( latestVersion.Name ) ||
-                 !latestVersion.Md5.Equals( localHashString, StringComparison.OrdinalIgnoreCase ) ) ) {
+                  !latestVersion.Md5.Equals( localHashString, StringComparison.OrdinalIgnoreCase ) ) ) {
                 DownloadBegin();
             }
 
@@ -164,13 +170,22 @@ namespace ChargedMinersLauncher {
 
         #region Sign-In
 
+        bool canSignIn,
+             directConnect;
+
         string storedLoginUsername,
                storedMinecraftUsername;
+
         readonly BackgroundWorker signInWorker = new BackgroundWorker();
-        static readonly Regex UsernameRegex = new Regex( @"^[a-zA-Z0-9_\.]{2,16}$" ),
-                              EmailRegex = new Regex( @"^[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@" +
-                                                      @"(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?$",
-                                                      RegexOptions.IgnoreCase );
+
+        static readonly Regex
+            UsernameRegex = new Regex( @"^[a-zA-Z0-9_\.]{2,16}$" ),
+            EmailRegex = new Regex( @"^[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@" +
+                                    @"(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?$",
+                                    RegexOptions.IgnoreCase ),
+            PlayLinkHash = new Regex( @"^http://www.minecraft.net/classic/play/([0-9a-fA-F]{28,32})/?(\?override=(true|1))?$" ),
+            PlayLinkDirect = new Regex( @"^mc://(\d{1,3}\.){3}\d{1,3}:\d{1,5}/([a-zA-Z0-9_\.]{2,16})/.*$" ),
+            PlayLinkIPPort = new Regex( @"^http://www.minecraft.net/classic/play/?\?ip=(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})&port=(\d{1,5})$" );
 
 
         void OnUsernameOrPasswordChanged( object sender, EventArgs e ) {
@@ -179,11 +194,46 @@ namespace ChargedMinersLauncher {
             } else {
                 tUsername.BackColor = Color.Yellow;
             }
-            bSignIn.Enabled = ( tPassword.Text.Length > 0 );
+            canSignIn = ( tPassword.Text.Length > 0 );
+            bSignIn.Enabled = canSignIn || directConnect;
+        }
+
+
+        void tURL_TextChanged( object sender, EventArgs e ) {
+            if( PlayLinkDirect.IsMatch( tUri.Text ) ) {
+                tUri.BackColor = SystemColors.Window;
+                bSignIn.Enabled = true;
+                directConnect = true;
+                tUsername.Enabled = false;
+                tPassword.Enabled = false;
+                Match womDirectMatch = PlayLinkDirect.Match( tUri.Text );
+                tUsername.Text = womDirectMatch.Groups[2].Value;
+            } else {
+                bSignIn.Enabled = canSignIn;
+                tUsername.Enabled = true;
+                tPassword.Enabled = true;
+                directConnect = false;
+                if( PlayLinkHash.IsMatch( tUri.Text ) || PlayLinkIPPort.IsMatch( tUri.Text ) ) {
+                    tUri.BackColor = SystemColors.Window;
+                } else if( tUri.Text.Length == 0 ) {
+                    tUri.BackColor = SystemColors.Window;
+                } else {
+                    tUri.BackColor = Color.Yellow;
+                }
+            }
         }
 
 
         void bSignIn_Click( object sender, EventArgs e ) {
+            if( directConnect ) {
+                loginCompleted = true;
+                if( updateCheckCompleted ) {
+                    OnSignInAndUpdateCheckCompleted();
+                } else {
+                    State = FormState.WaitingForUpdater;
+                }
+                return;
+            }
             string minecraftUsername;
             if( tUsername.Text == storedLoginUsername ) {
                 minecraftUsername = storedMinecraftUsername;
@@ -263,10 +313,10 @@ namespace ChargedMinersLauncher {
             string passwordFileFullName = Paths.PasswordSaveFile;
             if( xRemember.Checked ) {
                 File.WriteAllLines( passwordFileFullName, new[] {
-                                                                    MinecraftNetSession.Instance.LoginUsername,
-                                                                    MinecraftNetSession.Instance.Password,
-                                                                    MinecraftNetSession.Instance.MinercraftUsername
-                                                                } );
+                    MinecraftNetSession.Instance.LoginUsername,
+                    MinecraftNetSession.Instance.Password,
+                    MinecraftNetSession.Instance.MinercraftUsername
+                } );
             } else {
                 if( File.Exists( passwordFileFullName ) ) {
                     File.Delete( passwordFileFullName );
@@ -367,6 +417,7 @@ namespace ChargedMinersLauncher {
                 state = value;
             }
         }
+
         FormState state;
 
 
@@ -405,6 +456,28 @@ namespace ChargedMinersLauncher {
         #endregion
 
 
+        #region ToolTips
+
+        ToolTip toolTip;
+
+        const string ToolTipUsername = "Your minecraft.net username or email",
+                     ToolTipPassword = "Your minecraft.net password",
+                     ToolTipRemember = "Save your username and password for next time. Note that password is stored in plain text.",
+                     ToolTipUri = "Server's Minecraft.net URL or a DirectConnect (mc://) link. Optional.";
+
+        void SetToolTips() {
+            toolTip = new ToolTip();
+            toolTip.SetToolTip( tUsername, ToolTipUsername );
+            toolTip.SetToolTip( lUsername, ToolTipUsername );
+            toolTip.SetToolTip( tPassword, ToolTipPassword );
+            toolTip.SetToolTip( lPassword, ToolTipPassword );
+            toolTip.SetToolTip( xRemember, ToolTipRemember );
+            toolTip.SetToolTip( tUri, ToolTipUri );
+        }
+
+        #endregion
+
+
         void StartChargedMiners() {
             lStatus.Text = "Launching Charged-Miners...";
             bCancel.Visible = false;
@@ -421,7 +494,18 @@ namespace ChargedMinersLauncher {
                 chmod.WaitForExit();
             }
             Hide();
-            Process.Start( latestVersion.Name, "PLAY_SESSION=" + MinecraftNetSession.Instance.PlaySessionCookie );
+
+            string param;
+            if( PlayLinkDirect.IsMatch( tUri.Text ) ) {
+                param = tUri.Text;
+            } else if( PlayLinkHash.IsMatch( tUri.Text ) || PlayLinkIPPort.IsMatch( tUri.Text ) ) {
+                param = String.Format( "PLAY_SESSION={0} {1}",
+                                       MinecraftNetSession.Instance.PlaySessionCookie,
+                                       tUri.Text );
+            } else {
+                param = "PLAY_SESSION=" + MinecraftNetSession.Instance.PlaySessionCookie;
+            }
+            Process.Start( latestVersion.Name, param );
             Application.Exit();
         }
 

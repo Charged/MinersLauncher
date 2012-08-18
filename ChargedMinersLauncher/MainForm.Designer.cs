@@ -36,6 +36,7 @@
             this.pbSigningIn = new System.Windows.Forms.ProgressBar();
             this.lStatus = new System.Windows.Forms.Label();
             this.panelSignIn = new System.Windows.Forms.Panel();
+            this.tUri = new System.Windows.Forms.TextBox();
             this.lSignInStatus = new System.Windows.Forms.Label();
             this.xRemember = new System.Windows.Forms.CheckBox();
             this.bSignIn = new System.Windows.Forms.Button();
@@ -43,6 +44,7 @@
             this.tUsername = new System.Windows.Forms.TextBox();
             this.lUsername = new System.Windows.Forms.Label();
             this.tPassword = new System.Windows.Forms.TextBox();
+            this.label1 = new System.Windows.Forms.Label();
             this.flow.SuspendLayout();
             this.panelUpdatePrompt.SuspendLayout();
             this.panelStatus.SuspendLayout();
@@ -62,14 +64,16 @@
             // 
             // flow
             // 
-            this.flow.Controls.Add(this.panelUpdatePrompt);
-            this.flow.Controls.Add(this.panelStatus);
+            this.flow.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.flow.Controls.Add(this.panelSignIn);
-            this.flow.Dock = System.Windows.Forms.DockStyle.Bottom;
+            this.flow.Controls.Add(this.panelStatus);
+            this.flow.Controls.Add(this.panelUpdatePrompt);
             this.flow.FlowDirection = System.Windows.Forms.FlowDirection.BottomUp;
-            this.flow.Location = new System.Drawing.Point(0, 42);
+            this.flow.Location = new System.Drawing.Point(0, 40);
             this.flow.Name = "flow";
-            this.flow.Size = new System.Drawing.Size(286, 113);
+            this.flow.Size = new System.Drawing.Size(286, 139);
             this.flow.TabIndex = 8;
             // 
             // panelUpdatePrompt
@@ -77,15 +81,15 @@
             this.panelUpdatePrompt.Controls.Add(this.bUpdateNo);
             this.panelUpdatePrompt.Controls.Add(this.bUpdateYes);
             this.panelUpdatePrompt.Controls.Add(this.lUpdatePrompt);
-            this.panelUpdatePrompt.Location = new System.Drawing.Point(3, 5);
+            this.panelUpdatePrompt.Location = new System.Drawing.Point(575, 1);
             this.panelUpdatePrompt.Name = "panelUpdatePrompt";
-            this.panelUpdatePrompt.Size = new System.Drawing.Size(280, 105);
+            this.panelUpdatePrompt.Size = new System.Drawing.Size(280, 135);
             this.panelUpdatePrompt.TabIndex = 0;
             // 
             // bUpdateNo
             // 
             this.bUpdateNo.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.bUpdateNo.Location = new System.Drawing.Point(157, 79);
+            this.bUpdateNo.Location = new System.Drawing.Point(157, 109);
             this.bUpdateNo.Name = "bUpdateNo";
             this.bUpdateNo.Size = new System.Drawing.Size(120, 23);
             this.bUpdateNo.TabIndex = 5;
@@ -96,7 +100,7 @@
             // bUpdateYes
             // 
             this.bUpdateYes.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.bUpdateYes.Location = new System.Drawing.Point(3, 79);
+            this.bUpdateYes.Location = new System.Drawing.Point(3, 109);
             this.bUpdateYes.Name = "bUpdateYes";
             this.bUpdateYes.Size = new System.Drawing.Size(120, 23);
             this.bUpdateYes.TabIndex = 4;
@@ -106,10 +110,12 @@
             // 
             // lUpdatePrompt
             // 
-            this.lUpdatePrompt.Dock = System.Windows.Forms.DockStyle.Top;
+            this.lUpdatePrompt.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.lUpdatePrompt.Location = new System.Drawing.Point(0, 0);
             this.lUpdatePrompt.Name = "lUpdatePrompt";
-            this.lUpdatePrompt.Size = new System.Drawing.Size(280, 26);
+            this.lUpdatePrompt.Size = new System.Drawing.Size(280, 106);
             this.lUpdatePrompt.TabIndex = 1;
             this.lUpdatePrompt.Text = "An update for ChargedMiners is available.\r\nWould you like to download and apply i" +
     "t?";
@@ -121,9 +127,9 @@
             this.panelStatus.Controls.Add(this.bCancel);
             this.panelStatus.Controls.Add(this.pbSigningIn);
             this.panelStatus.Controls.Add(this.lStatus);
-            this.panelStatus.Location = new System.Drawing.Point(289, 5);
+            this.panelStatus.Location = new System.Drawing.Point(289, 1);
             this.panelStatus.Name = "panelStatus";
-            this.panelStatus.Size = new System.Drawing.Size(280, 105);
+            this.panelStatus.Size = new System.Drawing.Size(280, 135);
             this.panelStatus.TabIndex = 1;
             // 
             // lStatus2
@@ -140,7 +146,7 @@
             // 
             this.bCancel.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.bCancel.Location = new System.Drawing.Point(102, 79);
+            this.bCancel.Location = new System.Drawing.Point(102, 109);
             this.bCancel.Name = "bCancel";
             this.bCancel.Size = new System.Drawing.Size(76, 23);
             this.bCancel.TabIndex = 6;
@@ -168,6 +174,8 @@
             // 
             // panelSignIn
             // 
+            this.panelSignIn.Controls.Add(this.label1);
+            this.panelSignIn.Controls.Add(this.tUri);
             this.panelSignIn.Controls.Add(this.lSignInStatus);
             this.panelSignIn.Controls.Add(this.xRemember);
             this.panelSignIn.Controls.Add(this.bSignIn);
@@ -175,10 +183,18 @@
             this.panelSignIn.Controls.Add(this.tUsername);
             this.panelSignIn.Controls.Add(this.lUsername);
             this.panelSignIn.Controls.Add(this.tPassword);
-            this.panelSignIn.Location = new System.Drawing.Point(575, 5);
+            this.panelSignIn.Location = new System.Drawing.Point(3, 1);
             this.panelSignIn.Name = "panelSignIn";
-            this.panelSignIn.Size = new System.Drawing.Size(280, 105);
+            this.panelSignIn.Size = new System.Drawing.Size(280, 135);
             this.panelSignIn.TabIndex = 2;
+            // 
+            // tURL
+            // 
+            this.tUri.Location = new System.Drawing.Point(64, 111);
+            this.tUri.Name = "tUri";
+            this.tUri.Size = new System.Drawing.Size(213, 20);
+            this.tUri.TabIndex = 15;
+            this.tUri.TextChanged += new System.EventHandler(this.tURL_TextChanged);
             // 
             // lSignInStatus
             // 
@@ -195,7 +211,7 @@
             // 
             this.xRemember.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.xRemember.AutoSize = true;
-            this.xRemember.Location = new System.Drawing.Point(64, 83);
+            this.xRemember.Location = new System.Drawing.Point(64, 84);
             this.xRemember.Name = "xRemember";
             this.xRemember.Size = new System.Drawing.Size(77, 17);
             this.xRemember.TabIndex = 13;
@@ -206,7 +222,7 @@
             // 
             this.bSignIn.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.bSignIn.Enabled = false;
-            this.bSignIn.Location = new System.Drawing.Point(197, 79);
+            this.bSignIn.Location = new System.Drawing.Point(197, 80);
             this.bSignIn.Name = "bSignIn";
             this.bSignIn.Size = new System.Drawing.Size(80, 23);
             this.bSignIn.TabIndex = 12;
@@ -218,7 +234,7 @@
             // 
             this.lPassword.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.lPassword.AutoSize = true;
-            this.lPassword.Location = new System.Drawing.Point(5, 56);
+            this.lPassword.Location = new System.Drawing.Point(5, 57);
             this.lPassword.Name = "lPassword";
             this.lPassword.Size = new System.Drawing.Size(53, 13);
             this.lPassword.TabIndex = 10;
@@ -228,7 +244,7 @@
             // 
             this.tUsername.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.tUsername.Location = new System.Drawing.Point(64, 27);
+            this.tUsername.Location = new System.Drawing.Point(64, 28);
             this.tUsername.Name = "tUsername";
             this.tUsername.Size = new System.Drawing.Size(213, 20);
             this.tUsername.TabIndex = 9;
@@ -238,7 +254,7 @@
             // 
             this.lUsername.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.lUsername.AutoSize = true;
-            this.lUsername.Location = new System.Drawing.Point(3, 30);
+            this.lUsername.Location = new System.Drawing.Point(3, 31);
             this.lUsername.Name = "lUsername";
             this.lUsername.Size = new System.Drawing.Size(55, 13);
             this.lUsername.TabIndex = 8;
@@ -248,18 +264,27 @@
             // 
             this.tPassword.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.tPassword.Location = new System.Drawing.Point(64, 53);
+            this.tPassword.Location = new System.Drawing.Point(64, 54);
             this.tPassword.Name = "tPassword";
             this.tPassword.Size = new System.Drawing.Size(213, 20);
             this.tPassword.TabIndex = 11;
             this.tPassword.UseSystemPasswordChar = true;
             this.tPassword.TextChanged += new System.EventHandler(this.OnUsernameOrPasswordChanged);
             // 
+            // label1
+            // 
+            this.label1.AutoSize = true;
+            this.label1.Location = new System.Drawing.Point(29, 114);
+            this.label1.Name = "label1";
+            this.label1.Size = new System.Drawing.Size(29, 13);
+            this.label1.TabIndex = 16;
+            this.label1.Text = "URL";
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(286, 155);
+            this.ClientSize = new System.Drawing.Size(286, 191);
             this.Controls.Add(this.flow);
             this.Controls.Add(this.lChargedMiners);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
@@ -299,6 +324,8 @@
         private System.Windows.Forms.TextBox tUsername;
         private System.Windows.Forms.Label lUsername;
         private System.Windows.Forms.TextBox tPassword;
+        private System.Windows.Forms.TextBox tUri;
+        private System.Windows.Forms.Label label1;
     }
 }
 
