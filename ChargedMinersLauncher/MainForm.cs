@@ -5,7 +5,6 @@ using System.Diagnostics;
 using System.Drawing;
 using System.IO;
 using System.Net;
-using System.Reflection;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -68,10 +67,13 @@ namespace ChargedMinersLauncher {
 
         void CheckUpdates( object sender, DoWorkEventArgs e ) {
             Log( "CheckUpdates" );
+            VersionsTxt versionList;
+
             // download and parse version.txt
-            WebClient updateCheckDownloader = new WebClient();
-            string versions = updateCheckDownloader.DownloadString( UpdateUri + "version.txt" );
-            VersionsTxt versionList = new VersionsTxt( versions.Split( '\n' ) );
+            using( WebClient updateCheckDownloader = new WebClient() ) {
+                string versions = updateCheckDownloader.DownloadString( UpdateUri + "version.txt" );
+                versionList = new VersionsTxt( versions.Split( '\n' ) );
+            }
 
             // check if primary binary download is available
             latestVersion = versionList.Get( Paths.PrimaryBinary );
@@ -100,14 +102,15 @@ namespace ChargedMinersLauncher {
 
 
         // returns MD5 of a given file, as a hexadecimal string
-        string ComputeLocalHash( string fileName ) {
-            MD5 hasher = MD5.Create();
-            using( FileStream fs = File.OpenRead( fileName ) ) {
-                StringBuilder sb = new StringBuilder( 32 );
-                foreach( byte b in hasher.ComputeHash( fs ) ) {
-                    sb.AppendFormat( "{0:x2}", b );
+        static string ComputeLocalHash( string fileName ) {
+            using( MD5 hasher = MD5.Create() ) {
+                using( FileStream fs = File.OpenRead( fileName ) ) {
+                    StringBuilder sb = new StringBuilder( 32 );
+                    foreach( byte b in hasher.ComputeHash( fs ) ) {
+                        sb.AppendFormat( "{0:x2}", b );
+                    }
+                    return sb.ToString();
                 }
-                return sb.ToString();
             }
         }
 
@@ -284,7 +287,7 @@ namespace ChargedMinersLauncher {
                     if( ex != null ) {
                         lSignInStatus.Text = "Error: " + ex.Message;
                     } else {
-                        lSignInStatus.Text = "An unknown error occured.";
+                        lSignInStatus.Text = "An unknown error occurred.";
                     }
                     SelectedPanel = panelSignIn;
                     break;
@@ -293,10 +296,9 @@ namespace ChargedMinersLauncher {
 
 
         void LoadLoginInfo() {
-            string passwordFileFullName = Paths.PasswordSaveFile;
             try {
-                if( File.Exists( passwordFileFullName ) ) {
-                    string[] loginData = File.ReadAllLines( passwordFileFullName );
+                if( File.Exists( Paths.PasswordSaveFile ) ) {
+                    string[] loginData = File.ReadAllLines( Paths.PasswordSaveFile );
                     storedLoginUsername = loginData[0];
                     tUsername.Text = storedLoginUsername;
                     tPassword.Text = loginData[1];
@@ -310,16 +312,15 @@ namespace ChargedMinersLauncher {
 
 
         void SaveLoginInfo() {
-            string passwordFileFullName = Paths.PasswordSaveFile;
             if( xRemember.Checked ) {
-                File.WriteAllLines( passwordFileFullName, new[] {
+                File.WriteAllLines( Paths.PasswordSaveFile, new[] {
                     MinecraftNetSession.Instance.LoginUsername,
                     MinecraftNetSession.Instance.Password,
                     MinecraftNetSession.Instance.MinercraftUsername
                 } );
             } else {
-                if( File.Exists( passwordFileFullName ) ) {
-                    File.Delete( passwordFileFullName );
+                if( File.Exists( Paths.PasswordSaveFile ) ) {
+                    File.Delete( Paths.PasswordSaveFile );
                 }
             }
         }

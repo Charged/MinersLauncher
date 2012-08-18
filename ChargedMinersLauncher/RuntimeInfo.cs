@@ -1,10 +1,10 @@
 // Part of ChargedMinersLaunher | Copyright (c) 2012 Jakob Bornecrantz <wallbraker@gmail.com> | Stolen from SirCmpwn | BSD-3 | See LICENSE.txt
 using System;
-using System.IO;
 using System.Diagnostics;
+using System.IO;
 
 namespace ChargedMinersLauncher {
-    public static class RuntimeInfo {
+    static class RuntimeInfo {
         public static bool Is32Bit { get; private set; }
         public static bool Is64Bit { get; private set; }
         public static bool IsMono { get; private set; }

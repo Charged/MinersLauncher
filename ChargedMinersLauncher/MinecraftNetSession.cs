@@ -79,11 +79,10 @@ namespace ChargedMinersLauncher {
 
 
         void LoadCookie( bool remember ) {
-            string cookieFile = Paths.CookieContainerFile;
-            if( File.Exists( cookieFile ) ) {
+            if( File.Exists( Paths.CookieContainerFile ) ) {
                 if( remember ) {
                     BinaryFormatter formatter = new BinaryFormatter();
-                    using( Stream s = File.OpenRead( cookieFile ) ) {
+                    using( Stream s = File.OpenRead( Paths.CookieContainerFile ) ) {
                         cookieJar = (CookieContainer)formatter.Deserialize( s );
                     }
                     CookieCollection cookies = cookieJar.GetCookies( new Uri( "http://www.minecraft.net/" ) );
@@ -98,7 +97,7 @@ namespace ChargedMinersLauncher {
                         cookieJar = new CookieContainer();
                     }
                 } else {
-                    File.Delete( cookieFile );
+                    File.Delete( Paths.CookieContainerFile );
                 }
             } else {
                 cookieJar = new CookieContainer();
@@ -107,9 +106,8 @@ namespace ChargedMinersLauncher {
 
 
         void SaveCookie() {
-            string cookieFile = Paths.CookieContainerFile;
             BinaryFormatter formatter = new BinaryFormatter();
-            using( Stream s = File.Create( cookieFile ) ) {
+            using( Stream s = File.Create( Paths.CookieContainerFile ) ) {
                 formatter.Serialize( s, cookieJar );
             }
         }
