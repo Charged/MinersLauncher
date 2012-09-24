@@ -18,6 +18,9 @@ namespace ChargedMinersLauncher {
             LoginAuthToken = new Regex( @"<input type=""hidden"" name=""authenticityToken"" value=""([0-9a-f]+)"">" ),
             LoggedInAs = new Regex( @"<span class=""logged-in"">\s*Logged in as ([a-zA-Z0-9_\.]{2,16})" );
 
+        const string MigratedAccountMessage = "Your account has been migrated",
+                     WrongUsernameOrPasswordMessage ="Oops, unknown username or password.";
+
         public string LoginUsername { get; private set; }
         public string MinercraftUsername { get; private set; }
         public string Password { get; private set; }
@@ -63,7 +66,7 @@ namespace ChargedMinersLauncher {
             }
 
             string loginResponse = UploadString( LoginSecureUri, LoginUri, loginString );
-            if( loginResponse.Contains( "Oops, unknown username or password." ) ) {
+            if( loginResponse.Contains( WrongUsernameOrPasswordMessage ) ) {
                 Status = LoginResult.WrongUsernameOrPass;
 
             } else if( LoggedInAs.IsMatch( loginResponse ) ) {
@@ -71,6 +74,8 @@ namespace ChargedMinersLauncher {
                 Status = LoginResult.Success;
                 SaveCookie();
 
+            } else if( loginResponse.Contains( MigratedAccountMessage ) ) {
+                Status = LoginResult.MigratedAccount;
             } else {
                 Status = LoginResult.Error;
             }

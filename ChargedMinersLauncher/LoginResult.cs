@@ -4,6 +4,7 @@ namespace ChargedMinersLauncher {
     enum LoginResult {
         Success,
         WrongUsernameOrPass,
+        MigratedAccount,
         Error
     }
 }

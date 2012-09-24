@@ -60,7 +60,7 @@ namespace ChargedMinersLauncher {
 
         readonly BackgroundWorker versionCheckWorker = new BackgroundWorker();
         string localHashString;
-        static readonly Uri UpdateUri = new Uri( "http://cloud.github.com/downloads/Wallbraker/Charged-Miners/" );
+        static readonly Uri UpdateUri = new Uri( "http://cloud.github.com/downloads/Charged/Miners/" );
         readonly WebClient binaryDownloader = new WebClient();
         VersionInfo latestVersion;
 
@@ -277,6 +277,11 @@ namespace ChargedMinersLauncher {
                     }
                     break;
 
+                case LoginResult.MigratedAccount:
+                    lSignInStatus.Text = "Migrated account. Use your email to sign in.";
+                    SelectedPanel = panelSignIn;
+                    break;
+
                 case LoginResult.WrongUsernameOrPass:
                     lSignInStatus.Text = "Wrong username or password.";
                     SelectedPanel = panelSignIn;
@@ -368,12 +373,16 @@ namespace ChargedMinersLauncher {
                 Log( "State = " + value );
                 switch( value ) {
                     case FormState.AtSignInForm:
+                        AcceptButton = bSignIn;
+                        CancelButton = null;
                         lStatus.Text = "";
                         lStatus2.Text = "";
                         SelectedPanel = panelSignIn;
                         break;
 
                     case FormState.SigningIn:
+                        AcceptButton = null;
+                        CancelButton = bCancel;
                         lSignInStatus.Text = "";
                         lStatus.Text = String.Format( "Signing in as {0}...",
                                                       MinecraftNetSession.Instance.LoginUsername );
@@ -385,6 +394,8 @@ namespace ChargedMinersLauncher {
                         break;
 
                     case FormState.WaitingForUpdater:
+                        AcceptButton = null;
+                        CancelButton = bCancel;
                         lSignInStatus.Text = "";
                         lStatus.Text = "Checking for updates...";
                         lStatus2.Text = "";
@@ -393,6 +404,8 @@ namespace ChargedMinersLauncher {
                         break;
 
                     case FormState.PlatformNotSupportedError:
+                        AcceptButton = bCancel;
+                        CancelButton = null;
                         lStatus.Text = "Failed to initialize";
                         lStatus2.Text = "Charged-Miners is not available for this platform.";
                         pbSigningIn.Style = ProgressBarStyle.Continuous;
@@ -402,10 +415,14 @@ namespace ChargedMinersLauncher {
                         break;
 
                     case FormState.PromptingToUpdate:
+                        AcceptButton = bUpdateYes;
+                        CancelButton = bUpdateNo;
                         SelectedPanel = panelUpdatePrompt;
                         break;
 
                     case FormState.DownloadingBinary:
+                        AcceptButton = null;
+                        CancelButton = bCancel;
                         lStatus.Text = String.Format( "Downloading {0} (?/?)", latestVersion.HttpName );
                         lStatus2.Text = "";
                         pbSigningIn.Style = ProgressBarStyle.Continuous;
