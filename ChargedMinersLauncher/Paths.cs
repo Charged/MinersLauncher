@@ -18,6 +18,10 @@ namespace ChargedMinersLauncher {
         public const string PasswordSaveFile = "saved-login.dat";
         public const string CookieContainerFile = "saved-session.dat";
 
+        public static string SettingsFile {
+            get { return Path.Combine( ConfigPath, "settings.ini" ); }
+        }
+
 
         public static bool Init() {
             if( !Directory.Exists( ConfigPath ) ) {

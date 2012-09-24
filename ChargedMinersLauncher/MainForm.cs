@@ -173,8 +173,8 @@ namespace ChargedMinersLauncher {
 
         #region Sign-In
 
-        bool canSignIn,
-             directConnect;
+        bool directConnect,
+             clickedGo;
 
         string storedLoginUsername,
                storedMinecraftUsername;
@@ -192,51 +192,42 @@ namespace ChargedMinersLauncher {
 
 
         void OnUsernameOrPasswordChanged( object sender, EventArgs e ) {
+            bool canSignIn = false;
             if( UsernameRegex.IsMatch( tUsername.Text ) || EmailRegex.IsMatch( tUsername.Text ) ) {
                 tUsername.BackColor = SystemColors.Window;
+                canSignIn = true;
             } else {
                 tUsername.BackColor = Color.Yellow;
             }
-            canSignIn = ( tPassword.Text.Length > 0 );
-            bSignIn.Enabled = canSignIn || directConnect;
+            canSignIn |= ( tPassword.Text.Length > 0 );
+            bSignIn.Enabled = canSignIn;
+            tURL_TextChanged( sender, e );
         }
 
 
         void tURL_TextChanged( object sender, EventArgs e ) {
             if( PlayLinkDirect.IsMatch( tUri.Text ) ) {
                 tUri.BackColor = SystemColors.Window;
-                bSignIn.Enabled = true;
+                bGo.Enabled = true;
                 directConnect = true;
-                tUsername.Enabled = false;
-                tPassword.Enabled = false;
-                Match womDirectMatch = PlayLinkDirect.Match( tUri.Text );
-                tUsername.Text = womDirectMatch.Groups[2].Value;
             } else {
-                bSignIn.Enabled = canSignIn;
-                tUsername.Enabled = true;
-                tPassword.Enabled = true;
                 directConnect = false;
                 if( PlayLinkHash.IsMatch( tUri.Text ) || PlayLinkIPPort.IsMatch( tUri.Text ) ) {
                     tUri.BackColor = SystemColors.Window;
+                    bGo.Enabled = bSignIn.Enabled;
                 } else if( tUri.Text.Length == 0 ) {
                     tUri.BackColor = SystemColors.Window;
+                    bGo.Enabled = bSignIn.Enabled;
                 } else {
                     tUri.BackColor = Color.Yellow;
+                    bGo.Enabled = false;
                 }
             }
         }
 
 
         void bSignIn_Click( object sender, EventArgs e ) {
-            if( directConnect ) {
-                loginCompleted = true;
-                if( updateCheckCompleted ) {
-                    OnSignInAndUpdateCheckCompleted();
-                } else {
-                    State = FormState.WaitingForUpdater;
-                }
-                return;
-            }
+            directConnect = false;
             string minecraftUsername;
             if( tUsername.Text == storedLoginUsername ) {
                 minecraftUsername = storedMinecraftUsername;
@@ -247,6 +238,21 @@ namespace ChargedMinersLauncher {
 
             State = FormState.SigningIn;
             signInWorker.RunWorkerAsync();
+        }
+
+
+        private void bGo_Click( object sender, EventArgs e ) {
+            clickedGo = true;
+            if( directConnect ) {
+                loginCompleted = true;
+                if( updateCheckCompleted ) {
+                    OnSignInAndUpdateCheckCompleted();
+                } else {
+                    State = FormState.WaitingForUpdater;
+                }
+            } else {
+                bSignIn_Click( sender, e );
+            }
         }
 
 
@@ -337,10 +343,24 @@ namespace ChargedMinersLauncher {
 
         bool loginCompleted, updateCheckCompleted, downloadComplete;
 
+        static readonly Regex ChargedMinersLastServer = new Regex( @"^mc\.lastMcUrl:(mc.*)$" );
+
 
         protected override void OnShown( EventArgs e ) {
             if( Paths.Init() ) {
                 LoadLoginInfo();
+
+                if( File.Exists( Paths.SettingsFile ) ) {
+                    string[] config = File.ReadAllLines( Paths.SettingsFile );
+                    foreach( string line in config ) {
+                        Match configMatch = ChargedMinersLastServer.Match( line );
+                        if( configMatch.Success ) {
+                            tUri.Text = configMatch.Groups[1].Value;
+                            break;
+                        }
+                    }
+                }
+
                 versionCheckWorker.RunWorkerAsync();
             } else {
                 State = FormState.PlatformNotSupportedError;
@@ -481,7 +501,8 @@ namespace ChargedMinersLauncher {
         const string ToolTipUsername = "Your minecraft.net username or email",
                      ToolTipPassword = "Your minecraft.net password",
                      ToolTipRemember = "Save your username and password for next time. Note that password is stored in plain text.",
-                     ToolTipUri = "Server's Minecraft.net URL or a DirectConnect (mc://) link. Optional.";
+                     ToolTipUri = "Server's Minecraft.net URL or a DirectConnect (mc://) link. Optional.",
+                     ToolTipResume = "Try to reuse the last-used credentials, to connect to the most-recently-joined server.";
 
         void SetToolTips() {
             toolTip = new ToolTip();
@@ -491,6 +512,8 @@ namespace ChargedMinersLauncher {
             toolTip.SetToolTip( lPassword, ToolTipPassword );
             toolTip.SetToolTip( xRemember, ToolTipRemember );
             toolTip.SetToolTip( tUri, ToolTipUri );
+            toolTip.SetToolTip( lUri, ToolTipUri );
+            toolTip.SetToolTip( bGo, ToolTipResume );
         }
 
         #endregion
@@ -514,9 +537,9 @@ namespace ChargedMinersLauncher {
             Hide();
 
             string param;
-            if( PlayLinkDirect.IsMatch( tUri.Text ) ) {
+            if( directConnect ) {
                 param = tUri.Text;
-            } else if( PlayLinkHash.IsMatch( tUri.Text ) || PlayLinkIPPort.IsMatch( tUri.Text ) ) {
+            } else if( clickedGo ) {
                 param = String.Format( "PLAY_SESSION={0} {1}",
                                        MinecraftNetSession.Instance.PlaySessionCookie,
                                        tUri.Text );
