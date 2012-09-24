@@ -10,9 +10,9 @@ namespace ChargedMinersLauncher {
     sealed class MinecraftNetSession {
         public static MinecraftNetSession Instance { get; set; }
 
-        const string RefererUri = "http://www.minecraft.net/",
-                     LoginUri = "http://www.minecraft.net/login",
-                     LoginSecureUri = "https://www.minecraft.net/login";
+        const string MinecraftNet = "http://minecraft.net/",
+                     LoginUri = "http://minecraft.net/login",
+                     LoginSecureUri = "https://minecraft.net/login";
 
         static readonly Regex
             LoginAuthToken = new Regex( @"<input type=""hidden"" name=""authenticityToken"" value=""([0-9a-f]+)"">" ),
@@ -26,7 +26,7 @@ namespace ChargedMinersLauncher {
 
         public string PlaySessionCookie {
             get {
-                CookieCollection cookies = cookieJar.GetCookies( new Uri( "http://www.minecraft.net/" ) );
+                CookieCollection cookies = cookieJar.GetCookies( new Uri( MinecraftNet ) );
                 return cookies["PLAY_SESSION"].Value;
             }
         }
@@ -44,7 +44,7 @@ namespace ChargedMinersLauncher {
         public LoginResult Login( bool remember ) {
             LoadCookie( remember );
 
-            string loginPage = DownloadString( LoginUri, RefererUri );
+            string loginPage = DownloadString( LoginUri, MinecraftNet );
             if( LoggedInAs.IsMatch( loginPage ) ) {
                 MinercraftUsername = LoggedInAs.Match( loginPage ).Groups[1].Value;
                 Status = LoginResult.Success;
@@ -85,7 +85,7 @@ namespace ChargedMinersLauncher {
                     using( Stream s = File.OpenRead( Paths.CookieContainerFile ) ) {
                         cookieJar = (CookieContainer)formatter.Deserialize( s );
                     }
-                    CookieCollection cookies = cookieJar.GetCookies( new Uri( "http://www.minecraft.net/" ) );
+                    CookieCollection cookies = cookieJar.GetCookies( new Uri( MinecraftNet ) );
                     bool found = false;
                     foreach( Cookie c in cookies ) {
                         if( c.Value.Contains( "username%3A" + MinercraftUsername ) ) {
