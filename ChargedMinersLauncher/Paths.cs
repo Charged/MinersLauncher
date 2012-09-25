@@ -1,13 +1,10 @@
 ﻿// Part of ChargedMinersLaunher | Copyright (c) 2012 Matvei Stefarov <me@matvei.org> | BSD-3 | See LICENSE.txt
 using System;
 using System.IO;
+using System.Reflection;
 
 namespace ChargedMinersLauncher {
     static class Paths {
-        public static string ConfigPath {
-            get { return Path.Combine( Environment.GetFolderPath( Environment.SpecialFolder.ApplicationData ), "charge" ); }
-        }
-
         public static string PrimaryBinary,
                              AlternativeBinary;
         const string ChargeBinaryFormatWindows = "Charge.{0}.exe";
@@ -18,12 +15,16 @@ namespace ChargedMinersLauncher {
         public const string PasswordSaveFile = "saved-login.dat";
         public const string CookieContainerFile = "saved-session.dat";
 
-        public static string SettingsFile {
-            get { return Path.Combine( ConfigPath, "settings.ini" ); }
-        }
+        public static string LauncherPath { get; private set; }
+        public static string ConfigPath { get; private set; }
+        public static string SettingsPath { get; private set; }
 
 
         public static bool Init() {
+            LauncherPath = Assembly.GetExecutingAssembly().Location;
+            ConfigPath = Path.Combine( Environment.GetFolderPath( Environment.SpecialFolder.ApplicationData ), "charge" );
+            SettingsPath = Path.Combine( ConfigPath, "settings.ini" );
+
             if( !Directory.Exists( ConfigPath ) ) {
                 Directory.CreateDirectory( ConfigPath );
             }

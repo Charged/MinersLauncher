@@ -350,8 +350,8 @@ namespace ChargedMinersLauncher {
             if( Paths.Init() ) {
                 LoadLoginInfo();
 
-                if( File.Exists( Paths.SettingsFile ) ) {
-                    string[] config = File.ReadAllLines( Paths.SettingsFile );
+                if( File.Exists( Paths.SettingsPath ) ) {
+                    string[] config = File.ReadAllLines( Paths.SettingsPath );
                     foreach( string line in config ) {
                         Match configMatch = ChargedMinersLastServer.Match( line );
                         if( configMatch.Success ) {
@@ -545,6 +545,10 @@ namespace ChargedMinersLauncher {
                                        tUri.Text );
             } else {
                 param = "PLAY_SESSION=" + MinecraftNetSession.Instance.PlaySessionCookie;
+            }
+
+            if( RuntimeInfo.IsWindows ) {
+                param += String.Format( " LAUNCHER_PATH=\"{0}\"", Paths.LauncherPath );
             }
             Process.Start( latestVersion.Name, param );
             Application.Exit();
