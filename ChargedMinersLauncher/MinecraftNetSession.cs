@@ -11,7 +11,6 @@ namespace ChargedMinersLauncher {
         public static MinecraftNetSession Instance { get; set; }
 
         const string MinecraftNet = "http://minecraft.net/",
-                     LoginUri = "http://minecraft.net/login",
                      LoginSecureUri = "https://minecraft.net/login";
 
         static readonly Regex
@@ -47,7 +46,7 @@ namespace ChargedMinersLauncher {
         public LoginResult Login( bool remember ) {
             LoadCookie( remember );
 
-            string loginPage = DownloadString( LoginUri, MinecraftNet );
+            string loginPage = DownloadString( LoginSecureUri, MinecraftNet );
             if( LoggedInAs.IsMatch( loginPage ) ) {
                 MinercraftUsername = LoggedInAs.Match( loginPage ).Groups[1].Value;
                 Status = LoginResult.Success;
@@ -65,7 +64,7 @@ namespace ChargedMinersLauncher {
                 loginString += "&remember=true";
             }
 
-            string loginResponse = UploadString( LoginSecureUri, LoginUri, loginString );
+            string loginResponse = UploadString( LoginSecureUri, LoginSecureUri, loginString );
             if( loginResponse.Contains( WrongUsernameOrPasswordMessage ) ) {
                 Status = LoginResult.WrongUsernameOrPass;
 
