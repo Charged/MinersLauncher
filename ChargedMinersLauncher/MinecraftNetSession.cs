@@ -76,7 +76,7 @@ namespace ChargedMinersLauncher {
             } else if( loginResponse.Contains( MigratedAccountMessage ) ) {
                 Status = LoginResult.MigratedAccount;
             } else {
-                Status = LoginResult.Error;
+                Status = LoginResult.UnrecognizedResponse;
             }
             return Status;
         }

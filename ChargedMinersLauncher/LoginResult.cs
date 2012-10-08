@@ -5,6 +5,7 @@ namespace ChargedMinersLauncher {
         Success,
         WrongUsernameOrPass,
         MigratedAccount,
+        UnrecognizedResponse,
         Error
     }
 }

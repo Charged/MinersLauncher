@@ -293,6 +293,11 @@ namespace ChargedMinersLauncher {
                     SelectedPanel = panelSignIn;
                     break;
 
+                case LoginResult.UnrecognizedResponse:
+                    lSignInStatus.Text = "Could not understand minecraft.net response.";
+                    SelectedPanel = panelSignIn;
+                    break;
+
                 case LoginResult.Error:
                     Exception ex = MinecraftNetSession.Instance.LoginException;
                     if( ex != null ) {
