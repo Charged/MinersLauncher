@@ -187,7 +187,7 @@ namespace ChargedMinersLauncher {
                                     @"(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?$",
                                     RegexOptions.IgnoreCase ),
             PlayLinkHash = new Regex( @"^http://minecraft.net/classic/play/([0-9a-fA-F]{28,32})/?(\?override=(true|1))?$" ),
-            PlayLinkDirect = new Regex( @"^mc://(\d{1,3}\.){3}\d{1,3}:\d{1,5}/([a-zA-Z0-9_\.]{2,16})/.*$" ),
+            PlayLinkDirect = new Regex( @"^mc://((\d{1,3}\.){3}\d{1,3}|([a-zA-Z0-9\-]+\.)+([a-zA-Z0-9\-]+))(:\d{1,5})?/([a-zA-Z0-9_\.]{2,16})/.*$" ),
             PlayLinkIPPort = new Regex( @"^http://minecraft.net/classic/play/?\?ip=(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})&port=(\d{1,5})$" );
 
 
@@ -207,18 +207,22 @@ namespace ChargedMinersLauncher {
 
         void tURL_TextChanged( object sender, EventArgs e ) {
             if( PlayLinkDirect.IsMatch( tUri.Text ) ) {
+                // "mc://" url
                 tUri.BackColor = SystemColors.Window;
                 bGo.Enabled = true;
                 directConnect = true;
             } else {
                 directConnect = false;
                 if( PlayLinkHash.IsMatch( tUri.Text ) || PlayLinkIPPort.IsMatch( tUri.Text ) ) {
+                    // minecraft.net play link
                     tUri.BackColor = SystemColors.Window;
                     bGo.Enabled = bSignIn.Enabled;
                 } else if( tUri.Text.Length == 0 ) {
+                    // no URL given
                     tUri.BackColor = SystemColors.Window;
                     bGo.Enabled = bSignIn.Enabled;
                 } else {
+                    // unrecognized URL given
                     tUri.BackColor = Color.Yellow;
                     bGo.Enabled = false;
                 }
