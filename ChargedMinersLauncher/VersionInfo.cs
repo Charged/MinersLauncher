@@ -1,4 +1,4 @@
-// Part of ChargedMinersLaunher | Copyright (c) 2012 Jakob Bornecrantz <wallbraker@gmail.com> | BSD-3 | See LICENSE.txt
+// Part of ChargedMinersLauncher | Copyright (c) 2012 Jakob Bornecrantz <wallbraker@gmail.com> | BSD-3 | See LICENSE.txt
 using System;
 
 namespace ChargedMinersLauncher {
