@@ -1,4 +1,4 @@
-// Part of ChargedMinersLaunher | Copyright (c) 2012 Jakob Bornecrantz <wallbraker@gmail.com> | Stolen from SirCmpwn | BSD-3 | See LICENSE.txt
+// Part of ChargedMinersLauncher | Copyright (c) 2012 Jakob Bornecrantz <wallbraker@gmail.com> | Stolen from SirCmpwn | BSD-3 | See LICENSE.txt
 using System;
 using System.Diagnostics;
 using System.IO;
@@ -14,7 +14,7 @@ namespace ChargedMinersLauncher {
         public static bool IsMacOSX { get; private set; }
 
 
-        internal static void GatherInfo() {
+        static RuntimeInfo() {
             IsMono = Type.GetType( "Mono.Runtime" ) != null;
             int p = (int)Environment.OSVersion.Platform;
             IsUnix = ( p == 4 ) || ( p == 6 ) || ( p == 128 );
