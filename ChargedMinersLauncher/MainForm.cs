@@ -186,9 +186,9 @@ namespace ChargedMinersLauncher {
             EmailRegex = new Regex( @"^[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@" +
                                     @"(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?$",
                                     RegexOptions.IgnoreCase ),
-            PlayLinkHash = new Regex( @"^http://minecraft.net/classic/play/([0-9a-fA-F]{28,32})/?(\?override=(true|1))?$" ),
+            PlayLinkHash = new Regex( @"^http://(www\.)?minecraft.net/classic/play/([0-9a-fA-F]{28,32})/?(\?override=(true|1))?$" ),
             PlayLinkDirect = new Regex( @"^mc://((\d{1,3}\.){3}\d{1,3}|([a-zA-Z0-9\-]+\.)+([a-zA-Z0-9\-]+))(:\d{1,5})?/([a-zA-Z0-9_\.]{2,16})/.*$" ),
-            PlayLinkIPPort = new Regex( @"^http://minecraft.net/classic/play/?\?ip=(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})&port=(\d{1,5})$" );
+            PlayLinkIPPort = new Regex( @"^http://(www\.)?minecraft.net/classic/play/?\?ip=(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})&port=(\d{1,5})$" );
 
 
         void OnUsernameOrPasswordChanged( object sender, EventArgs e ) {
@@ -350,7 +350,7 @@ namespace ChargedMinersLauncher {
 
         #region State Control
 
-        bool loginCompleted, updateCheckCompleted, downloadComplete;
+        volatile bool loginCompleted, updateCheckCompleted, downloadComplete;
 
         static readonly Regex ChargedMinersLastServer = new Regex( @"^mc\.lastMcUrl:(mc.*)$" );
 
@@ -359,6 +359,7 @@ namespace ChargedMinersLauncher {
             if( Paths.Init() ) {
                 LoadLoginInfo();
 
+                // fill in the Uri field with CM's last-joined server
                 if( File.Exists( Paths.SettingsPath ) ) {
                     string[] config = File.ReadAllLines( Paths.SettingsPath );
                     foreach( string line in config ) {
@@ -381,16 +382,23 @@ namespace ChargedMinersLauncher {
         void OnSignInAndUpdateCheckCompleted() {
             Log( "OnSignInAndUpdateCheckCompleted" );
             if( latestVersion == null ) {
+                // no CM version found for this platform; notify, then terminate
                 State = FormState.PlatformNotSupportedError;
+
             } else if( !File.Exists( latestVersion.Name ) ) {
+                // no local CM binaries: download them
                 if( downloadComplete ) {
                     ApplyUpdate();
                 } else {
                     State = FormState.DownloadingBinary;
                 }
+
             } else if( !latestVersion.Md5.Equals( localHashString, StringComparison.OrdinalIgnoreCase ) ) {
+                // local CM binaries are outdated; prompt to update
                 State = FormState.PromptingToUpdate;
+
             } else {
+                // local CM binaries are up to date; run
                 StartChargedMiners();
             }
         }
@@ -532,6 +540,8 @@ namespace ChargedMinersLauncher {
             lStatus.Text = "Launching Charged-Miners...";
             bCancel.Visible = false;
             Log( "StartChargedMiners" );
+
+            // if we are on unix, set +x on Charge binaries
             if( RuntimeInfo.IsUnix ) {
                 Process chmod = new Process {
                     StartInfo = {
@@ -543,22 +553,29 @@ namespace ChargedMinersLauncher {
                 chmod.Start();
                 chmod.WaitForExit();
             }
+
+            // hide the form, to avoid stealing focus from CM window
             Hide();
 
             string param;
             if( directConnect ) {
+                // for direct-connect URIs (no session)
                 param = tUri.Text;
+
             } else if( clickedGo ) {
+                // for minecraft.net URIs
                 param = String.Format( "PLAY_SESSION={0} {1}",
                                        MinecraftNetSession.Instance.PlaySessionCookie,
                                        tUri.Text );
             } else {
+                // pass session only
                 param = "PLAY_SESSION=" + MinecraftNetSession.Instance.PlaySessionCookie;
             }
 
             if( RuntimeInfo.IsWindows ) {
                 param += String.Format( " LAUNCHER_PATH=\"{0}\"", Paths.LauncherPath );
             }
+
             Process.Start( latestVersion.Name, param );
             Application.Exit();
         }
