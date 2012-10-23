@@ -2,10 +2,35 @@
 Charged-Miners Launcher
 ======
 
-GUI launcher for Charged-Miners client: https://github.com/Wallbraker/Charged-Miners
+GUI launcher for Charged-Miners client: https://github.com/Charged/Miners
 
-.. image:: http://i.imgur.com/CX0ii.png
+.. image:: http://i.imgur.com/Vx6XI.png
 
-Only works on Windows. Requires Microsoft.NET Framework 3.5
+Handles software updates and login for Charged-Miners.
+Requires Microsoft.NET Framework 3.5.
+Tested only on Windows, but should work with Mono.
 
-Latest binaries can be found at http://www.fcraft.net/ChargedMinersLauncher/
+Latest binaries can be found at https://github.com/Charged/Miners/downloads
+
+---------------
+ Version history
+---------------
+- 1.03
+    Allowed more kinds of mc:// URLs. Port number is now optional, and hostnames can be used in place of IPs.
+    Made "www." optional in minecraft.net URLs
+    Made error messages more informative
+    Added logging to %AppData%/charge/launcher.log
+
+- 1.02
+    Switched from using www.minecraft.net to minecraft.net
+    Added a special handler for "Migrated account" error messages.
+    Made Enter/Escape buttons work as expected on various dialogues, without needing to click or tab over to the buttons.
+    URL field is now loaded from settings.ini (mc.lastMcUrl)
+
+- 1.01
+    Removed server-list fetching (now handled internally by CM).
+    Added automatic updates of CM.
+    Redesigned the interface.
+
+- 1.00
+    Initial release.
