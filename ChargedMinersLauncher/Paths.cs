@@ -18,12 +18,16 @@ namespace ChargedMinersLauncher {
         public static string LauncherPath { get; private set; }
         public static string ConfigPath { get; private set; }
         public static string SettingsPath { get; private set; }
+        public static string LauncherLogPath { get; private set; }
+
+        public static bool IsPlatformSupported { get; set; }
 
 
-        public static bool Init() {
+        static Paths() {
             LauncherPath = Assembly.GetExecutingAssembly().Location;
             ConfigPath = Path.Combine( Environment.GetFolderPath( Environment.SpecialFolder.ApplicationData ), "charge" );
             SettingsPath = Path.Combine( ConfigPath, "settings.ini" );
+            LauncherLogPath = Path.Combine( ConfigPath, "launcher.log" );
 
             if( !Directory.Exists( ConfigPath ) ) {
                 Directory.CreateDirectory( ConfigPath );
@@ -38,7 +42,8 @@ namespace ChargedMinersLauncher {
             } else if( RuntimeInfo.IsLinux ) {
                 tmp = ChargeBinaryFormatLinux;
             } else {
-                return false;
+                IsPlatformSupported = false;
+                return;
             }
 
             if( RuntimeInfo.Is32Bit ) {
@@ -47,9 +52,11 @@ namespace ChargedMinersLauncher {
                 PrimaryBinary = String.Format( tmp, ChargeBinaryFormat64Bit );
                 AlternativeBinary = String.Format( tmp, ChargeBinaryFormat32Bit );
             } else {
-                return false;
+                IsPlatformSupported = false;
+                return;
             }
-            return true;
+
+            IsPlatformSupported = true;
         }
     }
 }

@@ -37,6 +37,7 @@ namespace ChargedMinersLauncher {
 
 
         public MainForm() {
+            Log( "---- " + DateTime.Now.ToLongDateString() + " ----" );
             InitializeComponent();
 
             SetToolTips();
@@ -186,9 +187,14 @@ namespace ChargedMinersLauncher {
             EmailRegex = new Regex( @"^[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@" +
                                     @"(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?$",
                                     RegexOptions.IgnoreCase ),
-            PlayLinkHash = new Regex( @"^http://(www\.)?minecraft.net/classic/play/([0-9a-fA-F]{28,32})/?(\?override=(true|1))?$" ),
-            PlayLinkDirect = new Regex( @"^mc://((\d{1,3}\.){3}\d{1,3}|([a-zA-Z0-9\-]+\.)+([a-zA-Z0-9\-]+))(:\d{1,5})?/([a-zA-Z0-9_\.]{2,16})/.*$" ),
-            PlayLinkIPPort = new Regex( @"^http://(www\.)?minecraft.net/classic/play/?\?ip=(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})&port=(\d{1,5})$" );
+            PlayLinkHash =
+                new Regex( @"^http://(www\.)?minecraft.net/classic/play/([0-9a-fA-F]{28,32})/?(\?override=(true|1))?$" ),
+            PlayLinkDirect =
+                new Regex(
+                    @"^mc://((\d{1,3}\.){3}\d{1,3}|([a-zA-Z0-9\-]+\.)+([a-zA-Z0-9\-]+))(:\d{1,5})?/([a-zA-Z0-9_\.]{2,16})/.*$" ),
+            PlayLinkIPPort =
+                new Regex(
+                    @"^http://(www\.)?minecraft.net/classic/play/?\?ip=(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})&port=(\d{1,5})$" );
 
 
         void OnUsernameOrPasswordChanged( object sender, EventArgs e ) {
@@ -245,7 +251,7 @@ namespace ChargedMinersLauncher {
         }
 
 
-        private void bGo_Click( object sender, EventArgs e ) {
+        void bGo_Click( object sender, EventArgs e ) {
             clickedGo = true;
             if( directConnect ) {
                 loginCompleted = true;
@@ -356,7 +362,7 @@ namespace ChargedMinersLauncher {
 
 
         protected override void OnShown( EventArgs e ) {
-            if( Paths.Init() ) {
+            if( Paths.IsPlatformSupported ) {
                 LoadLoginInfo();
 
                 // fill in the Uri field with CM's last-joined server
@@ -517,9 +523,12 @@ namespace ChargedMinersLauncher {
 
         const string ToolTipUsername = "Your minecraft.net username or email",
                      ToolTipPassword = "Your minecraft.net password",
-                     ToolTipRemember = "Save your username and password for next time. Note that password is stored in plain text.",
+                     ToolTipRemember =
+                         "Save your username and password for next time. Note that password is stored in plain text.",
                      ToolTipUri = "Server's Minecraft.net URL or a DirectConnect (mc://) link. Optional.",
-                     ToolTipResume = "Try to reuse the last-used credentials, to connect to the most-recently-joined server.";
+                     ToolTipResume =
+                         "Try to reuse the last-used credentials, to connect to the most-recently-joined server.";
+
 
         void SetToolTips() {
             toolTip = new ToolTip();
@@ -581,12 +590,21 @@ namespace ChargedMinersLauncher {
         }
 
 
-        static void Log( string message ) {
+        static readonly object LogLock = new object();
+
+        public static void Log( string message ) {
+            lock( LogLock ) {
+                string fullMsg = String.Format( "* {0:HH':'mm':'ss'.'ff} {1}{2}",
+                                                DateTime.Now, message, Environment.NewLine );
 #if DEBUG
-            string fullMsg = String.Format( "* {0:HH':'mm':'ss'.'ff} {1} {2}",
-                                            DateTime.Now, message, Environment.NewLine );
-            Debugger.Log( 0, "Debug", fullMsg );
+                Debugger.Log( 0, "Debug", fullMsg );
 #endif
+                File.AppendAllText( Paths.LauncherLogPath, fullMsg );
+            }
+        }
+
+        private void MainForm_FormClosed( object sender, FormClosedEventArgs e ) {
+            Log( "Closed: " + e.CloseReason );
         }
     }
 }

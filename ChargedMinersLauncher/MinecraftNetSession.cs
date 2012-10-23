@@ -43,15 +43,17 @@ namespace ChargedMinersLauncher {
         }
 
 
-        public LoginResult Login( bool remember ) {
+        public void Login( bool remember ) {
             LoadCookie( remember );
 
             string loginPage = DownloadString( LoginSecureUri, MinecraftNet );
             if( LoggedInAs.IsMatch( loginPage ) ) {
+                // if player is already logged, restored from a previous session
+                MainForm.Log( "Login: Restored session for " + MinercraftUsername );
                 MinercraftUsername = LoggedInAs.Match( loginPage ).Groups[1].Value;
                 Status = LoginResult.Success;
                 SaveCookie();
-                return Status;
+                return;
             }
 
             string authToken = LoginAuthToken.Match( loginPage ).Groups[1].Value;
@@ -75,16 +77,18 @@ namespace ChargedMinersLauncher {
 
             } else if( loginResponse.Contains( MigratedAccountMessage ) ) {
                 Status = LoginResult.MigratedAccount;
+
             } else {
                 Status = LoginResult.UnrecognizedResponse;
             }
-            return Status;
         }
 
 
+        // Handle saved minecraft.net sessions
         void LoadCookie( bool remember ) {
             if( File.Exists( Paths.CookieContainerFile ) ) {
                 if( remember ) {
+                    // load a saved session
                     BinaryFormatter formatter = new BinaryFormatter();
                     using( Stream s = File.OpenRead( Paths.CookieContainerFile ) ) {
                         cookieJar = (CookieContainer)formatter.Deserialize( s );
@@ -92,18 +96,25 @@ namespace ChargedMinersLauncher {
                     CookieCollection cookies = cookieJar.GetCookies( new Uri( MinecraftNet ) );
                     bool found = false;
                     foreach( Cookie c in cookies ) {
-                        if( c.Value.Contains( "username%3A" + MinercraftUsername ) ) {
+                        // look for a cookie that corresponds to the current minecraft username
+                        if( c.Value.IndexOf( "username%3A" + MinercraftUsername, StringComparison.OrdinalIgnoreCase ) != -1 ) {
                             found = true;
+                            MainForm.Log( "LoadCookie: Loaded saved session for " + MinercraftUsername );
                             break;
                         }
                     }
                     if( !found ) {
+                        // if saved session was not for the current username, discard it
+                        MainForm.Log( "LoadCookie: Discarded a saved session (username mismatch)" );
                         cookieJar = new CookieContainer();
                     }
                 } else {
+                    // discard a saved session
+                    MainForm.Log( "LoadCookie: Discarded a saved session" );
                     File.Delete( Paths.CookieContainerFile );
                 }
             } else {
+                // no session saved
                 cookieJar = new CookieContainer();
             }
         }
