@@ -17,19 +17,27 @@ Latest binaries can be found at https://github.com/Charged/Miners/downloads
 ---------------
 - 1.03
     Allowed more kinds of mc:// URLs. Port number is now optional, and hostnames can be used in place of IPs.
-    Made "www." optional in minecraft.net URLs
-    Made error messages more informative
-    Added logging to %AppData%/charge/launcher.log
+
+    Made "www." optional in minecraft.net URLs.
+
+    Made error messages more informative.
+
+    Added logging to %AppData%/charge/launcher.log.
 
 - 1.02
-    Switched from using www.minecraft.net to minecraft.net
+    Switched from using www.minecraft.net to minecraft.net.
+
     Added a special handler for "Migrated account" error messages.
+
     Made Enter/Escape buttons work as expected on various dialogues, without needing to click or tab over to the buttons.
-    URL field is now loaded from settings.ini (mc.lastMcUrl)
+
+    URL now defaults to a direct-connect link for the most-recently-joined server.
 
 - 1.01
     Removed server-list fetching (now handled internally by CM).
-    Added automatic updates of CM.
+
+    Added automatic updating of CM.
+
     Redesigned the interface.
 
 - 1.00
