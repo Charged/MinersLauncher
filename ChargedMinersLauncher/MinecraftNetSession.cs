@@ -18,7 +18,7 @@ namespace ChargedMinersLauncher {
             LoggedInAs = new Regex( @"<span class=""logged-in"">\s*Logged in as ([a-zA-Z0-9_\.]{2,16})" );
 
         const string MigratedAccountMessage = "Your account has been migrated",
-                     WrongUsernameOrPasswordMessage ="Oops, unknown username or password.";
+                     WrongUsernameOrPasswordMessage = "Oops, unknown username or password.";
 
         public string LoginUsername { get; private set; }
         public string MinercraftUsername { get; private set; }
@@ -29,7 +29,12 @@ namespace ChargedMinersLauncher {
         public string PlaySessionCookie {
             get {
                 CookieCollection cookies = cookieJar.GetCookies( new Uri( MinecraftNet ) );
-                return cookies["PLAY_SESSION"].Value;
+                var cookie = cookies["PLAY_SESSION"];
+                if( cookie != null ) {
+                    return cookie.Value;
+                } else {
+                    throw new WebException( "PLAY_SESSION cookie missing!" );
+                }
             }
         }
 
@@ -94,25 +99,26 @@ namespace ChargedMinersLauncher {
                         cookieJar = (CookieContainer)formatter.Deserialize( s );
                     }
                     CookieCollection cookies = cookieJar.GetCookies( new Uri( MinecraftNet ) );
-                    bool found = false;
                     foreach( Cookie c in cookies ) {
                         // look for a cookie that corresponds to the current minecraft username
-                        if( c.Value.IndexOf( "username%3A" + MinercraftUsername, StringComparison.OrdinalIgnoreCase ) != -1 ) {
-                            found = true;
+                        int start = c.Value.IndexOf( "username%3A" + MinercraftUsername,
+                                                     StringComparison.OrdinalIgnoreCase );
+                        if( start != -1 ) {
                             MainForm.Log( "LoadCookie: Loaded saved session for " + MinercraftUsername );
-                            break;
+                            return;
                         }
                     }
-                    if( !found ) {
-                        // if saved session was not for the current username, discard it
-                        MainForm.Log( "LoadCookie: Discarded a saved session (username mismatch)" );
-                        cookieJar = new CookieContainer();
-                    }
+
+                    // if saved session was not for the current username, discard it
+                    MainForm.Log( "LoadCookie: Discarded a saved session (username mismatch)" );
+                    cookieJar = new CookieContainer();
+
                 } else {
                     // discard a saved session
                     MainForm.Log( "LoadCookie: Discarded a saved session" );
                     File.Delete( Paths.CookieContainerFile );
                 }
+
             } else {
                 // no session saved
                 cookieJar = new CookieContainer();
@@ -159,7 +165,7 @@ namespace ChargedMinersLauncher {
         string DownloadString( string uri, string referer ) {
             var response = MakeRequest( uri, referer, null );
             using( Stream stream = response.GetResponseStream() ) {
-                if( stream == null ) throw new IOException();
+                if( stream == null ) throw new IOException( "Null response stream for " + uri );
                 using( StreamReader reader = new StreamReader( stream ) ) {
                     return reader.ReadToEnd();
                 }
@@ -170,7 +176,7 @@ namespace ChargedMinersLauncher {
         string UploadString( string uri, string referer, string dataToPost ) {
             var response = MakeRequest( uri, referer, dataToPost );
             using( Stream stream = response.GetResponseStream() ) {
-                if( stream == null ) throw new IOException();
+                if( stream == null ) throw new IOException( "Null response stream after posting to " + uri );
                 using( StreamReader reader = new StreamReader( stream ) ) {
                     return reader.ReadToEnd();
                 }
