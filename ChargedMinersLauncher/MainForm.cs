@@ -13,19 +13,19 @@ using System.Windows.Forms;
 namespace ChargedMinersLauncher {
     public sealed partial class MainForm : Form {
 
-        Panel SelectedPanel {
+        Control SelectedPanel {
             get { return selectedPanel; }
             set {
-                if( value == panelSignIn ) {
+                if( value == tabs ) {
                     panelStatus.Visible = false;
                     panelUpdatePrompt.Visible = false;
-                    panelSignIn.Visible = true;
+                    tabs.Visible = true;
                 } else if( value == panelStatus ) {
                     panelUpdatePrompt.Visible = false;
-                    panelSignIn.Visible = false;
+                    tabs.Visible = false;
                     panelStatus.Visible = true;
                 } else {
-                    panelSignIn.Visible = false;
+                    tabs.Visible = false;
                     panelStatus.Visible = false;
                     panelUpdatePrompt.Visible = true;
                 }
@@ -33,7 +33,7 @@ namespace ChargedMinersLauncher {
             }
         }
 
-        Panel selectedPanel;
+        Control selectedPanel;
 
 
         public MainForm() {
@@ -190,11 +190,9 @@ namespace ChargedMinersLauncher {
             PlayLinkHash =
                 new Regex( @"^http://(www\.)?minecraft.net/classic/play/([0-9a-fA-F]{28,32})/?(\?override=(true|1))?$" ),
             PlayLinkDirect =
-                new Regex(
-                    @"^mc://((\d{1,3}\.){3}\d{1,3}|([a-zA-Z0-9\-]+\.)+([a-zA-Z0-9\-]+))(:\d{1,5})?/([a-zA-Z0-9_\.]{2,16})/.*$" ),
+                new Regex( @"^mc://(((\d{1,3}\.){3}\d{1,3}|([a-zA-Z0-9\-]+\.)+([a-zA-Z0-9\-]+))(:\d{1,5})?)/([a-zA-Z0-9_\.]{2,16})/(.*)$" ),
             PlayLinkIPPort =
-                new Regex(
-                    @"^http://(www\.)?minecraft.net/classic/play/?\?ip=(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})&port=(\d{1,5})$" );
+                new Regex( @"^http://(www\.)?minecraft.net/classic/play/?\?ip=(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})&port=(\d{1,5})$" );
 
 
         void OnUsernameOrPasswordChanged( object sender, EventArgs e ) {
@@ -212,25 +210,25 @@ namespace ChargedMinersLauncher {
 
 
         void tURL_TextChanged( object sender, EventArgs e ) {
-            if( PlayLinkDirect.IsMatch( tUri.Text ) ) {
+            if( PlayLinkDirect.IsMatch( tDirectUrl.Text ) ) {
                 // "mc://" url
-                tUri.BackColor = SystemColors.Window;
-                bGo.Enabled = true;
+                tDirectUrl.BackColor = SystemColors.Window;
+                bDirectConnect.Enabled = true;
                 directConnect = true;
             } else {
                 directConnect = false;
-                if( PlayLinkHash.IsMatch( tUri.Text ) || PlayLinkIPPort.IsMatch( tUri.Text ) ) {
+                if( PlayLinkHash.IsMatch( tDirectUrl.Text ) || PlayLinkIPPort.IsMatch( tDirectUrl.Text ) ) {
                     // minecraft.net play link
-                    tUri.BackColor = SystemColors.Window;
-                    bGo.Enabled = bSignIn.Enabled;
-                } else if( tUri.Text.Length == 0 ) {
+                    tDirectUrl.BackColor = SystemColors.Window;
+                    bDirectConnect.Enabled = bSignIn.Enabled;
+                } else if( tDirectUrl.Text.Length == 0 ) {
                     // no URL given
-                    tUri.BackColor = SystemColors.Window;
-                    bGo.Enabled = bSignIn.Enabled;
+                    tDirectUrl.BackColor = SystemColors.Window;
+                    bDirectConnect.Enabled = bSignIn.Enabled;
                 } else {
                     // unrecognized URL given
-                    tUri.BackColor = Color.Yellow;
-                    bGo.Enabled = false;
+                    tDirectUrl.BackColor = Color.Yellow;
+                    bDirectConnect.Enabled = false;
                 }
             }
         }
@@ -295,17 +293,17 @@ namespace ChargedMinersLauncher {
 
                 case LoginResult.MigratedAccount:
                     lSignInStatus.Text = "Migrated account. Use your email to sign in.";
-                    SelectedPanel = panelSignIn;
+                    SelectedPanel = tabs;
                     break;
 
                 case LoginResult.WrongUsernameOrPass:
                     lSignInStatus.Text = "Wrong username or password.";
-                    SelectedPanel = panelSignIn;
+                    SelectedPanel = tabs;
                     break;
 
                 case LoginResult.UnrecognizedResponse:
                     lSignInStatus.Text = "Could not understand minecraft.net response.";
-                    SelectedPanel = panelSignIn;
+                    SelectedPanel = tabs;
                     break;
 
                 case LoginResult.Error:
@@ -315,7 +313,7 @@ namespace ChargedMinersLauncher {
                     } else {
                         lSignInStatus.Text = "An unknown error occurred.";
                     }
-                    SelectedPanel = panelSignIn;
+                    SelectedPanel = tabs;
                     break;
             }
         }
@@ -358,7 +356,8 @@ namespace ChargedMinersLauncher {
 
         volatile bool loginCompleted, updateCheckCompleted, downloadComplete;
 
-        static readonly Regex ChargedMinersLastServer = new Regex( @"^mc\.lastMcUrl:(mc.*)$" );
+        static readonly Regex ChargedMinersLastServer = new Regex( @"^mc\.lastMcUrl:(mc.*)$" ),
+                              ChargedMinersLastServerName = new Regex( @"^mc\.lastClassicServer:(.*)$" );
 
 
         protected override void OnShown( EventArgs e ) {
@@ -371,8 +370,19 @@ namespace ChargedMinersLauncher {
                     foreach( string line in config ) {
                         Match configMatch = ChargedMinersLastServer.Match( line );
                         if( configMatch.Success ) {
-                            tUri.Text = configMatch.Groups[1].Value;
+                            tDirectUrl.Text = configMatch.Groups[1].Value;
+
+                            Match match = PlayLinkDirect.Match( tDirectUrl.Text );
+                            tResumeServerIP.Text = match.Groups[1].Value;
+                            tResumeUsername.Text = match.Groups[7].Value;
+                            tDirectServerIP.Text = match.Groups[1].Value;
+                            tDirectUsername.Text = match.Groups[7].Value;
                             break;
+                        } else {
+                            Match serverNameMatch = ChargedMinersLastServerName.Match( line );
+                            if( serverNameMatch.Success ) {
+                                tResumeServerName.Text = serverNameMatch.Groups[1].Value;
+                            }
                         }
                     }
                 }
@@ -420,7 +430,7 @@ namespace ChargedMinersLauncher {
                         CancelButton = null;
                         lStatus.Text = "";
                         lStatus2.Text = "";
-                        SelectedPanel = panelSignIn;
+                        SelectedPanel = tabs;
                         break;
 
                     case FormState.SigningIn:
@@ -537,9 +547,9 @@ namespace ChargedMinersLauncher {
             toolTip.SetToolTip( tPassword, ToolTipPassword );
             toolTip.SetToolTip( lPassword, ToolTipPassword );
             toolTip.SetToolTip( xRemember, ToolTipRemember );
-            toolTip.SetToolTip( tUri, ToolTipUri );
-            toolTip.SetToolTip( lUri, ToolTipUri );
-            toolTip.SetToolTip( bGo, ToolTipResume );
+            toolTip.SetToolTip( tDirectUrl, ToolTipUri );
+            toolTip.SetToolTip( lDirectUrl, ToolTipUri );
+            toolTip.SetToolTip( bDirectConnect, ToolTipResume );
         }
 
         #endregion
@@ -569,13 +579,13 @@ namespace ChargedMinersLauncher {
             string param;
             if( directConnect ) {
                 // for direct-connect URIs (no session)
-                param = tUri.Text;
+                param = tDirectUrl.Text;
 
             } else if( clickedGo ) {
                 // for minecraft.net URIs
                 param = String.Format( "PLAY_SESSION={0} {1}",
                                        MinecraftNetSession.Instance.PlaySessionCookie,
-                                       tUri.Text );
+                                       tDirectUrl.Text );
             } else {
                 // pass session only
                 param = "PLAY_SESSION=" + MinecraftNetSession.Instance.PlaySessionCookie;
@@ -603,8 +613,14 @@ namespace ChargedMinersLauncher {
             }
         }
 
+
+        // log close reason
         private void MainForm_FormClosed( object sender, FormClosedEventArgs e ) {
             Log( "Closed: " + e.CloseReason );
+        }
+
+
+        private void tabs_SelectedIndexChanged( object sender, EventArgs e ) {
         }
     }
 }
