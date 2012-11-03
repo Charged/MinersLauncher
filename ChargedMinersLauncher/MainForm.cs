@@ -13,10 +13,12 @@ using System.Windows.Forms;
 namespace ChargedMinersLauncher {
     public sealed partial class MainForm : Form {
         public MainForm() {
+            // Start logging
             File.Delete( Paths.LauncherLogPath );
             Log( "---- " + DateTime.Now.ToLongDateString() + " ----" );
-            InitializeComponent();
 
+            // Set up the GUI
+            InitializeComponent();
             SetToolTips();
 
             lSignInStatus.Text = "";
@@ -31,6 +33,8 @@ namespace ChargedMinersLauncher {
 
             binaryDownloader.DownloadProgressChanged += OnDownloadProgress;
             binaryDownloader.DownloadFileCompleted += OnDownloadCompleted;
+
+            Shown += OnShown;
         }
 
 
@@ -339,38 +343,43 @@ namespace ChargedMinersLauncher {
                               ChargedMinersLastServerName = new Regex( @"^mc\.lastClassicServer:(.*)$" );
 
 
-        protected override void OnShown( EventArgs e ) {
-            if( Paths.IsPlatformSupported ) {
-                LoadLoginInfo();
+        void OnShown( object sender, EventArgs e ) {
+            if( !Paths.IsPlatformSupported ) {
+                State = FormState.PlatformNotSupportedError;
+                return;
+            }
 
-                // fill in the Uri field with CM's last-joined server
-                if( File.Exists( Paths.SettingsPath ) ) {
-                    string[] config = File.ReadAllLines( Paths.SettingsPath );
-                    foreach( string line in config ) {
-                        Match configMatch = ChargedMinersLastServer.Match( line );
-                        if( configMatch.Success ) {
-                            tDirectUrl.Text = configMatch.Groups[1].Value;
+            LoadLoginInfo();
 
-                            Match match = PlayLinkDirect.Match( tDirectUrl.Text );
-                            tResumeServerIP.Text = match.Groups[1].Value;
-                            tResumeUsername.Text = match.Groups[7].Value;
-                            tDirectServerIP.Text = match.Groups[1].Value;
-                            tDirectUsername.Text = match.Groups[7].Value;
-                            break;
-                        } else {
-                            Match serverNameMatch = ChargedMinersLastServerName.Match( line );
-                            if( serverNameMatch.Success ) {
-                                tResumeServerName.Text = serverNameMatch.Groups[1].Value;
-                            }
+            // fill in the Uri field with CM's last-joined server
+            if( File.Exists( Paths.SettingsPath ) ) {
+                string[] config = File.ReadAllLines( Paths.SettingsPath );
+                foreach( string line in config ) {
+                    Match configMatch = ChargedMinersLastServer.Match( line );
+                    if( configMatch.Success ) {
+                        tDirectUrl.Text = configMatch.Groups[1].Value;
+
+                        Match match = PlayLinkDirect.Match( tDirectUrl.Text );
+                        tResumeServerIP.Text = match.Groups[1].Value;
+                        tResumeUsername.Text = match.Groups[7].Value;
+                        tDirectServerIP.Text = match.Groups[1].Value;
+                        tDirectUsername.Text = match.Groups[7].Value;
+                        break;
+                    } else {
+                        Match serverNameMatch = ChargedMinersLastServerName.Match( line );
+                        if( serverNameMatch.Success ) {
+                            tResumeServerName.Text = serverNameMatch.Groups[1].Value;
                         }
                     }
                 }
-
-                versionCheckWorker.RunWorkerAsync();
-            } else {
-                State = FormState.PlatformNotSupportedError;
             }
-            base.OnShown( e );
+
+            // To fix compatibility with Lighttpd daemon
+            ServicePointManager.Expect100Continue = false;
+            // To bypass HTTPS certificate validation
+            ServicePointManager.ServerCertificateValidationCallback += delegate { return true; };
+
+            versionCheckWorker.RunWorkerAsync();
         }
 
 
