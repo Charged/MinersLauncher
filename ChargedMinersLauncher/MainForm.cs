@@ -12,31 +12,8 @@ using System.Windows.Forms;
 
 namespace ChargedMinersLauncher {
     public sealed partial class MainForm : Form {
-
-        Control SelectedPanel {
-            get { return selectedPanel; }
-            set {
-                if( value == tabs ) {
-                    panelStatus.Visible = false;
-                    panelUpdatePrompt.Visible = false;
-                    tabs.Visible = true;
-                } else if( value == panelStatus ) {
-                    panelUpdatePrompt.Visible = false;
-                    tabs.Visible = false;
-                    panelStatus.Visible = true;
-                } else {
-                    tabs.Visible = false;
-                    panelStatus.Visible = false;
-                    panelUpdatePrompt.Visible = true;
-                }
-                selectedPanel = value;
-            }
-        }
-
-        Control selectedPanel;
-
-
         public MainForm() {
+            File.Delete( Paths.LauncherLogPath );
             Log( "---- " + DateTime.Now.ToLongDateString() + " ----" );
             InitializeComponent();
 
@@ -275,11 +252,12 @@ namespace ChargedMinersLauncher {
 
 
         void OnSignInCompleted( object sender, RunWorkerCompletedEventArgs e ) {
-            Log( "OnSignInCompleted" );
             if( e.Cancelled ) {
+                Log( "OnSignInCompleted Canceled" );
                 State = FormState.AtSignInForm;
                 return;
             }
+            Log( "OnSignInCompleted " + MinecraftNetSession.Instance.Status );
             switch( MinecraftNetSession.Instance.Status ) {
                 case LoginResult.Success:
                     SaveLoginInfo();
@@ -309,6 +287,7 @@ namespace ChargedMinersLauncher {
                 case LoginResult.Error:
                     Exception ex = MinecraftNetSession.Instance.LoginException;
                     if( ex != null ) {
+                        Log( "LoginException: " + ex );
                         lSignInStatus.Text = "Error: " + ex.Message;
                     } else {
                         lSignInStatus.Text = "An unknown error occurred.";
@@ -492,22 +471,49 @@ namespace ChargedMinersLauncher {
         FormState state;
 
 
+        Control SelectedPanel {
+            get { return selectedPanel; }
+            set {
+                if( value == tabs ) {
+                    panelStatus.Visible = false;
+                    panelUpdatePrompt.Visible = false;
+                    tabs.Visible = true;
+                } else if( value == panelStatus ) {
+                    panelUpdatePrompt.Visible = false;
+                    tabs.Visible = false;
+                    panelStatus.Visible = true;
+                } else {
+                    tabs.Visible = false;
+                    panelStatus.Visible = false;
+                    panelUpdatePrompt.Visible = true;
+                }
+                selectedPanel = value;
+            }
+        }
+
+        Control selectedPanel;
+
+
         void bUpdateYes_Click( object sender, EventArgs e ) {
             if( downloadComplete ) {
+                Log( "[UpdateYes] Applying" );
                 ApplyUpdate();
             } else {
+                Log( "[UpdateYes] Downloading" );
                 State = FormState.DownloadingBinary;
             }
         }
 
 
         void bUpdateNo_Click( object sender, EventArgs e ) {
+            Log( "[UpdateNo]" );
             binaryDownloader.CancelAsync();
             StartChargedMiners();
         }
 
 
         void bCancel_Click( object sender, EventArgs e ) {
+            Log( "[Cancel] " + State );
             switch( State ) {
                 case FormState.SigningIn:
                     signInWorker.CancelAsync();
@@ -602,6 +608,7 @@ namespace ChargedMinersLauncher {
 
         static readonly object LogLock = new object();
 
+
         public static void Log( string message ) {
             lock( LogLock ) {
                 string fullMsg = String.Format( "* {0:HH':'mm':'ss'.'ff} {1}{2}",
@@ -617,10 +624,6 @@ namespace ChargedMinersLauncher {
         // log close reason
         private void MainForm_FormClosed( object sender, FormClosedEventArgs e ) {
             Log( "Closed: " + e.CloseReason );
-        }
-
-
-        private void tabs_SelectedIndexChanged( object sender, EventArgs e ) {
         }
     }
 }
