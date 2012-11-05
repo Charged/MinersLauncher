@@ -156,7 +156,7 @@ namespace ChargedMinersLauncher {
                     canSignIn = false;
                     tSignInUrl.BackColor = Color.Yellow;
                     if( sender == tSignInUrl || lSignInStatus.Text.Length == 0 ) {
-                        lSignInStatus.Text = "Sign-in username does not match URL username.";
+                        lSignInStatus.Text = "Given sign-in username does not match username in direct-connect URL.";
                     }
                 }
 

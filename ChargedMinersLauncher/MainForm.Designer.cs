@@ -151,7 +151,6 @@
             this.tSignInUrl.Name = "tSignInUrl";
             this.tSignInUrl.Size = new System.Drawing.Size(187, 20);
             this.tSignInUrl.TabIndex = 15;
-            this.tSignInUrl.UseSystemPasswordChar = true;
             this.tSignInUrl.TextChanged += new System.EventHandler(this.SignInFieldChanged);
             // 
             // lSignInUrl
