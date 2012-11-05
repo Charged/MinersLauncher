@@ -22,8 +22,10 @@ namespace ChargedMinersLauncher {
             SetToolTips();
 
             lSignInStatus.Text = "";
+            lSaveReminder.Visible = false;
             State = FormState.AtSignInForm;
 
+            // hook up event handlers
             signInWorker.DoWork += SignIn;
             signInWorker.RunWorkerCompleted += OnSignInCompleted;
             signInWorker.WorkerSupportsCancellation = true;
@@ -35,6 +37,55 @@ namespace ChargedMinersLauncher {
             binaryDownloader.DownloadFileCompleted += OnDownloadCompleted;
 
             Shown += OnShown;
+            FormClosed += OnFormClosed;
+
+            // TODO: load launcher settings
+        }
+
+
+        void OnShown( object sender, EventArgs e ) {
+            if( !Paths.IsPlatformSupported ) {
+                State = FormState.PlatformNotSupportedError;
+                return;
+            }
+
+            LoadLoginInfo();
+
+            // fill in the Uri field with CM's last-joined server
+            if( File.Exists( Paths.SettingsPath ) ) {
+                string[] config = File.ReadAllLines( Paths.SettingsPath );
+                foreach( string line in config ) {
+                    Match configMatch = ChargedMinersLastServer.Match( line );
+                    if( configMatch.Success ) {
+                        tDirectUrl.Text = configMatch.Groups[1].Value;
+
+                        Match match = PlayLinkDirect.Match( tDirectUrl.Text );
+                        tResumeServerIP.Text = match.Groups[1].Value;
+                        tResumeUsername.Text = match.Groups[7].Value;
+                        tDirectServerIP.Text = match.Groups[1].Value;
+                        tDirectUsername.Text = match.Groups[7].Value;
+                        break;
+                    } else {
+                        Match serverNameMatch = ChargedMinersLastServerName.Match( line );
+                        if( serverNameMatch.Success ) {
+                            tResumeServerName.Text = serverNameMatch.Groups[1].Value;
+                        }
+                    }
+                }
+            }
+
+            // To fix compatibility with Lighttpd daemon
+            ServicePointManager.Expect100Continue = false;
+            // To bypass HTTPS certificate validation
+            ServicePointManager.ServerCertificateValidationCallback += delegate { return true; };
+
+            versionCheckWorker.RunWorkerAsync();
+        }
+
+
+        // log close reason
+        private void OnFormClosed( object sender, FormClosedEventArgs e ) {
+            Log( "Closed: " + e.CloseReason );
         }
 
 
@@ -178,13 +229,13 @@ namespace ChargedMinersLauncher {
 
         void OnUsernameOrPasswordChanged( object sender, EventArgs e ) {
             bool canSignIn = false;
-            if( UsernameRegex.IsMatch( tUsername.Text ) || EmailRegex.IsMatch( tUsername.Text ) ) {
-                tUsername.BackColor = SystemColors.Window;
+            if( UsernameRegex.IsMatch( tSignInUsername.Text ) || EmailRegex.IsMatch( tSignInUsername.Text ) ) {
+                tSignInUsername.BackColor = SystemColors.Window;
                 canSignIn = true;
             } else {
-                tUsername.BackColor = Color.Yellow;
+                tSignInUsername.BackColor = Color.Yellow;
             }
-            canSignIn |= ( tPassword.Text.Length > 0 );
+            canSignIn |= ( tSignInPassword.Text.Length > 0 );
             bSignIn.Enabled = canSignIn;
             tURL_TextChanged( sender, e );
         }
@@ -218,12 +269,12 @@ namespace ChargedMinersLauncher {
         void bSignIn_Click( object sender, EventArgs e ) {
             directConnect = false;
             string minecraftUsername;
-            if( tUsername.Text == storedLoginUsername ) {
+            if( tSignInUsername.Text == storedLoginUsername ) {
                 minecraftUsername = storedMinecraftUsername;
             } else {
-                minecraftUsername = tUsername.Text;
+                minecraftUsername = tSignInUsername.Text;
             }
-            MinecraftNetSession.Instance = new MinecraftNetSession( tUsername.Text, minecraftUsername, tPassword.Text );
+            MinecraftNetSession.Instance = new MinecraftNetSession( tSignInUsername.Text, minecraftUsername, tSignInPassword.Text );
 
             State = FormState.SigningIn;
             signInWorker.RunWorkerAsync();
@@ -247,7 +298,7 @@ namespace ChargedMinersLauncher {
 
         void SignIn( object sender, DoWorkEventArgs e ) {
             try {
-                MinecraftNetSession.Instance.Login( xRemember.Checked );
+                MinecraftNetSession.Instance.Login( xRememberUsername.Checked );
             } catch( WebException ex ) {
                 MinecraftNetSession.Instance.LoginException = ex;
                 MinecraftNetSession.Instance.Status = LoginResult.Error;
@@ -307,10 +358,10 @@ namespace ChargedMinersLauncher {
                 if( File.Exists( Paths.PasswordSaveFile ) ) {
                     string[] loginData = File.ReadAllLines( Paths.PasswordSaveFile );
                     storedLoginUsername = loginData[0];
-                    tUsername.Text = storedLoginUsername;
-                    tPassword.Text = loginData[1];
+                    tSignInUsername.Text = storedLoginUsername;
+                    tSignInPassword.Text = loginData[1];
                     storedMinecraftUsername = loginData.Length > 2 ? loginData[2] : storedLoginUsername;
-                    xRemember.Checked = true;
+                    xRememberUsername.Checked = true;
                 }
             } catch( Exception ) {
                 lSignInStatus.Text = "Could not load saved login information.";
@@ -319,7 +370,7 @@ namespace ChargedMinersLauncher {
 
 
         void SaveLoginInfo() {
-            if( xRemember.Checked ) {
+            if( xRememberUsername.Checked ) {
                 File.WriteAllLines( Paths.PasswordSaveFile, new[] {
                     MinecraftNetSession.Instance.LoginUsername,
                     MinecraftNetSession.Instance.Password,
@@ -341,46 +392,6 @@ namespace ChargedMinersLauncher {
 
         static readonly Regex ChargedMinersLastServer = new Regex( @"^mc\.lastMcUrl:(mc.*)$" ),
                               ChargedMinersLastServerName = new Regex( @"^mc\.lastClassicServer:(.*)$" );
-
-
-        void OnShown( object sender, EventArgs e ) {
-            if( !Paths.IsPlatformSupported ) {
-                State = FormState.PlatformNotSupportedError;
-                return;
-            }
-
-            LoadLoginInfo();
-
-            // fill in the Uri field with CM's last-joined server
-            if( File.Exists( Paths.SettingsPath ) ) {
-                string[] config = File.ReadAllLines( Paths.SettingsPath );
-                foreach( string line in config ) {
-                    Match configMatch = ChargedMinersLastServer.Match( line );
-                    if( configMatch.Success ) {
-                        tDirectUrl.Text = configMatch.Groups[1].Value;
-
-                        Match match = PlayLinkDirect.Match( tDirectUrl.Text );
-                        tResumeServerIP.Text = match.Groups[1].Value;
-                        tResumeUsername.Text = match.Groups[7].Value;
-                        tDirectServerIP.Text = match.Groups[1].Value;
-                        tDirectUsername.Text = match.Groups[7].Value;
-                        break;
-                    } else {
-                        Match serverNameMatch = ChargedMinersLastServerName.Match( line );
-                        if( serverNameMatch.Success ) {
-                            tResumeServerName.Text = serverNameMatch.Groups[1].Value;
-                        }
-                    }
-                }
-            }
-
-            // To fix compatibility with Lighttpd daemon
-            ServicePointManager.Expect100Continue = false;
-            // To bypass HTTPS certificate validation
-            ServicePointManager.ServerCertificateValidationCallback += delegate { return true; };
-
-            versionCheckWorker.RunWorkerAsync();
-        }
 
 
         void OnSignInAndUpdateCheckCompleted() {
@@ -557,11 +568,11 @@ namespace ChargedMinersLauncher {
 
         void SetToolTips() {
             toolTip = new ToolTip();
-            toolTip.SetToolTip( tUsername, ToolTipUsername );
+            toolTip.SetToolTip( tSignInUsername, ToolTipUsername );
             toolTip.SetToolTip( lUsername, ToolTipUsername );
-            toolTip.SetToolTip( tPassword, ToolTipPassword );
+            toolTip.SetToolTip( tSignInPassword, ToolTipPassword );
             toolTip.SetToolTip( lPassword, ToolTipPassword );
-            toolTip.SetToolTip( xRemember, ToolTipRemember );
+            toolTip.SetToolTip( xRememberUsername, ToolTipRemember );
             toolTip.SetToolTip( tDirectUrl, ToolTipUri );
             toolTip.SetToolTip( lDirectUrl, ToolTipUri );
             toolTip.SetToolTip( bDirectConnect, ToolTipResume );
@@ -627,12 +638,6 @@ namespace ChargedMinersLauncher {
 #endif
                 File.AppendAllText( Paths.LauncherLogPath, fullMsg );
             }
-        }
-
-
-        // log close reason
-        private void MainForm_FormClosed( object sender, FormClosedEventArgs e ) {
-            Log( "Closed: " + e.CloseReason );
         }
     }
 }
