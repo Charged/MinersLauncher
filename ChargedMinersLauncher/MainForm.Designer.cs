@@ -28,7 +28,7 @@
             this.tabs = new System.Windows.Forms.TabControl();
             this.tabSignIn = new System.Windows.Forms.TabPage();
             this.lSignInStatus = new System.Windows.Forms.Label();
-            this.tSignInURL = new System.Windows.Forms.TextBox();
+            this.tSignInUrl = new System.Windows.Forms.TextBox();
             this.lSignInUrl = new System.Windows.Forms.Label();
             this.tSignInUsername = new System.Windows.Forms.TextBox();
             this.tSignInPassword = new System.Windows.Forms.TextBox();
@@ -52,6 +52,8 @@
             this.tDirectUrl = new System.Windows.Forms.TextBox();
             this.lDirectUrl = new System.Windows.Forms.Label();
             this.tabOptions = new System.Windows.Forms.TabPage();
+            this.lSaveReminder = new System.Windows.Forms.Label();
+            this.bOptionsSave = new System.Windows.Forms.Button();
             this.lGameUpdates = new System.Windows.Forms.Label();
             this.cGameUpdates = new System.Windows.Forms.ComboBox();
             this.xRememberServer = new System.Windows.Forms.CheckBox();
@@ -74,8 +76,6 @@
             this.bUpdateNo = new System.Windows.Forms.Button();
             this.bUpdateYes = new System.Windows.Forms.Button();
             this.lUpdatePrompt = new System.Windows.Forms.Label();
-            this.bOptionsSave = new System.Windows.Forms.Button();
-            this.lSaveReminder = new System.Windows.Forms.Label();
             this.flow.SuspendLayout();
             this.tabs.SuspendLayout();
             this.tabSignIn.SuspendLayout();
@@ -116,7 +116,7 @@
             // tabSignIn
             // 
             this.tabSignIn.Controls.Add(this.lSignInStatus);
-            this.tabSignIn.Controls.Add(this.tSignInURL);
+            this.tabSignIn.Controls.Add(this.tSignInUrl);
             this.tabSignIn.Controls.Add(this.lSignInUrl);
             this.tabSignIn.Controls.Add(this.tSignInUsername);
             this.tabSignIn.Controls.Add(this.tSignInPassword);
@@ -143,15 +143,16 @@
             this.lSignInStatus.Text = "SignInStatus";
             this.lSignInStatus.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
-            // tSignInURL
+            // tSignInUrl
             // 
-            this.tSignInURL.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            this.tSignInUrl.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.tSignInURL.Location = new System.Drawing.Point(79, 58);
-            this.tSignInURL.Name = "tSignInURL";
-            this.tSignInURL.Size = new System.Drawing.Size(187, 20);
-            this.tSignInURL.TabIndex = 15;
-            this.tSignInURL.UseSystemPasswordChar = true;
+            this.tSignInUrl.Location = new System.Drawing.Point(79, 58);
+            this.tSignInUrl.Name = "tSignInUrl";
+            this.tSignInUrl.Size = new System.Drawing.Size(187, 20);
+            this.tSignInUrl.TabIndex = 15;
+            this.tSignInUrl.UseSystemPasswordChar = true;
+            this.tSignInUrl.TextChanged += new System.EventHandler(this.SignInFieldChanged);
             // 
             // lSignInUrl
             // 
@@ -171,7 +172,7 @@
             this.tSignInUsername.Name = "tSignInUsername";
             this.tSignInUsername.Size = new System.Drawing.Size(187, 20);
             this.tSignInUsername.TabIndex = 9;
-            this.tSignInUsername.TextChanged += new System.EventHandler(this.OnUsernameOrPasswordChanged);
+            this.tSignInUsername.TextChanged += new System.EventHandler(this.SignInFieldChanged);
             // 
             // tSignInPassword
             // 
@@ -182,7 +183,7 @@
             this.tSignInPassword.Size = new System.Drawing.Size(187, 20);
             this.tSignInPassword.TabIndex = 11;
             this.tSignInPassword.UseSystemPasswordChar = true;
-            this.tSignInPassword.TextChanged += new System.EventHandler(this.OnUsernameOrPasswordChanged);
+            this.tSignInPassword.TextChanged += new System.EventHandler(this.SignInFieldChanged);
             // 
             // lUsername
             // 
@@ -406,6 +407,29 @@
             this.tabOptions.TabIndex = 3;
             this.tabOptions.Text = "Options";
             this.tabOptions.UseVisualStyleBackColor = true;
+            // 
+            // lSaveReminder
+            // 
+            this.lSaveReminder.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.lSaveReminder.ForeColor = System.Drawing.Color.Red;
+            this.lSaveReminder.Location = new System.Drawing.Point(6, 132);
+            this.lSaveReminder.Name = "lSaveReminder";
+            this.lSaveReminder.Size = new System.Drawing.Size(174, 19);
+            this.lSaveReminder.TabIndex = 22;
+            this.lSaveReminder.Text = "Click \"Save\" to apply changes";
+            this.lSaveReminder.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            // 
+            // bOptionsSave
+            // 
+            this.bOptionsSave.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.bOptionsSave.Enabled = false;
+            this.bOptionsSave.Location = new System.Drawing.Point(186, 130);
+            this.bOptionsSave.Name = "bOptionsSave";
+            this.bOptionsSave.Size = new System.Drawing.Size(80, 23);
+            this.bOptionsSave.TabIndex = 21;
+            this.bOptionsSave.Text = "Save";
+            this.bOptionsSave.UseVisualStyleBackColor = true;
             // 
             // lGameUpdates
             // 
@@ -641,29 +665,6 @@
     "t?";
             this.lUpdatePrompt.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
-            // bOptionsSave
-            // 
-            this.bOptionsSave.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.bOptionsSave.Enabled = false;
-            this.bOptionsSave.Location = new System.Drawing.Point(186, 130);
-            this.bOptionsSave.Name = "bOptionsSave";
-            this.bOptionsSave.Size = new System.Drawing.Size(80, 23);
-            this.bOptionsSave.TabIndex = 21;
-            this.bOptionsSave.Text = "Save";
-            this.bOptionsSave.UseVisualStyleBackColor = true;
-            // 
-            // lSaveReminder
-            // 
-            this.lSaveReminder.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.lSaveReminder.ForeColor = System.Drawing.Color.Red;
-            this.lSaveReminder.Location = new System.Drawing.Point(6, 132);
-            this.lSaveReminder.Name = "lSaveReminder";
-            this.lSaveReminder.Size = new System.Drawing.Size(174, 19);
-            this.lSaveReminder.TabIndex = 22;
-            this.lSaveReminder.Text = "Click \"Save\" to apply changes";
-            this.lSaveReminder.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
-            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -732,7 +733,7 @@
         private System.Windows.Forms.TextBox tDirectUrl;
         private System.Windows.Forms.Label lDirectUrl;
         private System.Windows.Forms.TabPage tabOptions;
-        private System.Windows.Forms.TextBox tSignInURL;
+        private System.Windows.Forms.TextBox tSignInUrl;
         private System.Windows.Forms.Label lSignInUrl;
         private System.Windows.Forms.CheckBox xRememberServer;
         private System.Windows.Forms.CheckBox xRememberPassword;

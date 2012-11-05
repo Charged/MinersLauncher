@@ -43,6 +43,8 @@ namespace ChargedMinersLauncher {
         }
 
 
+        #region Startup
+
         void OnShown( object sender, EventArgs e ) {
             if( !Paths.IsPlatformSupported ) {
                 State = FormState.PlatformNotSupportedError;
@@ -74,7 +76,7 @@ namespace ChargedMinersLauncher {
                 }
             }
 
-            // To fix compatibility with Lighttpd daemon
+            // To fix compatibility with Lighttpd when doing HttpWebRequests
             ServicePointManager.Expect100Continue = false;
             // To bypass HTTPS certificate validation
             ServicePointManager.ServerCertificateValidationCallback += delegate { return true; };
@@ -83,13 +85,105 @@ namespace ChargedMinersLauncher {
         }
 
 
+        ToolTip toolTip;
+
+        const string ToolTipUsername = "Your minecraft.net username or email",
+                     ToolTipPassword = "Your minecraft.net password",
+                     ToolTipRemember = "Save your username and password for next time. Note that password is stored in plain text.",
+                     ToolTipUri = "Server's Minecraft.net URL or a DirectConnect (mc://) link. Optional.",
+                     ToolTipResume = "Try to reuse the last-used credentials, to connect to the most-recently-joined server.";
+
+
+        void SetToolTips() {
+            toolTip = new ToolTip();
+            toolTip.SetToolTip( tSignInUsername, ToolTipUsername );
+            toolTip.SetToolTip( lUsername, ToolTipUsername );
+            toolTip.SetToolTip( tSignInPassword, ToolTipPassword );
+            toolTip.SetToolTip( lPassword, ToolTipPassword );
+            toolTip.SetToolTip( xRememberUsername, ToolTipRemember );
+            toolTip.SetToolTip( tDirectUrl, ToolTipUri );
+            toolTip.SetToolTip( lDirectUrl, ToolTipUri );
+            toolTip.SetToolTip( bDirectConnect, ToolTipResume );
+        }
+
+
         // log close reason
         private void OnFormClosed( object sender, FormClosedEventArgs e ) {
             Log( "Closed: " + e.CloseReason );
         }
 
+        #endregion
 
-        #region Check Updates / Download
+
+        LaunchMode launchMode;
+
+        #region UI Event Hooks
+
+        // Sign-In
+        void SignInFieldChanged( object sender, EventArgs e ) {
+            lSignInStatus.Text = "";
+
+            bool canSignIn = false;
+            // check the username field
+            if( UsernameRegex.IsMatch( tSignInUsername.Text ) || EmailRegex.IsMatch( tSignInUsername.Text ) ) {
+                tSignInUsername.BackColor = SystemColors.Window;
+                canSignIn = true;
+            } else {
+                tSignInUsername.BackColor = Color.Yellow;
+                lSignInStatus.Text = "Invalid username/email.";
+            }
+
+            // check the password field
+            if( tSignInPassword.Text.Length == 0 ) {
+                canSignIn = false;
+                tSignInPassword.BackColor = Color.Yellow;
+                if( sender == tSignInPassword || lSignInStatus.Text.Length == 0 ) {
+                    lSignInStatus.Text = "Password is required.";
+                }
+            } else {
+                tSignInPassword.BackColor = SystemColors.Window;
+            }
+
+            // check the URL field
+            Match match = PlayLinkDirect.Match( tSignInUrl.Text );
+            tResumeServerIP.Text = match.Groups[1].Value;
+            tResumeUsername.Text = match.Groups[7].Value;
+            if( match.Success ) {
+                // "mc://" url
+                if( match.Groups[7].Value.Equals( tSignInUsername.Text, StringComparison.OrdinalIgnoreCase ) ) {
+                    tSignInUrl.BackColor = SystemColors.Window;
+                } else {
+                    canSignIn = false;
+                    tSignInUrl.BackColor = Color.Yellow;
+                    if( sender == tSignInUrl || lSignInStatus.Text.Length == 0 ) {
+                        lSignInStatus.Text = "Sign-in username does not match URL username.";
+                    }
+                }
+
+            } else if( PlayLinkHash.IsMatch( tSignInUrl.Text ) || PlayLinkIPPort.IsMatch( tSignInUrl.Text ) ) {
+                // minecraft.net play link
+                tSignInUrl.BackColor = SystemColors.Window;
+
+            } else if( tSignInUrl.Text.Length == 0 ) {
+                // no URL given
+                tSignInUrl.BackColor = SystemColors.Window;
+
+            } else {
+                // unrecognized URL given
+                tSignInUrl.BackColor = Color.Yellow;
+                if( sender == tSignInUrl || lSignInStatus.Text.Length == 0 ) {
+                    lSignInStatus.Text = "Unrecognized URL";
+                }
+                canSignIn = false;
+            }
+
+            bSignIn.Enabled = canSignIn;
+        }
+
+        #endregion
+
+
+        #region Update Check / Update Download
 
         readonly BackgroundWorker versionCheckWorker = new BackgroundWorker();
         string localHashString;
@@ -97,40 +191,43 @@ namespace ChargedMinersLauncher {
         readonly WebClient binaryDownloader = new WebClient();
         VersionInfo latestVersion;
 
-
         void CheckUpdates( object sender, DoWorkEventArgs e ) {
-            Log( "CheckUpdates" );
-            VersionsTxt versionList;
+            try {
+                Log( "CheckUpdates" );
+                VersionsTxt versionList;
 
-            // download and parse version.txt
-            using( WebClient updateCheckDownloader = new WebClient() ) {
-                string versions = updateCheckDownloader.DownloadString( UpdateUri + "version.txt" );
-                versionList = new VersionsTxt( versions.Split( '\n' ) );
+                // download and parse version.txt
+                using( WebClient updateCheckDownloader = new WebClient() ) {
+                    string versions = updateCheckDownloader.DownloadString( UpdateUri + "version.txt" );
+                    versionList = new VersionsTxt( versions.Split( '\n' ) );
+                }
+
+                // check if primary binary download is available
+                latestVersion = versionList.Get( Paths.PrimaryBinary );
+                if( latestVersion != null ) {
+                    // check if local primary binary exists
+                    if( File.Exists( Paths.PrimaryBinary ) ) {
+                        localHashString = ComputeLocalHash( Paths.PrimaryBinary );
+                    } // else download primary binary
+                    return;
+                }
+
+                // no alternative available, fail
+                if( Paths.AlternativeBinary == null ) return;
+
+                // check if alternative binary download is available
+                latestVersion = versionList.Get( Paths.AlternativeBinary );
+
+                // if not, fail
+                if( latestVersion == null ) return;
+
+                // check if local alt binary exists
+                if( File.Exists( Paths.AlternativeBinary ) ) {
+                    localHashString = ComputeLocalHash( Paths.AlternativeBinary );
+                } // else download alt binary
+            } catch( Exception ex ) {
+                Log( "CheckUpdates ERROR: " + ex );
             }
-
-            // check if primary binary download is available
-            latestVersion = versionList.Get( Paths.PrimaryBinary );
-            if( latestVersion != null ) {
-                // check if local primary binary exists
-                if( File.Exists( Paths.PrimaryBinary ) ) {
-                    localHashString = ComputeLocalHash( Paths.PrimaryBinary );
-                } // else download primary binary
-                return;
-            }
-
-            // no alternative available, fail
-            if( Paths.AlternativeBinary == null ) return;
-
-            // check if alternative binary download is available
-            latestVersion = versionList.Get( Paths.AlternativeBinary );
-
-            // if not, fail
-            if( latestVersion == null ) return;
-
-            // check if local alt binary exists
-            if( File.Exists( Paths.AlternativeBinary ) ) {
-                localHashString = ComputeLocalHash( Paths.AlternativeBinary );
-            } // else download alt binary
         }
 
 
@@ -225,20 +322,6 @@ namespace ChargedMinersLauncher {
                 new Regex( @"^mc://(((\d{1,3}\.){3}\d{1,3}|([a-zA-Z0-9\-]+\.)+([a-zA-Z0-9\-]+))(:\d{1,5})?)/([a-zA-Z0-9_\.]{2,16})/(.*)$" ),
             PlayLinkIPPort =
                 new Regex( @"^http://(www\.)?minecraft.net/classic/play/?\?ip=(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})&port=(\d{1,5})$" );
-
-
-        void OnUsernameOrPasswordChanged( object sender, EventArgs e ) {
-            bool canSignIn = false;
-            if( UsernameRegex.IsMatch( tSignInUsername.Text ) || EmailRegex.IsMatch( tSignInUsername.Text ) ) {
-                tSignInUsername.BackColor = SystemColors.Window;
-                canSignIn = true;
-            } else {
-                tSignInUsername.BackColor = Color.Yellow;
-            }
-            canSignIn |= ( tSignInPassword.Text.Length > 0 );
-            bSignIn.Enabled = canSignIn;
-            tURL_TextChanged( sender, e );
-        }
 
 
         void tURL_TextChanged( object sender, EventArgs e ) {
@@ -553,34 +636,6 @@ namespace ChargedMinersLauncher {
         #endregion
 
 
-        #region ToolTips
-
-        ToolTip toolTip;
-
-        const string ToolTipUsername = "Your minecraft.net username or email",
-                     ToolTipPassword = "Your minecraft.net password",
-                     ToolTipRemember =
-                         "Save your username and password for next time. Note that password is stored in plain text.",
-                     ToolTipUri = "Server's Minecraft.net URL or a DirectConnect (mc://) link. Optional.",
-                     ToolTipResume =
-                         "Try to reuse the last-used credentials, to connect to the most-recently-joined server.";
-
-
-        void SetToolTips() {
-            toolTip = new ToolTip();
-            toolTip.SetToolTip( tSignInUsername, ToolTipUsername );
-            toolTip.SetToolTip( lUsername, ToolTipUsername );
-            toolTip.SetToolTip( tSignInPassword, ToolTipPassword );
-            toolTip.SetToolTip( lPassword, ToolTipPassword );
-            toolTip.SetToolTip( xRememberUsername, ToolTipRemember );
-            toolTip.SetToolTip( tDirectUrl, ToolTipUri );
-            toolTip.SetToolTip( lDirectUrl, ToolTipUri );
-            toolTip.SetToolTip( bDirectConnect, ToolTipResume );
-        }
-
-        #endregion
-
-
         void StartChargedMiners() {
             lStatus.Text = "Launching Charged-Miners...";
             bCancel.Visible = false;
@@ -639,5 +694,14 @@ namespace ChargedMinersLauncher {
                 File.AppendAllText( Paths.LauncherLogPath, fullMsg );
             }
         }
+    }
+
+
+    enum LaunchMode {
+        SignIn,
+        SignInWithUri,
+        SignInWithDirectUri,
+        Resume,
+        Direct
     }
 }
