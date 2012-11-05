@@ -36,6 +36,8 @@
             this.lPassword = new System.Windows.Forms.Label();
             this.bSignIn = new System.Windows.Forms.Button();
             this.tabResume = new System.Windows.Forms.TabPage();
+            this.tResumeUri = new System.Windows.Forms.TextBox();
+            this.lResumeUri = new System.Windows.Forms.Label();
             this.bResume = new System.Windows.Forms.Button();
             this.tResumeServerName = new System.Windows.Forms.TextBox();
             this.lResumeServerName = new System.Windows.Forms.Label();
@@ -44,6 +46,7 @@
             this.lResumeServerIP = new System.Windows.Forms.Label();
             this.lResumeUsername = new System.Windows.Forms.Label();
             this.tabDirect = new System.Windows.Forms.TabPage();
+            this.lDirectStatus = new System.Windows.Forms.Label();
             this.tDirectServerIP = new System.Windows.Forms.TextBox();
             this.tDirectUsername = new System.Windows.Forms.TextBox();
             this.lDirectServerIP = new System.Windows.Forms.Label();
@@ -76,9 +79,6 @@
             this.bUpdateNo = new System.Windows.Forms.Button();
             this.bUpdateYes = new System.Windows.Forms.Button();
             this.lUpdatePrompt = new System.Windows.Forms.Label();
-            this.tResumeUri = new System.Windows.Forms.TextBox();
-            this.lResumeUri = new System.Windows.Forms.Label();
-            this.lDirectStatus = new System.Windows.Forms.Label();
             this.flow.SuspendLayout();
             this.tabs.SuspendLayout();
             this.tabSignIn.SuspendLayout();
@@ -236,6 +236,26 @@
             this.tabResume.Text = "Resume";
             this.tabResume.UseVisualStyleBackColor = true;
             // 
+            // tResumeUri
+            // 
+            this.tResumeUri.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.tResumeUri.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            this.tResumeUri.Location = new System.Drawing.Point(79, 9);
+            this.tResumeUri.Name = "tResumeUri";
+            this.tResumeUri.ReadOnly = true;
+            this.tResumeUri.Size = new System.Drawing.Size(187, 13);
+            this.tResumeUri.TabIndex = 33;
+            // 
+            // lResumeUri
+            // 
+            this.lResumeUri.AutoSize = true;
+            this.lResumeUri.Location = new System.Drawing.Point(13, 9);
+            this.lResumeUri.Name = "lResumeUri";
+            this.lResumeUri.Size = new System.Drawing.Size(60, 13);
+            this.lResumeUri.TabIndex = 32;
+            this.lResumeUri.Text = "Direct URL";
+            // 
             // bResume
             // 
             this.bResume.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
@@ -272,7 +292,7 @@
             this.tResumeServerIP.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.tResumeServerIP.BorderStyle = System.Windows.Forms.BorderStyle.None;
-            this.tResumeServerIP.Location = new System.Drawing.Point(79, 38);
+            this.tResumeServerIP.Location = new System.Drawing.Point(79, 35);
             this.tResumeServerIP.Name = "tResumeServerIP";
             this.tResumeServerIP.ReadOnly = true;
             this.tResumeServerIP.Size = new System.Drawing.Size(187, 13);
@@ -283,7 +303,7 @@
             this.tResumeUsername.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.tResumeUsername.BorderStyle = System.Windows.Forms.BorderStyle.None;
-            this.tResumeUsername.Location = new System.Drawing.Point(79, 64);
+            this.tResumeUsername.Location = new System.Drawing.Point(79, 61);
             this.tResumeUsername.Name = "tResumeUsername";
             this.tResumeUsername.ReadOnly = true;
             this.tResumeUsername.Size = new System.Drawing.Size(187, 13);
@@ -293,7 +313,7 @@
             // lResumeServerIP
             // 
             this.lResumeServerIP.AutoSize = true;
-            this.lResumeServerIP.Location = new System.Drawing.Point(22, 38);
+            this.lResumeServerIP.Location = new System.Drawing.Point(22, 35);
             this.lResumeServerIP.Name = "lResumeServerIP";
             this.lResumeServerIP.Size = new System.Drawing.Size(51, 13);
             this.lResumeServerIP.TabIndex = 26;
@@ -302,7 +322,7 @@
             // lResumeUsername
             // 
             this.lResumeUsername.AutoSize = true;
-            this.lResumeUsername.Location = new System.Drawing.Point(18, 64);
+            this.lResumeUsername.Location = new System.Drawing.Point(18, 61);
             this.lResumeUsername.Name = "lResumeUsername";
             this.lResumeUsername.Size = new System.Drawing.Size(55, 13);
             this.lResumeUsername.TabIndex = 25;
@@ -325,6 +345,18 @@
             this.tabDirect.TabIndex = 2;
             this.tabDirect.Text = "Direct";
             this.tabDirect.UseVisualStyleBackColor = true;
+            // 
+            // lDirectStatus
+            // 
+            this.lDirectStatus.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.lDirectStatus.ForeColor = System.Drawing.Color.Red;
+            this.lDirectStatus.Location = new System.Drawing.Point(6, 81);
+            this.lDirectStatus.Name = "lDirectStatus";
+            this.lDirectStatus.Size = new System.Drawing.Size(260, 45);
+            this.lDirectStatus.TabIndex = 25;
+            this.lDirectStatus.Text = "lDirectStatus";
+            this.lDirectStatus.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
             // tDirectServerIP
             // 
@@ -672,38 +704,6 @@
             this.lUpdatePrompt.Text = "An update for ChargedMiners is available.\r\nWould you like to download and apply i" +
     "t?";
             this.lUpdatePrompt.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
-            // 
-            // tResumeUri
-            // 
-            this.tResumeUri.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.tResumeUri.BorderStyle = System.Windows.Forms.BorderStyle.None;
-            this.tResumeUri.Location = new System.Drawing.Point(79, 9);
-            this.tResumeUri.Name = "tResumeUri";
-            this.tResumeUri.ReadOnly = true;
-            this.tResumeUri.Size = new System.Drawing.Size(187, 13);
-            this.tResumeUri.TabIndex = 33;
-            // 
-            // lResumeUri
-            // 
-            this.lResumeUri.AutoSize = true;
-            this.lResumeUri.Location = new System.Drawing.Point(13, 9);
-            this.lResumeUri.Name = "lResumeUri";
-            this.lResumeUri.Size = new System.Drawing.Size(60, 13);
-            this.lResumeUri.TabIndex = 32;
-            this.lResumeUri.Text = "Direct URL";
-            // 
-            // lDirectStatus
-            // 
-            this.lDirectStatus.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.lDirectStatus.ForeColor = System.Drawing.Color.Red;
-            this.lDirectStatus.Location = new System.Drawing.Point(6, 81);
-            this.lDirectStatus.Name = "lDirectStatus";
-            this.lDirectStatus.Size = new System.Drawing.Size(260, 45);
-            this.lDirectStatus.TabIndex = 25;
-            this.lDirectStatus.Text = "lDirectStatus";
-            this.lDirectStatus.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
             // MainForm
             // 
