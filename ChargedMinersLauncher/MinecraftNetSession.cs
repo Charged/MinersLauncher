@@ -8,8 +8,6 @@ using System.Text.RegularExpressions;
 
 namespace ChargedMinersLauncher {
     sealed class MinecraftNetSession {
-        public static MinecraftNetSession Instance { get; set; }
-
         const string MinecraftNet = "http://minecraft.net/",
                      LoginSecureUri = "https://minecraft.net/login";
 

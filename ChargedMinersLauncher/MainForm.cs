@@ -21,7 +21,6 @@ namespace ChargedMinersLauncher {
             InitializeComponent();
             SetToolTips();
 
-            lSignInStatus.Text = "";
             lSaveReminder.Visible = false;
             State = FormState.AtSignInForm;
 
@@ -53,19 +52,20 @@ namespace ChargedMinersLauncher {
 
             LoadLoginInfo();
 
+            // trigger input validation
+            SignInFieldChanged( tSignInUsername, EventArgs.Empty );
+            tDirectUrl_TextChanged( tDirectUrl, EventArgs.Empty );
+
             // fill in the Uri field with CM's last-joined server
             if( File.Exists( Paths.SettingsPath ) ) {
                 string[] config = File.ReadAllLines( Paths.SettingsPath );
                 foreach( string line in config ) {
                     Match configMatch = ChargedMinersLastServer.Match( line );
                     if( configMatch.Success ) {
-                        tDirectUrl.Text = configMatch.Groups[1].Value;
-
-                        Match match = PlayLinkDirect.Match( tDirectUrl.Text );
+                        tResumeUri.Text = configMatch.Groups[1].Value;
+                        Match match = PlayLinkDirect.Match( tResumeUri.Text );
                         tResumeServerIP.Text = match.Groups[1].Value;
                         tResumeUsername.Text = match.Groups[7].Value;
-                        tDirectServerIP.Text = match.Groups[1].Value;
-                        tDirectUsername.Text = match.Groups[7].Value;
                         break;
                     } else {
                         Match serverNameMatch = ChargedMinersLastServerName.Match( line );
@@ -115,11 +115,10 @@ namespace ChargedMinersLauncher {
         #endregion
 
 
-        LaunchMode launchMode;
-
         #region UI Event Hooks
 
-        // Sign-In
+        MinecraftNetSession signInSession;
+
         void SignInFieldChanged( object sender, EventArgs e ) {
             lSignInStatus.Text = "";
 
@@ -146,12 +145,11 @@ namespace ChargedMinersLauncher {
 
             // check the URL field
             Match match = PlayLinkDirect.Match( tSignInUrl.Text );
-            tResumeServerIP.Text = match.Groups[1].Value;
-            tResumeUsername.Text = match.Groups[7].Value;
             if( match.Success ) {
                 // "mc://" url
                 if( match.Groups[7].Value.Equals( tSignInUsername.Text, StringComparison.OrdinalIgnoreCase ) ) {
                     tSignInUrl.BackColor = SystemColors.Window;
+                    launchMode = LaunchMode.SignInWithDirectUri;
                 } else {
                     canSignIn = false;
                     tSignInUrl.BackColor = Color.Yellow;
@@ -162,10 +160,12 @@ namespace ChargedMinersLauncher {
 
             } else if( PlayLinkHash.IsMatch( tSignInUrl.Text ) || PlayLinkIPPort.IsMatch( tSignInUrl.Text ) ) {
                 // minecraft.net play link
+                launchMode = LaunchMode.SignInWithUri;
                 tSignInUrl.BackColor = SystemColors.Window;
 
             } else if( tSignInUrl.Text.Length == 0 ) {
                 // no URL given
+                launchMode = LaunchMode.SignIn;
                 tSignInUrl.BackColor = SystemColors.Window;
 
             } else {
@@ -178,6 +178,62 @@ namespace ChargedMinersLauncher {
             }
 
             bSignIn.Enabled = canSignIn;
+        }
+
+
+        void bSignIn_Click( object sender, EventArgs e ) {
+            string minecraftUsername;
+            if( tSignInUsername.Text == storedLoginUsername ) {
+                minecraftUsername = storedMinecraftUsername;
+            } else {
+                minecraftUsername = tSignInUsername.Text;
+            }
+            signInSession = new MinecraftNetSession( tSignInUsername.Text, minecraftUsername, tSignInPassword.Text );
+
+            State = FormState.SigningIn;
+            signInWorker.RunWorkerAsync();
+        }
+
+
+        private void bResume_Click( object sender, EventArgs e ) {
+            launchMode = LaunchMode.Resume;
+            loginCompleted = true;
+            if( updateCheckCompleted ) {
+                OnSignInAndUpdateCheckCompleted();
+            } else {
+                State = FormState.WaitingForUpdater;
+            }
+        }
+
+
+        private void tDirectUrl_TextChanged( object sender, EventArgs e ) {
+            // check the URL field
+            Match match = PlayLinkDirect.Match( tDirectUrl.Text );
+            if( match.Success ) {
+                // "mc://" url
+                tDirectServerIP.Text = match.Groups[1].Value;
+                tDirectUsername.Text = match.Groups[7].Value;
+                tDirectUrl.BackColor = SystemColors.Window;
+                launchMode = LaunchMode.Direct;
+                lDirectStatus.Text = "";
+                bResume.Enabled = true;
+
+            } else {
+                tDirectServerIP.Text = "?";
+                tDirectUsername.Text = "?";
+                tDirectUrl.BackColor = Color.Yellow;
+                bResume.Enabled = false;
+                if( PlayLinkHash.IsMatch( tDirectUrl.Text ) || PlayLinkIPPort.IsMatch( tDirectUrl.Text ) ) {
+                    // minecraft.net play link
+                    lDirectStatus.Text = "You must sign in to connect to servers via minecraft.net links.";
+                } else if( tDirectUrl.Text.Length == 0 ) {
+                    // no URL given
+                    lDirectStatus.Text = "Provide a direct-connect (mc://) URL.";
+                } else {
+                    // unrecognized URL given
+                    lDirectStatus.Text = "Unrecognized URL.";
+                }
+            }
         }
 
         #endregion
@@ -303,6 +359,8 @@ namespace ChargedMinersLauncher {
 
         #region Sign-In
 
+        LaunchMode launchMode;
+
         bool directConnect,
              clickedGo;
 
@@ -319,72 +377,17 @@ namespace ChargedMinersLauncher {
             PlayLinkHash =
                 new Regex( @"^http://(www\.)?minecraft.net/classic/play/([0-9a-fA-F]{28,32})/?(\?override=(true|1))?$" ),
             PlayLinkDirect =
-                new Regex( @"^mc://(((\d{1,3}\.){3}\d{1,3}|([a-zA-Z0-9\-]+\.)+([a-zA-Z0-9\-]+))(:\d{1,5})?)/([a-zA-Z0-9_\.]{2,16})/(.*)$" ),
+                new Regex( @"^mc://((localhost|(\d{1,3}\.){3}\d{1,3}|([a-zA-Z0-9\-]+\.)+([a-zA-Z0-9\-]+))(:\d{1,5})?)/([a-zA-Z0-9_\.]{2,16})/(.*)$" ),
             PlayLinkIPPort =
                 new Regex( @"^http://(www\.)?minecraft.net/classic/play/?\?ip=(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})&port=(\d{1,5})$" );
 
 
-        void tURL_TextChanged( object sender, EventArgs e ) {
-            if( PlayLinkDirect.IsMatch( tDirectUrl.Text ) ) {
-                // "mc://" url
-                tDirectUrl.BackColor = SystemColors.Window;
-                bDirectConnect.Enabled = true;
-                directConnect = true;
-            } else {
-                directConnect = false;
-                if( PlayLinkHash.IsMatch( tDirectUrl.Text ) || PlayLinkIPPort.IsMatch( tDirectUrl.Text ) ) {
-                    // minecraft.net play link
-                    tDirectUrl.BackColor = SystemColors.Window;
-                    bDirectConnect.Enabled = bSignIn.Enabled;
-                } else if( tDirectUrl.Text.Length == 0 ) {
-                    // no URL given
-                    tDirectUrl.BackColor = SystemColors.Window;
-                    bDirectConnect.Enabled = bSignIn.Enabled;
-                } else {
-                    // unrecognized URL given
-                    tDirectUrl.BackColor = Color.Yellow;
-                    bDirectConnect.Enabled = false;
-                }
-            }
-        }
-
-
-        void bSignIn_Click( object sender, EventArgs e ) {
-            directConnect = false;
-            string minecraftUsername;
-            if( tSignInUsername.Text == storedLoginUsername ) {
-                minecraftUsername = storedMinecraftUsername;
-            } else {
-                minecraftUsername = tSignInUsername.Text;
-            }
-            MinecraftNetSession.Instance = new MinecraftNetSession( tSignInUsername.Text, minecraftUsername, tSignInPassword.Text );
-
-            State = FormState.SigningIn;
-            signInWorker.RunWorkerAsync();
-        }
-
-
-        void bGo_Click( object sender, EventArgs e ) {
-            clickedGo = true;
-            if( directConnect ) {
-                loginCompleted = true;
-                if( updateCheckCompleted ) {
-                    OnSignInAndUpdateCheckCompleted();
-                } else {
-                    State = FormState.WaitingForUpdater;
-                }
-            } else {
-                bSignIn_Click( sender, e );
-            }
-        }
-
-
         void SignIn( object sender, DoWorkEventArgs e ) {
             try {
-                MinecraftNetSession.Instance.Login( xRememberUsername.Checked );
+                signInSession.Login( xRememberUsername.Checked );
             } catch( WebException ex ) {
-                MinecraftNetSession.Instance.LoginException = ex;
-                MinecraftNetSession.Instance.Status = LoginResult.Error;
+                signInSession.LoginException = ex;
+                signInSession.Status = LoginResult.Error;
             }
         }
 
@@ -395,8 +398,8 @@ namespace ChargedMinersLauncher {
                 State = FormState.AtSignInForm;
                 return;
             }
-            Log( "OnSignInCompleted " + MinecraftNetSession.Instance.Status );
-            switch( MinecraftNetSession.Instance.Status ) {
+            Log( "OnSignInCompleted " + signInSession.Status );
+            switch( signInSession.Status ) {
                 case LoginResult.Success:
                     SaveLoginInfo();
                     loginCompleted = true;
@@ -423,7 +426,7 @@ namespace ChargedMinersLauncher {
                     break;
 
                 case LoginResult.Error:
-                    Exception ex = MinecraftNetSession.Instance.LoginException;
+                    Exception ex = signInSession.LoginException;
                     if( ex != null ) {
                         Log( "LoginException: " + ex );
                         lSignInStatus.Text = "Error: " + ex.Message;
@@ -455,9 +458,9 @@ namespace ChargedMinersLauncher {
         void SaveLoginInfo() {
             if( xRememberUsername.Checked ) {
                 File.WriteAllLines( Paths.PasswordSaveFile, new[] {
-                    MinecraftNetSession.Instance.LoginUsername,
-                    MinecraftNetSession.Instance.Password,
-                    MinecraftNetSession.Instance.MinercraftUsername
+                    signInSession.LoginUsername,
+                    signInSession.Password,
+                    signInSession.MinercraftUsername
                 } );
             } else {
                 if( File.Exists( Paths.PasswordSaveFile ) ) {
@@ -520,7 +523,7 @@ namespace ChargedMinersLauncher {
                         CancelButton = bCancel;
                         lSignInStatus.Text = "";
                         lStatus.Text = String.Format( "Signing in as {0}...",
-                                                      MinecraftNetSession.Instance.LoginUsername );
+                                                      signInSession.LoginUsername );
                         lStatus2.Text = "";
                         pbSigningIn.Style = ProgressBarStyle.Marquee;
                         bCancel.Text = "Cancel";
@@ -665,11 +668,11 @@ namespace ChargedMinersLauncher {
             } else if( clickedGo ) {
                 // for minecraft.net URIs
                 param = String.Format( "PLAY_SESSION={0} {1}",
-                                       MinecraftNetSession.Instance.PlaySessionCookie,
+                                       signInSession.PlaySessionCookie,
                                        tDirectUrl.Text );
             } else {
                 // pass session only
-                param = "PLAY_SESSION=" + MinecraftNetSession.Instance.PlaySessionCookie;
+                param = "PLAY_SESSION=" + signInSession.PlaySessionCookie;
             }
 
             if( RuntimeInfo.IsWindows ) {

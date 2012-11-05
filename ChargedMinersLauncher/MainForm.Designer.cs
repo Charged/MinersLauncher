@@ -76,6 +76,9 @@
             this.bUpdateNo = new System.Windows.Forms.Button();
             this.bUpdateYes = new System.Windows.Forms.Button();
             this.lUpdatePrompt = new System.Windows.Forms.Label();
+            this.tResumeUri = new System.Windows.Forms.TextBox();
+            this.lResumeUri = new System.Windows.Forms.Label();
+            this.lDirectStatus = new System.Windows.Forms.Label();
             this.flow.SuspendLayout();
             this.tabs.SuspendLayout();
             this.tabSignIn.SuspendLayout();
@@ -140,7 +143,7 @@
             this.lSignInStatus.Name = "lSignInStatus";
             this.lSignInStatus.Size = new System.Drawing.Size(260, 40);
             this.lSignInStatus.TabIndex = 14;
-            this.lSignInStatus.Text = "SignInStatus";
+            this.lSignInStatus.Text = "lSignInStatus";
             this.lSignInStatus.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
             // tSignInUrl
@@ -216,6 +219,8 @@
             // 
             // tabResume
             // 
+            this.tabResume.Controls.Add(this.tResumeUri);
+            this.tabResume.Controls.Add(this.lResumeUri);
             this.tabResume.Controls.Add(this.bResume);
             this.tabResume.Controls.Add(this.tResumeServerName);
             this.tabResume.Controls.Add(this.lResumeServerName);
@@ -240,13 +245,14 @@
             this.bResume.TabIndex = 31;
             this.bResume.Text = "Reconnect";
             this.bResume.UseVisualStyleBackColor = true;
+            this.bResume.Click += new System.EventHandler(this.bResume_Click);
             // 
             // tResumeServerName
             // 
             this.tResumeServerName.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.tResumeServerName.BorderStyle = System.Windows.Forms.BorderStyle.None;
-            this.tResumeServerName.Location = new System.Drawing.Point(79, 61);
+            this.tResumeServerName.Location = new System.Drawing.Point(79, 87);
             this.tResumeServerName.Name = "tResumeServerName";
             this.tResumeServerName.ReadOnly = true;
             this.tResumeServerName.Size = new System.Drawing.Size(187, 13);
@@ -255,7 +261,7 @@
             // lResumeServerName
             // 
             this.lResumeServerName.AutoSize = true;
-            this.lResumeServerName.Location = new System.Drawing.Point(6, 61);
+            this.lResumeServerName.Location = new System.Drawing.Point(6, 87);
             this.lResumeServerName.Name = "lResumeServerName";
             this.lResumeServerName.Size = new System.Drawing.Size(67, 13);
             this.lResumeServerName.TabIndex = 29;
@@ -266,7 +272,7 @@
             this.tResumeServerIP.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.tResumeServerIP.BorderStyle = System.Windows.Forms.BorderStyle.None;
-            this.tResumeServerIP.Location = new System.Drawing.Point(79, 35);
+            this.tResumeServerIP.Location = new System.Drawing.Point(79, 38);
             this.tResumeServerIP.Name = "tResumeServerIP";
             this.tResumeServerIP.ReadOnly = true;
             this.tResumeServerIP.Size = new System.Drawing.Size(187, 13);
@@ -277,16 +283,17 @@
             this.tResumeUsername.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.tResumeUsername.BorderStyle = System.Windows.Forms.BorderStyle.None;
-            this.tResumeUsername.Location = new System.Drawing.Point(79, 9);
+            this.tResumeUsername.Location = new System.Drawing.Point(79, 64);
             this.tResumeUsername.Name = "tResumeUsername";
             this.tResumeUsername.ReadOnly = true;
             this.tResumeUsername.Size = new System.Drawing.Size(187, 13);
             this.tResumeUsername.TabIndex = 27;
+            this.tResumeUsername.Text = " ";
             // 
             // lResumeServerIP
             // 
             this.lResumeServerIP.AutoSize = true;
-            this.lResumeServerIP.Location = new System.Drawing.Point(22, 35);
+            this.lResumeServerIP.Location = new System.Drawing.Point(22, 38);
             this.lResumeServerIP.Name = "lResumeServerIP";
             this.lResumeServerIP.Size = new System.Drawing.Size(51, 13);
             this.lResumeServerIP.TabIndex = 26;
@@ -295,7 +302,7 @@
             // lResumeUsername
             // 
             this.lResumeUsername.AutoSize = true;
-            this.lResumeUsername.Location = new System.Drawing.Point(18, 9);
+            this.lResumeUsername.Location = new System.Drawing.Point(18, 64);
             this.lResumeUsername.Name = "lResumeUsername";
             this.lResumeUsername.Size = new System.Drawing.Size(55, 13);
             this.lResumeUsername.TabIndex = 25;
@@ -303,6 +310,7 @@
             // 
             // tabDirect
             // 
+            this.tabDirect.Controls.Add(this.lDirectStatus);
             this.tabDirect.Controls.Add(this.tDirectServerIP);
             this.tabDirect.Controls.Add(this.tDirectUsername);
             this.tabDirect.Controls.Add(this.lDirectServerIP);
@@ -323,7 +331,7 @@
             this.tDirectServerIP.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.tDirectServerIP.BorderStyle = System.Windows.Forms.BorderStyle.None;
-            this.tDirectServerIP.Location = new System.Drawing.Point(79, 61);
+            this.tDirectServerIP.Location = new System.Drawing.Point(79, 35);
             this.tDirectServerIP.Name = "tDirectServerIP";
             this.tDirectServerIP.ReadOnly = true;
             this.tDirectServerIP.Size = new System.Drawing.Size(187, 13);
@@ -334,7 +342,7 @@
             this.tDirectUsername.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.tDirectUsername.BorderStyle = System.Windows.Forms.BorderStyle.None;
-            this.tDirectUsername.Location = new System.Drawing.Point(79, 35);
+            this.tDirectUsername.Location = new System.Drawing.Point(79, 61);
             this.tDirectUsername.Name = "tDirectUsername";
             this.tDirectUsername.ReadOnly = true;
             this.tDirectUsername.Size = new System.Drawing.Size(187, 13);
@@ -343,7 +351,7 @@
             // lDirectServerIP
             // 
             this.lDirectServerIP.AutoSize = true;
-            this.lDirectServerIP.Location = new System.Drawing.Point(22, 61);
+            this.lDirectServerIP.Location = new System.Drawing.Point(22, 35);
             this.lDirectServerIP.Name = "lDirectServerIP";
             this.lDirectServerIP.Size = new System.Drawing.Size(51, 13);
             this.lDirectServerIP.TabIndex = 22;
@@ -352,7 +360,7 @@
             // lDirectUsername
             // 
             this.lDirectUsername.AutoSize = true;
-            this.lDirectUsername.Location = new System.Drawing.Point(18, 35);
+            this.lDirectUsername.Location = new System.Drawing.Point(18, 61);
             this.lDirectUsername.Name = "lDirectUsername";
             this.lDirectUsername.Size = new System.Drawing.Size(55, 13);
             this.lDirectUsername.TabIndex = 21;
@@ -377,15 +385,16 @@
             this.tDirectUrl.Name = "tDirectUrl";
             this.tDirectUrl.Size = new System.Drawing.Size(187, 20);
             this.tDirectUrl.TabIndex = 18;
+            this.tDirectUrl.TextChanged += new System.EventHandler(this.tDirectUrl_TextChanged);
             // 
             // lDirectUrl
             // 
             this.lDirectUrl.AutoSize = true;
-            this.lDirectUrl.Location = new System.Drawing.Point(44, 9);
+            this.lDirectUrl.Location = new System.Drawing.Point(13, 9);
             this.lDirectUrl.Name = "lDirectUrl";
-            this.lDirectUrl.Size = new System.Drawing.Size(29, 13);
+            this.lDirectUrl.Size = new System.Drawing.Size(60, 13);
             this.lDirectUrl.TabIndex = 19;
-            this.lDirectUrl.Text = "URL";
+            this.lDirectUrl.Text = "Direct URL";
             this.lDirectUrl.TextAlign = System.Drawing.ContentAlignment.TopRight;
             // 
             // tabOptions
@@ -664,6 +673,38 @@
     "t?";
             this.lUpdatePrompt.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
+            // tResumeUri
+            // 
+            this.tResumeUri.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.tResumeUri.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            this.tResumeUri.Location = new System.Drawing.Point(79, 9);
+            this.tResumeUri.Name = "tResumeUri";
+            this.tResumeUri.ReadOnly = true;
+            this.tResumeUri.Size = new System.Drawing.Size(187, 13);
+            this.tResumeUri.TabIndex = 33;
+            // 
+            // lResumeUri
+            // 
+            this.lResumeUri.AutoSize = true;
+            this.lResumeUri.Location = new System.Drawing.Point(13, 9);
+            this.lResumeUri.Name = "lResumeUri";
+            this.lResumeUri.Size = new System.Drawing.Size(60, 13);
+            this.lResumeUri.TabIndex = 32;
+            this.lResumeUri.Text = "Direct URL";
+            // 
+            // lDirectStatus
+            // 
+            this.lDirectStatus.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.lDirectStatus.ForeColor = System.Drawing.Color.Red;
+            this.lDirectStatus.Location = new System.Drawing.Point(6, 81);
+            this.lDirectStatus.Name = "lDirectStatus";
+            this.lDirectStatus.Size = new System.Drawing.Size(260, 45);
+            this.lDirectStatus.TabIndex = 25;
+            this.lDirectStatus.Text = "lDirectStatus";
+            this.lDirectStatus.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -750,6 +791,9 @@
         private System.Windows.Forms.Label lSignInStatus;
         private System.Windows.Forms.Label lSaveReminder;
         private System.Windows.Forms.Button bOptionsSave;
+        private System.Windows.Forms.TextBox tResumeUri;
+        private System.Windows.Forms.Label lResumeUri;
+        private System.Windows.Forms.Label lDirectStatus;
     }
 }
 
