@@ -55,8 +55,6 @@
             this.tDirectUrl = new System.Windows.Forms.TextBox();
             this.lDirectUrl = new System.Windows.Forms.Label();
             this.tabOptions = new System.Windows.Forms.TabPage();
-            this.lSaveReminder = new System.Windows.Forms.Label();
-            this.bOptionsSave = new System.Windows.Forms.Button();
             this.lGameUpdates = new System.Windows.Forms.Label();
             this.cGameUpdates = new System.Windows.Forms.ComboBox();
             this.xRememberServer = new System.Windows.Forms.CheckBox();
@@ -431,8 +429,6 @@
             // 
             // tabOptions
             // 
-            this.tabOptions.Controls.Add(this.lSaveReminder);
-            this.tabOptions.Controls.Add(this.bOptionsSave);
             this.tabOptions.Controls.Add(this.lGameUpdates);
             this.tabOptions.Controls.Add(this.cGameUpdates);
             this.tabOptions.Controls.Add(this.xRememberServer);
@@ -447,29 +443,6 @@
             this.tabOptions.TabIndex = 3;
             this.tabOptions.Text = "Options";
             this.tabOptions.UseVisualStyleBackColor = true;
-            // 
-            // lSaveReminder
-            // 
-            this.lSaveReminder.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.lSaveReminder.ForeColor = System.Drawing.Color.Red;
-            this.lSaveReminder.Location = new System.Drawing.Point(6, 132);
-            this.lSaveReminder.Name = "lSaveReminder";
-            this.lSaveReminder.Size = new System.Drawing.Size(174, 19);
-            this.lSaveReminder.TabIndex = 22;
-            this.lSaveReminder.Text = "Click \"Save\" to apply changes";
-            this.lSaveReminder.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
-            // 
-            // bOptionsSave
-            // 
-            this.bOptionsSave.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.bOptionsSave.Enabled = false;
-            this.bOptionsSave.Location = new System.Drawing.Point(186, 130);
-            this.bOptionsSave.Name = "bOptionsSave";
-            this.bOptionsSave.Size = new System.Drawing.Size(80, 23);
-            this.bOptionsSave.TabIndex = 21;
-            this.bOptionsSave.Text = "Save";
-            this.bOptionsSave.UseVisualStyleBackColor = true;
             // 
             // lGameUpdates
             // 
@@ -789,8 +762,6 @@
         private System.Windows.Forms.Button bUploadLog;
         private System.Windows.Forms.Button bOpenDataDir;
         private System.Windows.Forms.Label lSignInStatus;
-        private System.Windows.Forms.Label lSaveReminder;
-        private System.Windows.Forms.Button bOptionsSave;
         private System.Windows.Forms.TextBox tResumeUri;
         private System.Windows.Forms.Label lResumeUri;
         private System.Windows.Forms.Label lDirectStatus;

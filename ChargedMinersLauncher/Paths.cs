@@ -5,8 +5,9 @@ using System.Reflection;
 
 namespace ChargedMinersLauncher {
     static class Paths {
-        public static string PrimaryBinary,
-                             AlternativeBinary;
+        public static readonly string PrimaryBinary,
+                                      AlternativeBinary;
+
         const string ChargeBinaryFormatWindows = "Charge.{0}.exe";
         const string ChargeBinaryFormatMacOSX = "Charge.{0}.MacOSX";
         const string ChargeBinaryFormatLinux = "Charge.{0}.Linux";
@@ -17,6 +18,7 @@ namespace ChargedMinersLauncher {
 
         public static string LauncherPath { get; private set; }
         public static string ConfigPath { get; private set; }
+        public static string LauncherConfigPath { get; private set; }
         public static string SettingsPath { get; private set; }
         public static string LauncherLogPath { get; private set; }
 
@@ -27,6 +29,7 @@ namespace ChargedMinersLauncher {
             LauncherPath = Assembly.GetExecutingAssembly().Location;
             ConfigPath = Path.Combine( Environment.GetFolderPath( Environment.SpecialFolder.ApplicationData ), "charge" );
             SettingsPath = Path.Combine( ConfigPath, "settings.ini" );
+            LauncherConfigPath = Path.Combine( ConfigPath, "launcher.ini" );
             LauncherLogPath = Path.Combine( ConfigPath, "launcher.log" );
 
             if( !Directory.Exists( ConfigPath ) ) {

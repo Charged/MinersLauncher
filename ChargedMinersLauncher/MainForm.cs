@@ -1,5 +1,6 @@
 ﻿// Part of ChargedMinersLauncher | Copyright (c) 2012 Matvei Stefarov <me@matvei.org> | BSD-3 | See LICENSE.txt
 using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Drawing;
@@ -21,7 +22,6 @@ namespace ChargedMinersLauncher {
             InitializeComponent();
             SetToolTips();
 
-            lSaveReminder.Visible = false;
             State = FormState.AtSignInForm;
 
             // hook up event handlers
@@ -43,6 +43,12 @@ namespace ChargedMinersLauncher {
 
 
         #region Startup
+
+        void ReadLauncherSettings() {
+            Dictionary<string, string> settings = SettingsFile.Load( Paths.LauncherConfigPath );
+
+        }
+
 
         void OnShown( object sender, EventArgs e ) {
             if( !Paths.IsPlatformSupported ) {
@@ -697,14 +703,5 @@ namespace ChargedMinersLauncher {
                 File.AppendAllText( Paths.LauncherLogPath, fullMsg );
             }
         }
-    }
-
-
-    enum LaunchMode {
-        SignIn,
-        SignInWithUri,
-        SignInWithDirectUri,
-        Resume,
-        Direct
     }
 }

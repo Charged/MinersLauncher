@@ -69,8 +69,12 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="FormState.cs" />
+    <Compile Include="GameUpdateMode.cs" />
+    <Compile Include="LaunchMode.cs" />
     <Compile Include="Paths.cs" />
     <Compile Include="RuntimeInfo.cs" />
+    <Compile Include="SettingsFile.cs" />
+    <Compile Include="StartingTab.cs" />
     <Compile Include="VersionInfo.cs" />
     <Compile Include="VersionsTxt.cs" />
     <Compile Include="MainForm.cs">
