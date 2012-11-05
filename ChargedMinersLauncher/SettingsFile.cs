@@ -12,8 +12,9 @@ namespace ChargedMinersLauncher {
 
         readonly Dictionary<string, string> settings = new Dictionary<string, string>();
 
-        public SettingsFile( string fileName ) {
-            string[] lines = File.ReadAllLines(fileName);
+
+        public void Load( string fileName ) {
+            string[] lines = File.ReadAllLines( fileName );
             foreach( string line in lines ) {
                 if( line == null ) break;
                 if( line.Length == 0 || CommentRegex.IsMatch( line ) ) continue;

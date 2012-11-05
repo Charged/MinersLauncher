@@ -77,6 +77,8 @@
             this.bUpdateNo = new System.Windows.Forms.Button();
             this.bUpdateYes = new System.Windows.Forms.Button();
             this.lUpdatePrompt = new System.Windows.Forms.Label();
+            this.lOptionsSaved = new System.Windows.Forms.Label();
+            this.lToolStatus = new System.Windows.Forms.Label();
             this.flow.SuspendLayout();
             this.tabs.SuspendLayout();
             this.tabSignIn.SuspendLayout();
@@ -429,6 +431,7 @@
             // 
             // tabOptions
             // 
+            this.tabOptions.Controls.Add(this.lOptionsSaved);
             this.tabOptions.Controls.Add(this.lGameUpdates);
             this.tabOptions.Controls.Add(this.cGameUpdates);
             this.tabOptions.Controls.Add(this.xRememberServer);
@@ -465,6 +468,7 @@
             this.cGameUpdates.Name = "cGameUpdates";
             this.cGameUpdates.Size = new System.Drawing.Size(178, 21);
             this.cGameUpdates.TabIndex = 19;
+            this.cGameUpdates.SelectedIndexChanged += new System.EventHandler(this.SaveLauncherSettings);
             // 
             // xRememberServer
             // 
@@ -475,6 +479,7 @@
             this.xRememberServer.TabIndex = 18;
             this.xRememberServer.Text = "Remember last-joined server";
             this.xRememberServer.UseVisualStyleBackColor = true;
+            this.xRememberServer.CheckedChanged += new System.EventHandler(this.SaveLauncherSettings);
             // 
             // xRememberPassword
             // 
@@ -485,6 +490,7 @@
             this.xRememberPassword.TabIndex = 17;
             this.xRememberPassword.Text = "Remember password";
             this.xRememberPassword.UseVisualStyleBackColor = true;
+            this.xRememberPassword.CheckedChanged += new System.EventHandler(this.SaveLauncherSettings);
             // 
             // lStartingTab
             // 
@@ -508,6 +514,7 @@
             this.cStartingTab.Name = "cStartingTab";
             this.cStartingTab.Size = new System.Drawing.Size(178, 21);
             this.cStartingTab.TabIndex = 15;
+            this.cStartingTab.SelectedIndexChanged += new System.EventHandler(this.SaveLauncherSettings);
             // 
             // xRememberUsername
             // 
@@ -518,9 +525,11 @@
             this.xRememberUsername.TabIndex = 14;
             this.xRememberUsername.Text = "Remember username\r\n";
             this.xRememberUsername.UseVisualStyleBackColor = true;
+            this.xRememberUsername.CheckedChanged += new System.EventHandler(this.SaveLauncherSettings);
             // 
             // tabTools
             // 
+            this.tabTools.Controls.Add(this.lToolStatus);
             this.tabTools.Controls.Add(this.tPastebinUrl);
             this.tabTools.Controls.Add(this.bDeleteData);
             this.tabTools.Controls.Add(this.bResetSettings);
@@ -552,6 +561,7 @@
             this.bDeleteData.TabIndex = 4;
             this.bDeleteData.Text = "Delete all saved data";
             this.bDeleteData.UseVisualStyleBackColor = true;
+            this.bDeleteData.Click += new System.EventHandler(this.bDeleteData_Click);
             // 
             // bResetSettings
             // 
@@ -561,6 +571,7 @@
             this.bResetSettings.TabIndex = 3;
             this.bResetSettings.Text = "Reset all settings";
             this.bResetSettings.UseVisualStyleBackColor = true;
+            this.bResetSettings.Click += new System.EventHandler(this.bResetSettings_Click);
             // 
             // bUploadLog
             // 
@@ -579,6 +590,7 @@
             this.bOpenDataDir.TabIndex = 0;
             this.bOpenDataDir.Text = "Open data directory";
             this.bOpenDataDir.UseVisualStyleBackColor = true;
+            this.bOpenDataDir.Click += new System.EventHandler(this.bOpenDataDir_Click);
             // 
             // panelStatus
             // 
@@ -678,6 +690,30 @@
     "t?";
             this.lUpdatePrompt.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
+            // lOptionsSaved
+            // 
+            this.lOptionsSaved.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.lOptionsSaved.ForeColor = System.Drawing.SystemColors.ControlDarkDark;
+            this.lOptionsSaved.Location = new System.Drawing.Point(6, 126);
+            this.lOptionsSaved.Name = "lOptionsSaved";
+            this.lOptionsSaved.Size = new System.Drawing.Size(260, 30);
+            this.lOptionsSaved.TabIndex = 26;
+            this.lOptionsSaved.Text = "lOptionsSaved";
+            this.lOptionsSaved.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            // 
+            // lToolStatus
+            // 
+            this.lToolStatus.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.lToolStatus.ForeColor = System.Drawing.SystemColors.ControlDarkDark;
+            this.lToolStatus.Location = new System.Drawing.Point(6, 90);
+            this.lToolStatus.Name = "lToolStatus";
+            this.lToolStatus.Size = new System.Drawing.Size(260, 66);
+            this.lToolStatus.TabIndex = 27;
+            this.lToolStatus.Text = "lToolStatus";
+            this.lToolStatus.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -765,6 +801,8 @@
         private System.Windows.Forms.TextBox tResumeUri;
         private System.Windows.Forms.Label lResumeUri;
         private System.Windows.Forms.Label lDirectStatus;
+        private System.Windows.Forms.Label lOptionsSaved;
+        private System.Windows.Forms.Label lToolStatus;
     }
 }
 

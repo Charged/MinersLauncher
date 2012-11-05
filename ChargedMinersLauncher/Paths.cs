@@ -17,9 +17,10 @@ namespace ChargedMinersLauncher {
         public const string CookieContainerFile = "saved-session.dat";
 
         public static string LauncherPath { get; private set; }
-        public static string ConfigPath { get; private set; }
-        public static string LauncherConfigPath { get; private set; }
-        public static string SettingsPath { get; private set; }
+        public static string DataPath { get; private set; }
+        public static string GameSettingsPath { get; private set; }
+        public static string GameLogPath { get; private set; }
+        public static string LauncherSettingsPath { get; private set; }
         public static string LauncherLogPath { get; private set; }
 
         public static bool IsPlatformSupported { get; set; }
@@ -27,15 +28,16 @@ namespace ChargedMinersLauncher {
 
         static Paths() {
             LauncherPath = Assembly.GetExecutingAssembly().Location;
-            ConfigPath = Path.Combine( Environment.GetFolderPath( Environment.SpecialFolder.ApplicationData ), "charge" );
-            SettingsPath = Path.Combine( ConfigPath, "settings.ini" );
-            LauncherConfigPath = Path.Combine( ConfigPath, "launcher.ini" );
-            LauncherLogPath = Path.Combine( ConfigPath, "launcher.log" );
+            DataPath = Path.Combine( Environment.GetFolderPath( Environment.SpecialFolder.ApplicationData ), "charge" );
+            LauncherSettingsPath = Path.Combine( DataPath, "launcher.ini" );
+            LauncherLogPath = Path.Combine( DataPath, "launcher.log" );
+            GameSettingsPath = Path.Combine( DataPath, "settings.ini" );
+            GameLogPath = Path.Combine( DataPath, "log.txt" );
 
-            if( !Directory.Exists( ConfigPath ) ) {
-                Directory.CreateDirectory( ConfigPath );
+            if( !Directory.Exists( DataPath ) ) {
+                Directory.CreateDirectory( DataPath );
             }
-            Directory.SetCurrentDirectory( ConfigPath );
+            Directory.SetCurrentDirectory( DataPath );
 
             string tmp;
             if( RuntimeInfo.IsWindows ) {

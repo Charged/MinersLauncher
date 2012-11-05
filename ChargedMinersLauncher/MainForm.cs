@@ -21,6 +21,8 @@ namespace ChargedMinersLauncher {
             // Set up the GUI
             InitializeComponent();
             SetToolTips();
+            lOptionsSaved.Text = "";
+            lToolStatus.Text = "";
 
             State = FormState.AtSignInForm;
 
@@ -38,15 +40,19 @@ namespace ChargedMinersLauncher {
             Shown += OnShown;
             FormClosed += OnFormClosed;
 
-            ReadLauncherSettings();
+            LoadLauncherSettings();
         }
 
 
         #region Startup
 
-        void ReadLauncherSettings() {
-            Log( "ReadLauncherSettings" );
-            SettingsFile settings = new SettingsFile( Paths.LauncherConfigPath );
+        bool settingsLoaded;
+        void LoadLauncherSettings() {
+            Log( "LoadLauncherSettings" );
+            SettingsFile settings = new SettingsFile();
+            if( File.Exists( Paths.LauncherSettingsPath ) ) {
+                settings.Load( Paths.LauncherSettingsPath );
+            }
             bool saveUsername = settings.Get( "rememberUsername", true );
             bool savePassword = settings.Get( "rememberPassword", false );
             bool saveUrl = settings.Get( "rememberServer", true );
@@ -57,17 +63,21 @@ namespace ChargedMinersLauncher {
             xRememberServer.Checked = saveUrl;
             cGameUpdates.SelectedIndex = (int)gameUpdateMode;
             cStartingTab.SelectedIndex = (int)startingTab;
+            settingsLoaded = true;
         }
 
 
-        void SaveLauncherSettings() {
+        void SaveLauncherSettings( object sender, EventArgs e ) {
+            if( !settingsLoaded ) return;
             Log( "SaveLauncherSettings" );
-            SettingsFile settings = new SettingsFile( Paths.LauncherConfigPath );
+            SettingsFile settings = new SettingsFile();
             settings.Set( "rememberUsername", xRememberUsername.Checked );
             settings.Set( "rememberPassword", xRememberPassword.Checked );
             settings.Set( "rememberServer", xRememberServer.Checked );
             settings.Set( "gameUpdateMode", (GameUpdateMode)cGameUpdates.SelectedIndex );
             settings.Set( "startingTab", (StartingTab)cStartingTab.SelectedIndex );
+            settings.Save( Paths.LauncherSettingsPath );
+            lOptionsSaved.Text = "Changes saved";
         }
 
 
@@ -84,8 +94,8 @@ namespace ChargedMinersLauncher {
             tDirectUrl_TextChanged( tDirectUrl, EventArgs.Empty );
 
             // fill in the Uri field with CM's last-joined server
-            if( File.Exists( Paths.SettingsPath ) ) {
-                string[] config = File.ReadAllLines( Paths.SettingsPath );
+            if( File.Exists( Paths.GameSettingsPath ) ) {
+                string[] config = File.ReadAllLines( Paths.GameSettingsPath );
                 foreach( string line in config ) {
                     Match configMatch = ChargedMinersLastServer.Match( line );
                     if( configMatch.Success ) {
@@ -261,6 +271,33 @@ namespace ChargedMinersLauncher {
                     lDirectStatus.Text = "Unrecognized URL.";
                 }
             }
+        }
+
+
+        private void bResetSettings_Click( object sender, EventArgs e ) {
+            File.Delete( Paths.LauncherSettingsPath );
+            File.Delete( Paths.GameSettingsPath );
+            settingsLoaded = false;
+            LoadLauncherSettings();
+            lToolStatus.Text = "Launcher and game settings were reset to defaults.";
+        }
+
+
+        private void bDeleteData_Click( object sender, EventArgs e ) {
+            File.Delete( Paths.LauncherSettingsPath );
+            File.Delete( Paths.GameSettingsPath );
+            File.Delete( Paths.LauncherLogPath );
+            File.Delete( Paths.GameLogPath );
+            File.Delete( Path.Combine( Paths.DataPath, Paths.CookieContainerFile ) );
+            File.Delete( Path.Combine( Paths.DataPath, Paths.PasswordSaveFile ) );
+            settingsLoaded = false;
+            LoadLauncherSettings();
+            lToolStatus.Text = "All settings, logs, and saved data were deleted.";
+        }
+
+
+        private void bOpenDataDir_Click( object sender, EventArgs e ) {
+            Process.Start( "file://" + Paths.DataPath );
         }
 
         #endregion
