@@ -38,15 +38,36 @@ namespace ChargedMinersLauncher {
             Shown += OnShown;
             FormClosed += OnFormClosed;
 
-            // TODO: load launcher settings
+            ReadLauncherSettings();
         }
 
 
         #region Startup
 
         void ReadLauncherSettings() {
-            Dictionary<string, string> settings = SettingsFile.Load( Paths.LauncherConfigPath );
+            Log( "ReadLauncherSettings" );
+            SettingsFile settings = new SettingsFile( Paths.LauncherConfigPath );
+            bool saveUsername = settings.Get( "rememberUsername", true );
+            bool savePassword = settings.Get( "rememberPassword", false );
+            bool saveUrl = settings.Get( "rememberServer", true );
+            GameUpdateMode gameUpdateMode = settings.Get( "gameUpdateMode", GameUpdateMode.Ask );
+            StartingTab startingTab = settings.Get( "startingTab", StartingTab.SignIn );
+            xRememberUsername.Checked = saveUsername;
+            xRememberPassword.Checked = savePassword;
+            xRememberServer.Checked = saveUrl;
+            cGameUpdates.SelectedIndex = (int)gameUpdateMode;
+            cStartingTab.SelectedIndex = (int)startingTab;
+        }
 
+
+        void SaveLauncherSettings() {
+            Log( "SaveLauncherSettings" );
+            SettingsFile settings = new SettingsFile( Paths.LauncherConfigPath );
+            settings.Set( "rememberUsername", xRememberUsername.Checked );
+            settings.Set( "rememberPassword", xRememberPassword.Checked );
+            settings.Set( "rememberServer", xRememberServer.Checked );
+            settings.Set( "gameUpdateMode", (GameUpdateMode)cGameUpdates.SelectedIndex );
+            settings.Set( "startingTab", (StartingTab)cStartingTab.SelectedIndex );
         }
 
 
