@@ -951,7 +951,7 @@ namespace ChargedMinersLauncher {
             object boxedVal;
             if( data.TryGetValue( key, out boxedVal ) ) {
                 try {
-                    TEnum enumVal = (TEnum)Enum.Parse( typeof( TEnum ), boxedVal.ToString(), true );
+                    TEnum enumVal = (TEnum)Enum.Parse( typeof( TEnum ), boxedVal.ToString(), ignoreCase );
                     if( Enum.IsDefined( typeof( TEnum ), enumVal ) ) {
                         val = enumVal;
                         return true;
@@ -968,7 +968,7 @@ namespace ChargedMinersLauncher {
             object boxedVal;
             if( data.TryGetValue( key, out boxedVal ) ) {
                 try {
-                    TEnum enumVal = (TEnum)Enum.Parse( typeof( TEnum ), boxedVal.ToString(), true );
+                    TEnum enumVal = (TEnum)Enum.Parse( typeof( TEnum ), boxedVal.ToString(), ignoreCase );
                     if( Enum.IsDefined( typeof( TEnum ), enumVal ) ) {
                         return true;
                     }

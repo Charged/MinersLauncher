@@ -1,6 +1,5 @@
 ﻿// Part of ChargedMinersLauncher | Copyright (c) 2012 Matvei Stefarov <me@matvei.org> | BSD-3 | See LICENSE.txt
 using System;
-using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Drawing;
@@ -142,21 +141,26 @@ namespace ChargedMinersLauncher {
 
         const string ToolTipUsername = "Your minecraft.net username or email",
                      ToolTipPassword = "Your minecraft.net password",
-                     ToolTipRemember = "Save your username and password for next time. Note that password is stored in plain text.",
-                     ToolTipUri = "Server's Minecraft.net URL or a DirectConnect (mc://) link. Optional.",
+                     ToolTipRememberUsername = "Save your username for next time.",
+                     ToolTipRememberPassword = "Save your password for next time. Note that password is stored in plain text.",
+                     ToolTipSignInUri = "Server's Minecraft.net URL or a DirectConnect (mc://) link. Optional.",
+                     ToolTipDirectUri = "Server's DirectConnect (mc://) link.",
                      ToolTipResume = "Try to reuse the last-used credentials, to connect to the most-recently-joined server.";
 
 
         void SetToolTips() {
             toolTip = new ToolTip();
             toolTip.SetToolTip( tSignInUsername, ToolTipUsername );
-            toolTip.SetToolTip( lUsername, ToolTipUsername );
+            toolTip.SetToolTip( lSignInUsername, ToolTipUsername );
             toolTip.SetToolTip( tSignInPassword, ToolTipPassword );
-            toolTip.SetToolTip( lPassword, ToolTipPassword );
-            toolTip.SetToolTip( xRememberUsername, ToolTipRemember );
-            toolTip.SetToolTip( tDirectUrl, ToolTipUri );
-            toolTip.SetToolTip( lDirectUrl, ToolTipUri );
-            toolTip.SetToolTip( bDirectConnect, ToolTipResume );
+            toolTip.SetToolTip( lSignInPassword, ToolTipPassword );
+            toolTip.SetToolTip( xRememberUsername, ToolTipRememberUsername );
+            toolTip.SetToolTip( xRememberPassword, ToolTipRememberPassword );
+            toolTip.SetToolTip( tSignInUrl, ToolTipSignInUri );
+            toolTip.SetToolTip( lSignInUrl, ToolTipSignInUri );
+            toolTip.SetToolTip( tDirectUrl, ToolTipDirectUri );
+            toolTip.SetToolTip( lDirectUrl, ToolTipDirectUri );
+            toolTip.SetToolTip( bResume, ToolTipResume );
         }
 
 
@@ -508,9 +512,6 @@ namespace ChargedMinersLauncher {
         MinecraftNetSession signInSession;
         LaunchMode launchMode;
 
-        bool directConnect,
-             clickedGo;
-
         string storedLoginUsername,
                storedMinecraftUsername;
 
@@ -592,11 +593,17 @@ namespace ChargedMinersLauncher {
             try {
                 if( File.Exists( Paths.PasswordSaveFile ) ) {
                     string[] loginData = File.ReadAllLines( Paths.PasswordSaveFile );
-                    storedLoginUsername = loginData[0];
-                    tSignInUsername.Text = storedLoginUsername;
-                    tSignInPassword.Text = loginData[1];
-                    storedMinecraftUsername = loginData.Length > 2 ? loginData[2] : storedLoginUsername;
-                    xRememberUsername.Checked = true;
+                    if( xRememberUsername.Checked ) {
+                        storedLoginUsername = loginData[0];
+                        tSignInUsername.Text = storedLoginUsername;
+                        storedMinecraftUsername = loginData.Length > 2 ? loginData[2] : storedLoginUsername;
+                    }
+                    if( xRememberPassword.Checked ) {
+                        tSignInPassword.Text = loginData[1];
+                    }
+                    if( xRememberServer.Checked ) {
+                        tSignInUrl.Text = loginData.Length > 3 ? loginData[3] : "";
+                    }
                 }
             } catch( Exception ) {
                 lSignInStatus.Text = "Could not load saved login information.";
@@ -605,11 +612,12 @@ namespace ChargedMinersLauncher {
 
 
         void SaveLoginInfo() {
-            if( xRememberUsername.Checked ) {
+            if( xRememberUsername.Checked || xRememberPassword.Checked || xRememberServer.Checked ) {
                 File.WriteAllLines( Paths.PasswordSaveFile, new[] {
-                    signInSession.LoginUsername,
-                    signInSession.Password,
-                    signInSession.MinercraftUsername
+                    xRememberUsername.Checked ? signInSession.LoginUsername : "",
+                    xRememberPassword.Checked ? signInSession.Password : "",
+                    xRememberUsername.Checked ? signInSession.MinercraftUsername : "",
+                    xRememberServer.Checked ? tSignInUrl.Text : ""
                 } );
             } else {
                 if( File.Exists( Paths.PasswordSaveFile ) ) {
@@ -735,7 +743,6 @@ namespace ChargedMinersLauncher {
 
 
         Control SelectedPanel {
-            get { return selectedPanel; }
             set {
                 if( value == tabs ) {
                     panelStatus.Visible = false;
@@ -750,11 +757,8 @@ namespace ChargedMinersLauncher {
                     panelStatus.Visible = false;
                     panelUpdatePrompt.Visible = true;
                 }
-                selectedPanel = value;
             }
         }
-
-        Control selectedPanel;
 
 
         void bUpdateYes_Click( object sender, EventArgs e ) {

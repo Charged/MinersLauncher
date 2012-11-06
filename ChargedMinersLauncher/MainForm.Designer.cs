@@ -32,8 +32,8 @@
             this.lSignInUrl = new System.Windows.Forms.Label();
             this.tSignInUsername = new System.Windows.Forms.TextBox();
             this.tSignInPassword = new System.Windows.Forms.TextBox();
-            this.lUsername = new System.Windows.Forms.Label();
-            this.lPassword = new System.Windows.Forms.Label();
+            this.lSignInUsername = new System.Windows.Forms.Label();
+            this.lSignInPassword = new System.Windows.Forms.Label();
             this.bSignIn = new System.Windows.Forms.Button();
             this.tabResume = new System.Windows.Forms.TabPage();
             this.tResumeUri = new System.Windows.Forms.TextBox();
@@ -114,7 +114,7 @@
             this.tabs.Name = "tabs";
             this.tabs.SelectedIndex = 0;
             this.tabs.Size = new System.Drawing.Size(280, 185);
-            this.tabs.TabIndex = 18;
+            this.tabs.TabIndex = 0;
             // 
             // tabSignIn
             // 
@@ -123,8 +123,8 @@
             this.tabSignIn.Controls.Add(this.lSignInUrl);
             this.tabSignIn.Controls.Add(this.tSignInUsername);
             this.tabSignIn.Controls.Add(this.tSignInPassword);
-            this.tabSignIn.Controls.Add(this.lUsername);
-            this.tabSignIn.Controls.Add(this.lPassword);
+            this.tabSignIn.Controls.Add(this.lSignInUsername);
+            this.tabSignIn.Controls.Add(this.lSignInPassword);
             this.tabSignIn.Controls.Add(this.bSignIn);
             this.tabSignIn.Location = new System.Drawing.Point(4, 22);
             this.tabSignIn.Name = "tabSignIn";
@@ -142,7 +142,7 @@
             this.lSignInStatus.Location = new System.Drawing.Point(6, 87);
             this.lSignInStatus.Name = "lSignInStatus";
             this.lSignInStatus.Size = new System.Drawing.Size(260, 40);
-            this.lSignInStatus.TabIndex = 14;
+            this.lSignInStatus.TabIndex = 7;
             this.lSignInStatus.Text = "lSignInStatus";
             this.lSignInStatus.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
@@ -153,7 +153,7 @@
             this.tSignInUrl.Location = new System.Drawing.Point(79, 58);
             this.tSignInUrl.Name = "tSignInUrl";
             this.tSignInUrl.Size = new System.Drawing.Size(187, 20);
-            this.tSignInUrl.TabIndex = 15;
+            this.tSignInUrl.TabIndex = 5;
             this.tSignInUrl.TextChanged += new System.EventHandler(this.SignInFieldChanged);
             // 
             // lSignInUrl
@@ -162,7 +162,7 @@
             this.lSignInUrl.Location = new System.Drawing.Point(23, 61);
             this.lSignInUrl.Name = "lSignInUrl";
             this.lSignInUrl.Size = new System.Drawing.Size(50, 26);
-            this.lSignInUrl.TabIndex = 14;
+            this.lSignInUrl.TabIndex = 4;
             this.lSignInUrl.Text = "URL\r\n(optional)";
             this.lSignInUrl.TextAlign = System.Drawing.ContentAlignment.TopRight;
             // 
@@ -173,7 +173,7 @@
             this.tSignInUsername.Location = new System.Drawing.Point(79, 6);
             this.tSignInUsername.Name = "tSignInUsername";
             this.tSignInUsername.Size = new System.Drawing.Size(187, 20);
-            this.tSignInUsername.TabIndex = 9;
+            this.tSignInUsername.TabIndex = 1;
             this.tSignInUsername.TextChanged += new System.EventHandler(this.SignInFieldChanged);
             // 
             // tSignInPassword
@@ -183,27 +183,27 @@
             this.tSignInPassword.Location = new System.Drawing.Point(79, 32);
             this.tSignInPassword.Name = "tSignInPassword";
             this.tSignInPassword.Size = new System.Drawing.Size(187, 20);
-            this.tSignInPassword.TabIndex = 11;
+            this.tSignInPassword.TabIndex = 3;
             this.tSignInPassword.UseSystemPasswordChar = true;
             this.tSignInPassword.TextChanged += new System.EventHandler(this.SignInFieldChanged);
             // 
-            // lUsername
+            // lSignInUsername
             // 
-            this.lUsername.AutoSize = true;
-            this.lUsername.Location = new System.Drawing.Point(20, 9);
-            this.lUsername.Name = "lUsername";
-            this.lUsername.Size = new System.Drawing.Size(55, 13);
-            this.lUsername.TabIndex = 8;
-            this.lUsername.Text = "Username";
+            this.lSignInUsername.AutoSize = true;
+            this.lSignInUsername.Location = new System.Drawing.Point(20, 9);
+            this.lSignInUsername.Name = "lSignInUsername";
+            this.lSignInUsername.Size = new System.Drawing.Size(55, 13);
+            this.lSignInUsername.TabIndex = 0;
+            this.lSignInUsername.Text = "Username";
             // 
-            // lPassword
+            // lSignInPassword
             // 
-            this.lPassword.AutoSize = true;
-            this.lPassword.Location = new System.Drawing.Point(20, 35);
-            this.lPassword.Name = "lPassword";
-            this.lPassword.Size = new System.Drawing.Size(53, 13);
-            this.lPassword.TabIndex = 10;
-            this.lPassword.Text = "Password";
+            this.lSignInPassword.AutoSize = true;
+            this.lSignInPassword.Location = new System.Drawing.Point(20, 35);
+            this.lSignInPassword.Name = "lSignInPassword";
+            this.lSignInPassword.Size = new System.Drawing.Size(53, 13);
+            this.lSignInPassword.TabIndex = 2;
+            this.lSignInPassword.Text = "Password";
             // 
             // bSignIn
             // 
@@ -212,7 +212,7 @@
             this.bSignIn.Location = new System.Drawing.Point(186, 130);
             this.bSignIn.Name = "bSignIn";
             this.bSignIn.Size = new System.Drawing.Size(80, 23);
-            this.bSignIn.TabIndex = 12;
+            this.bSignIn.TabIndex = 6;
             this.bSignIn.Text = "Sign In";
             this.bSignIn.UseVisualStyleBackColor = true;
             this.bSignIn.Click += new System.EventHandler(this.bSignIn_Click);
@@ -245,7 +245,7 @@
             this.tResumeUri.Name = "tResumeUri";
             this.tResumeUri.ReadOnly = true;
             this.tResumeUri.Size = new System.Drawing.Size(187, 13);
-            this.tResumeUri.TabIndex = 33;
+            this.tResumeUri.TabIndex = 2;
             // 
             // lResumeUri
             // 
@@ -253,7 +253,7 @@
             this.lResumeUri.Location = new System.Drawing.Point(13, 9);
             this.lResumeUri.Name = "lResumeUri";
             this.lResumeUri.Size = new System.Drawing.Size(60, 13);
-            this.lResumeUri.TabIndex = 32;
+            this.lResumeUri.TabIndex = 1;
             this.lResumeUri.Text = "Direct URL";
             // 
             // bResume
@@ -262,7 +262,7 @@
             this.bResume.Location = new System.Drawing.Point(186, 129);
             this.bResume.Name = "bResume";
             this.bResume.Size = new System.Drawing.Size(80, 23);
-            this.bResume.TabIndex = 31;
+            this.bResume.TabIndex = 0;
             this.bResume.Text = "Reconnect";
             this.bResume.UseVisualStyleBackColor = true;
             this.bResume.Click += new System.EventHandler(this.bResume_Click);
@@ -276,7 +276,7 @@
             this.tResumeServerName.Name = "tResumeServerName";
             this.tResumeServerName.ReadOnly = true;
             this.tResumeServerName.Size = new System.Drawing.Size(187, 13);
-            this.tResumeServerName.TabIndex = 30;
+            this.tResumeServerName.TabIndex = 8;
             // 
             // lResumeServerName
             // 
@@ -284,7 +284,7 @@
             this.lResumeServerName.Location = new System.Drawing.Point(6, 87);
             this.lResumeServerName.Name = "lResumeServerName";
             this.lResumeServerName.Size = new System.Drawing.Size(67, 13);
-            this.lResumeServerName.TabIndex = 29;
+            this.lResumeServerName.TabIndex = 7;
             this.lResumeServerName.Text = "Server name";
             // 
             // tResumeServerIP
@@ -296,7 +296,7 @@
             this.tResumeServerIP.Name = "tResumeServerIP";
             this.tResumeServerIP.ReadOnly = true;
             this.tResumeServerIP.Size = new System.Drawing.Size(187, 13);
-            this.tResumeServerIP.TabIndex = 28;
+            this.tResumeServerIP.TabIndex = 4;
             // 
             // tResumeUsername
             // 
@@ -307,7 +307,7 @@
             this.tResumeUsername.Name = "tResumeUsername";
             this.tResumeUsername.ReadOnly = true;
             this.tResumeUsername.Size = new System.Drawing.Size(187, 13);
-            this.tResumeUsername.TabIndex = 27;
+            this.tResumeUsername.TabIndex = 6;
             this.tResumeUsername.Text = " ";
             // 
             // lResumeServerIP
@@ -316,7 +316,7 @@
             this.lResumeServerIP.Location = new System.Drawing.Point(22, 35);
             this.lResumeServerIP.Name = "lResumeServerIP";
             this.lResumeServerIP.Size = new System.Drawing.Size(51, 13);
-            this.lResumeServerIP.TabIndex = 26;
+            this.lResumeServerIP.TabIndex = 3;
             this.lResumeServerIP.Text = "Server IP";
             // 
             // lResumeUsername
@@ -325,7 +325,7 @@
             this.lResumeUsername.Location = new System.Drawing.Point(18, 61);
             this.lResumeUsername.Name = "lResumeUsername";
             this.lResumeUsername.Size = new System.Drawing.Size(55, 13);
-            this.lResumeUsername.TabIndex = 25;
+            this.lResumeUsername.TabIndex = 5;
             this.lResumeUsername.Text = "Username";
             // 
             // tabDirect
@@ -354,7 +354,7 @@
             this.lDirectStatus.Location = new System.Drawing.Point(6, 81);
             this.lDirectStatus.Name = "lDirectStatus";
             this.lDirectStatus.Size = new System.Drawing.Size(260, 45);
-            this.lDirectStatus.TabIndex = 25;
+            this.lDirectStatus.TabIndex = 7;
             this.lDirectStatus.Text = "lDirectStatus";
             this.lDirectStatus.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
@@ -367,7 +367,7 @@
             this.tDirectServerIP.Name = "tDirectServerIP";
             this.tDirectServerIP.ReadOnly = true;
             this.tDirectServerIP.Size = new System.Drawing.Size(187, 13);
-            this.tDirectServerIP.TabIndex = 24;
+            this.tDirectServerIP.TabIndex = 4;
             // 
             // tDirectUsername
             // 
@@ -378,7 +378,7 @@
             this.tDirectUsername.Name = "tDirectUsername";
             this.tDirectUsername.ReadOnly = true;
             this.tDirectUsername.Size = new System.Drawing.Size(187, 13);
-            this.tDirectUsername.TabIndex = 23;
+            this.tDirectUsername.TabIndex = 6;
             // 
             // lDirectServerIP
             // 
@@ -386,7 +386,7 @@
             this.lDirectServerIP.Location = new System.Drawing.Point(22, 35);
             this.lDirectServerIP.Name = "lDirectServerIP";
             this.lDirectServerIP.Size = new System.Drawing.Size(51, 13);
-            this.lDirectServerIP.TabIndex = 22;
+            this.lDirectServerIP.TabIndex = 3;
             this.lDirectServerIP.Text = "Server IP";
             // 
             // lDirectUsername
@@ -395,7 +395,7 @@
             this.lDirectUsername.Location = new System.Drawing.Point(18, 61);
             this.lDirectUsername.Name = "lDirectUsername";
             this.lDirectUsername.Size = new System.Drawing.Size(55, 13);
-            this.lDirectUsername.TabIndex = 21;
+            this.lDirectUsername.TabIndex = 5;
             this.lDirectUsername.Text = "Username";
             // 
             // bDirectConnect
@@ -405,7 +405,7 @@
             this.bDirectConnect.Location = new System.Drawing.Point(186, 129);
             this.bDirectConnect.Name = "bDirectConnect";
             this.bDirectConnect.Size = new System.Drawing.Size(80, 23);
-            this.bDirectConnect.TabIndex = 20;
+            this.bDirectConnect.TabIndex = 2;
             this.bDirectConnect.Text = "Connect";
             this.bDirectConnect.UseVisualStyleBackColor = true;
             // 
@@ -416,7 +416,7 @@
             this.tDirectUrl.Location = new System.Drawing.Point(79, 6);
             this.tDirectUrl.Name = "tDirectUrl";
             this.tDirectUrl.Size = new System.Drawing.Size(187, 20);
-            this.tDirectUrl.TabIndex = 18;
+            this.tDirectUrl.TabIndex = 1;
             this.tDirectUrl.TextChanged += new System.EventHandler(this.tDirectUrl_TextChanged);
             // 
             // lDirectUrl
@@ -425,7 +425,7 @@
             this.lDirectUrl.Location = new System.Drawing.Point(13, 9);
             this.lDirectUrl.Name = "lDirectUrl";
             this.lDirectUrl.Size = new System.Drawing.Size(60, 13);
-            this.lDirectUrl.TabIndex = 19;
+            this.lDirectUrl.TabIndex = 0;
             this.lDirectUrl.Text = "Direct URL";
             this.lDirectUrl.TextAlign = System.Drawing.ContentAlignment.TopRight;
             // 
@@ -455,7 +455,7 @@
             this.lOptionsSaved.Location = new System.Drawing.Point(6, 126);
             this.lOptionsSaved.Name = "lOptionsSaved";
             this.lOptionsSaved.Size = new System.Drawing.Size(260, 30);
-            this.lOptionsSaved.TabIndex = 26;
+            this.lOptionsSaved.TabIndex = 7;
             this.lOptionsSaved.Text = "lOptionsSaved";
             this.lOptionsSaved.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
@@ -465,7 +465,7 @@
             this.lGameUpdates.Location = new System.Drawing.Point(6, 36);
             this.lGameUpdates.Name = "lGameUpdates";
             this.lGameUpdates.Size = new System.Drawing.Size(76, 13);
-            this.lGameUpdates.TabIndex = 20;
+            this.lGameUpdates.TabIndex = 2;
             this.lGameUpdates.Text = "Game updates";
             // 
             // cGameUpdates
@@ -479,7 +479,7 @@
             this.cGameUpdates.Location = new System.Drawing.Point(88, 33);
             this.cGameUpdates.Name = "cGameUpdates";
             this.cGameUpdates.Size = new System.Drawing.Size(178, 21);
-            this.cGameUpdates.TabIndex = 19;
+            this.cGameUpdates.TabIndex = 3;
             this.cGameUpdates.SelectedIndexChanged += new System.EventHandler(this.SaveLauncherSettings);
             // 
             // xRememberServer
@@ -488,7 +488,7 @@
             this.xRememberServer.Location = new System.Drawing.Point(6, 106);
             this.xRememberServer.Name = "xRememberServer";
             this.xRememberServer.Size = new System.Drawing.Size(159, 17);
-            this.xRememberServer.TabIndex = 18;
+            this.xRememberServer.TabIndex = 6;
             this.xRememberServer.Text = "Remember last-joined server";
             this.xRememberServer.UseVisualStyleBackColor = true;
             this.xRememberServer.CheckedChanged += new System.EventHandler(this.SaveLauncherSettings);
@@ -499,7 +499,7 @@
             this.xRememberPassword.Location = new System.Drawing.Point(6, 83);
             this.xRememberPassword.Name = "xRememberPassword";
             this.xRememberPassword.Size = new System.Drawing.Size(125, 17);
-            this.xRememberPassword.TabIndex = 17;
+            this.xRememberPassword.TabIndex = 5;
             this.xRememberPassword.Text = "Remember password";
             this.xRememberPassword.UseVisualStyleBackColor = true;
             this.xRememberPassword.CheckedChanged += new System.EventHandler(this.SaveLauncherSettings);
@@ -510,7 +510,7 @@
             this.lStartingTab.Location = new System.Drawing.Point(21, 9);
             this.lStartingTab.Name = "lStartingTab";
             this.lStartingTab.Size = new System.Drawing.Size(61, 13);
-            this.lStartingTab.TabIndex = 16;
+            this.lStartingTab.TabIndex = 0;
             this.lStartingTab.Text = "Starting tab";
             // 
             // cStartingTab
@@ -525,7 +525,7 @@
             this.cStartingTab.Location = new System.Drawing.Point(88, 6);
             this.cStartingTab.Name = "cStartingTab";
             this.cStartingTab.Size = new System.Drawing.Size(178, 21);
-            this.cStartingTab.TabIndex = 15;
+            this.cStartingTab.TabIndex = 1;
             this.cStartingTab.SelectedIndexChanged += new System.EventHandler(this.SaveLauncherSettings);
             // 
             // xRememberUsername
@@ -534,7 +534,7 @@
             this.xRememberUsername.Location = new System.Drawing.Point(6, 60);
             this.xRememberUsername.Name = "xRememberUsername";
             this.xRememberUsername.Size = new System.Drawing.Size(126, 17);
-            this.xRememberUsername.TabIndex = 14;
+            this.xRememberUsername.TabIndex = 4;
             this.xRememberUsername.Text = "Remember username\r\n";
             this.xRememberUsername.UseVisualStyleBackColor = true;
             this.xRememberUsername.CheckedChanged += new System.EventHandler(this.SaveLauncherSettings);
@@ -563,7 +563,7 @@
             this.lToolStatus.Location = new System.Drawing.Point(6, 90);
             this.lToolStatus.Name = "lToolStatus";
             this.lToolStatus.Size = new System.Drawing.Size(260, 66);
-            this.lToolStatus.TabIndex = 27;
+            this.lToolStatus.TabIndex = 5;
             this.lToolStatus.Text = "lToolStatus";
             this.lToolStatus.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
@@ -575,14 +575,14 @@
             this.tPastebinUrl.Name = "tPastebinUrl";
             this.tPastebinUrl.ReadOnly = true;
             this.tPastebinUrl.Size = new System.Drawing.Size(129, 20);
-            this.tPastebinUrl.TabIndex = 5;
+            this.tPastebinUrl.TabIndex = 4;
             // 
             // bDeleteData
             // 
             this.bDeleteData.Location = new System.Drawing.Point(137, 6);
             this.bDeleteData.Name = "bDeleteData";
             this.bDeleteData.Size = new System.Drawing.Size(125, 23);
-            this.bDeleteData.TabIndex = 4;
+            this.bDeleteData.TabIndex = 1;
             this.bDeleteData.Text = "Delete all saved data";
             this.bDeleteData.UseVisualStyleBackColor = true;
             this.bDeleteData.Click += new System.EventHandler(this.bDeleteData_Click);
@@ -592,7 +592,7 @@
             this.bResetSettings.Location = new System.Drawing.Point(6, 6);
             this.bResetSettings.Name = "bResetSettings";
             this.bResetSettings.Size = new System.Drawing.Size(125, 23);
-            this.bResetSettings.TabIndex = 3;
+            this.bResetSettings.TabIndex = 0;
             this.bResetSettings.Text = "Reset all settings";
             this.bResetSettings.UseVisualStyleBackColor = true;
             this.bResetSettings.Click += new System.EventHandler(this.bResetSettings_Click);
@@ -602,7 +602,7 @@
             this.bUploadLog.Location = new System.Drawing.Point(6, 64);
             this.bUploadLog.Name = "bUploadLog";
             this.bUploadLog.Size = new System.Drawing.Size(125, 23);
-            this.bUploadLog.TabIndex = 2;
+            this.bUploadLog.TabIndex = 3;
             this.bUploadLog.Text = "Upload logfile";
             this.bUploadLog.UseVisualStyleBackColor = true;
             this.bUploadLog.Click += new System.EventHandler(this.bUploadLog_Click);
@@ -612,7 +612,7 @@
             this.bOpenDataDir.Location = new System.Drawing.Point(6, 35);
             this.bOpenDataDir.Name = "bOpenDataDir";
             this.bOpenDataDir.Size = new System.Drawing.Size(125, 23);
-            this.bOpenDataDir.TabIndex = 0;
+            this.bOpenDataDir.TabIndex = 2;
             this.bOpenDataDir.Text = "Open data directory";
             this.bOpenDataDir.UseVisualStyleBackColor = true;
             this.bOpenDataDir.Click += new System.EventHandler(this.bOpenDataDir_Click);
@@ -760,9 +760,9 @@
         private System.Windows.Forms.ProgressBar pbSigningIn;
         private System.Windows.Forms.Label lStatus;
         private System.Windows.Forms.Button bSignIn;
-        private System.Windows.Forms.Label lPassword;
+        private System.Windows.Forms.Label lSignInPassword;
         private System.Windows.Forms.TextBox tSignInUsername;
-        private System.Windows.Forms.Label lUsername;
+        private System.Windows.Forms.Label lSignInUsername;
         private System.Windows.Forms.TextBox tSignInPassword;
         private System.Windows.Forms.TabControl tabs;
         private System.Windows.Forms.TabPage tabResume;
