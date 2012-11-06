@@ -7,8 +7,8 @@ using System.Text.RegularExpressions;
 namespace ChargedMinersLauncher {
     sealed class SettingsFile {
         static readonly Regex CommentRegex = new Regex( @"^\s*#" );
-        static readonly Regex SettingRegex = new Regex( @"^\s*(\S*)\s*=\s*(\S*)" );
-        static readonly Regex SettingLiteralRegex = new Regex( @"\s*(\S*)\s*=?\s*:(.*)" );
+        static readonly Regex SettingRegex = new Regex( @"^\s*(\S+?)\s*=\s*(\S*)$" );
+        static readonly Regex SettingLiteralRegex = new Regex( @"^\s*(\S+?)\s*=?\s*:(.*)$" );
 
         readonly Dictionary<string, string> settings = new Dictionary<string, string>();
 
@@ -30,7 +30,7 @@ namespace ChargedMinersLauncher {
         }
 
 
-        public bool Get( string key, bool defaultVal ) {
+        public bool GetBool( string key, bool defaultVal ) {
             string stringVal;
             if( settings.TryGetValue( key, out stringVal ) ) {
                 bool boolVal;
@@ -42,7 +42,16 @@ namespace ChargedMinersLauncher {
         }
 
 
-        public TEnum Get<TEnum>( string key, TEnum defaultVal ) where TEnum : struct {
+        public string GetString( string key, string defaultVal ) {
+            string stringVal;
+            if( settings.TryGetValue( key, out stringVal ) ) {
+                return stringVal;
+            }
+            return defaultVal;
+        }
+
+
+        public TEnum GetEnum<TEnum>( string key, TEnum defaultVal ) where TEnum : struct {
             string stringVal;
             if( settings.TryGetValue( key, out stringVal ) ) {
                 try {
@@ -50,9 +59,7 @@ namespace ChargedMinersLauncher {
                     if( Enum.IsDefined( typeof( TEnum ), enumVal ) ) {
                         return enumVal;
                     }
-                } catch( ArgumentException ) {
-                } catch( OverflowException ) {
-                }
+                } catch( ArgumentException ) {} catch( OverflowException ) {}
             }
             return defaultVal;
         }

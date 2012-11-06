@@ -43,6 +43,7 @@ namespace ChargedMinersLauncher {
             Shown += OnShown;
             FormClosed += OnFormClosed;
 
+            // load and apply settings
             LoadLauncherSettings();
 
             switch( (StartingTab)cStartingTab.SelectedIndex ) {
@@ -70,31 +71,17 @@ namespace ChargedMinersLauncher {
             if( File.Exists( Paths.LauncherSettingsPath ) ) {
                 settings.Load( Paths.LauncherSettingsPath );
             }
-            bool saveUsername = settings.Get( "rememberUsername", true );
-            bool savePassword = settings.Get( "rememberPassword", false );
-            bool saveUrl = settings.Get( "rememberServer", true );
-            GameUpdateMode gameUpdateMode = settings.Get( "gameUpdateMode", GameUpdateMode.Ask );
-            StartingTab startingTab = settings.Get( "startingTab", StartingTab.SignIn );
+            bool saveUsername = settings.GetBool( "rememberUsername", true );
+            bool savePassword = settings.GetBool( "rememberPassword", false );
+            bool saveUrl = settings.GetBool( "rememberServer", true );
+            GameUpdateMode gameUpdateMode = settings.GetEnum( "gameUpdateMode", GameUpdateMode.Ask );
+            StartingTab startingTab = settings.GetEnum( "startingTab", StartingTab.SignIn );
             xRememberUsername.Checked = saveUsername;
             xRememberPassword.Checked = savePassword;
             xRememberServer.Checked = saveUrl;
             cGameUpdates.SelectedIndex = (int)gameUpdateMode;
             cStartingTab.SelectedIndex = (int)startingTab;
             settingsLoaded = true;
-        }
-
-
-        void SaveLauncherSettings( object sender, EventArgs e ) {
-            if( !settingsLoaded ) return;
-            Log( "SaveLauncherSettings" );
-            SettingsFile settings = new SettingsFile();
-            settings.Set( "rememberUsername", xRememberUsername.Checked );
-            settings.Set( "rememberPassword", xRememberPassword.Checked );
-            settings.Set( "rememberServer", xRememberServer.Checked );
-            settings.Set( "gameUpdateMode", (GameUpdateMode)cGameUpdates.SelectedIndex );
-            settings.Set( "startingTab", (StartingTab)cStartingTab.SelectedIndex );
-            settings.Save( Paths.LauncherSettingsPath );
-            lOptionsSaved.Text = "Changes saved.";
         }
 
 
@@ -110,22 +97,30 @@ namespace ChargedMinersLauncher {
             SignInFieldChanged( tSignInUsername, EventArgs.Empty );
             tDirectUrl_TextChanged( tDirectUrl, EventArgs.Empty );
 
-            // fill in the Uri field with CM's last-joined server
+            // Load "Resume" information from CM's settings file
             if( File.Exists( Paths.GameSettingsPath ) ) {
-                string[] config = File.ReadAllLines( Paths.GameSettingsPath );
-                foreach( string line in config ) {
-                    Match configMatch = ChargedMinersLastServer.Match( line );
-                    if( configMatch.Success ) {
-                        tResumeUri.Text = configMatch.Groups[1].Value;
-                        Match match = PlayLinkDirect.Match( tResumeUri.Text );
+                SettingsFile gameSettings = new SettingsFile();
+                gameSettings.Load( Paths.GameSettingsPath );
+                string resumeUri = gameSettings.GetString( "mc.lastMcUrl", "" );
+                if( resumeUri.Length > 0 ) {
+                    Match match = PlayLinkDirect.Match( resumeUri );
+                    if( match.Success ) {
+                        tResumeUri.Text = resumeUri;
                         tResumeServerIP.Text = match.Groups[1].Value;
                         tResumeUsername.Text = match.Groups[7].Value;
-                        break;
-                    } else {
-                        Match serverNameMatch = ChargedMinersLastServerName.Match( line );
-                        if( serverNameMatch.Success ) {
-                            tResumeServerName.Text = serverNameMatch.Groups[1].Value;
+                        string resumeServerName = gameSettings.GetString( "mc.lastClassicServer", "" );
+                        if( resumeServerName.Length > 0 ) {
+                            tResumeServerName.Text = resumeServerName;
+                        } else {
+                            tResumeServerName.Text = "?";
                         }
+                        bResume.Enabled = true;
+                    } else {
+                        tResumeUri.Text = "(Not Available)";
+                        tResumeUsername.Text = "?";
+                        tResumeServerIP.Text = "?";
+                        tResumeServerName.Text = "?";
+                        bResume.Enabled = false;
                     }
                 }
             }
@@ -147,11 +142,9 @@ namespace ChargedMinersLauncher {
 
         const string ToolTipUsername = "Your minecraft.net username or email",
                      ToolTipPassword = "Your minecraft.net password",
-                     ToolTipRemember =
-                         "Save your username and password for next time. Note that password is stored in plain text.",
+                     ToolTipRemember = "Save your username and password for next time. Note that password is stored in plain text.",
                      ToolTipUri = "Server's Minecraft.net URL or a DirectConnect (mc://) link. Optional.",
-                     ToolTipResume =
-                         "Try to reuse the last-used credentials, to connect to the most-recently-joined server.";
+                     ToolTipResume = "Try to reuse the last-used credentials, to connect to the most-recently-joined server.";
 
 
         void SetToolTips() {
@@ -177,9 +170,7 @@ namespace ChargedMinersLauncher {
 
         #region UI Event Hooks
 
-        MinecraftNetSession signInSession;
-
-
+        // Sign-In tab
         void SignInFieldChanged( object sender, EventArgs e ) {
             lSignInStatus.Text = "";
 
@@ -210,7 +201,7 @@ namespace ChargedMinersLauncher {
                 // "mc://" url
                 if( match.Groups[7].Value.Equals( tSignInUsername.Text, StringComparison.OrdinalIgnoreCase ) ) {
                     tSignInUrl.BackColor = SystemColors.Window;
-                    launchMode = LaunchMode.SignInWithDirectUri;
+                    launchMode = LaunchMode.SignInWithUri;
                 } else {
                     canSignIn = false;
                     tSignInUrl.BackColor = Color.Yellow;
@@ -256,6 +247,7 @@ namespace ChargedMinersLauncher {
         }
 
 
+        // Resume tab
         void bResume_Click( object sender, EventArgs e ) {
             launchMode = LaunchMode.Resume;
             loginCompleted = true;
@@ -267,6 +259,7 @@ namespace ChargedMinersLauncher {
         }
 
 
+        // Direct tab
         void tDirectUrl_TextChanged( object sender, EventArgs e ) {
             // check the URL field
             Match match = PlayLinkDirect.Match( tDirectUrl.Text );
@@ -295,6 +288,21 @@ namespace ChargedMinersLauncher {
                     lDirectStatus.Text = "Unrecognized URL.";
                 }
             }
+        }
+
+
+        // Options tab
+        void SaveLauncherSettings( object sender, EventArgs e ) {
+            if( !settingsLoaded ) return;
+            Log( "SaveLauncherSettings" );
+            SettingsFile settings = new SettingsFile();
+            settings.Set( "rememberUsername", xRememberUsername.Checked );
+            settings.Set( "rememberPassword", xRememberPassword.Checked );
+            settings.Set( "rememberServer", xRememberServer.Checked );
+            settings.Set( "gameUpdateMode", (GameUpdateMode)cGameUpdates.SelectedIndex );
+            settings.Set( "startingTab", (StartingTab)cStartingTab.SelectedIndex );
+            settings.Save( Paths.LauncherSettingsPath );
+            lOptionsSaved.Text = "Changes saved.";
         }
 
 
@@ -497,6 +505,7 @@ namespace ChargedMinersLauncher {
 
         #region Sign-In
 
+        MinecraftNetSession signInSession;
         LaunchMode launchMode;
 
         bool directConnect,
@@ -614,10 +623,9 @@ namespace ChargedMinersLauncher {
 
         #region State Control
 
-        volatile bool loginCompleted, updateCheckCompleted, downloadComplete;
-
-        static readonly Regex ChargedMinersLastServer = new Regex( @"^mc\.lastMcUrl:(mc.*)$" ),
-                              ChargedMinersLastServerName = new Regex( @"^mc\.lastClassicServer:(.*)$" );
+        volatile bool loginCompleted,
+                      updateCheckCompleted,
+                      downloadComplete;
 
 
         void OnSignInAndUpdateCheckCompleted() {
@@ -808,20 +816,25 @@ namespace ChargedMinersLauncher {
 
             // hide the form, to avoid stealing focus from CM window
             Hide();
-
+            
             string param;
-            if( directConnect ) {
-                // for direct-connect URIs (no session)
-                param = tDirectUrl.Text;
-
-            } else if( clickedGo ) {
-                // for minecraft.net URIs
-                param = String.Format( "PLAY_SESSION={0} {1}",
-                                       signInSession.PlaySessionCookie,
-                                       tDirectUrl.Text );
-            } else {
-                // pass session only
-                param = "PLAY_SESSION=" + signInSession.PlaySessionCookie;
+            switch( launchMode ) {
+                case LaunchMode.Direct:
+                    param = tDirectUrl.Text;
+                    break;
+                case LaunchMode.Resume:
+                    param = tResumeUri.Text;
+                    break;
+                case LaunchMode.SignIn:
+                    param = "PLAY_SESSION=" + signInSession.PlaySessionCookie;
+                    break;
+                case LaunchMode.SignInWithUri:
+                    param = String.Format( "PLAY_SESSION={0} {1}",
+                                           signInSession.PlaySessionCookie,
+                                           tSignInUrl.Text );
+                    break;
+                default:
+                    throw new Exception( "LaunchMode not set" );
             }
 
             if( RuntimeInfo.IsWindows ) {

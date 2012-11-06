@@ -4,7 +4,6 @@ namespace ChargedMinersLauncher {
     enum LaunchMode {
         SignIn,
         SignInWithUri,
-        SignInWithDirectUri,
         Resume,
         Direct
     }
