@@ -15,7 +15,10 @@ namespace ChargedMinersLauncher {
     public sealed partial class MainForm : Form {
         public MainForm() {
             // Start logging
-            File.Delete( Paths.LauncherLogPath );
+            if( File.Exists( Paths.LauncherLogPath ) ) {
+                File.Delete( Paths.LauncherLogPath + ".old" );
+                File.Move( Paths.LauncherLogPath, Paths.LauncherLogPath + ".old" );
+            }
             Log( "---- " + DateTime.Now.ToLongDateString() + " ----" );
 
             // Set up the GUI
@@ -47,6 +50,8 @@ namespace ChargedMinersLauncher {
         #region Startup
 
         bool settingsLoaded;
+
+
         void LoadLauncherSettings() {
             Log( "LoadLauncherSettings" );
             SettingsFile settings = new SettingsFile();
@@ -126,9 +131,11 @@ namespace ChargedMinersLauncher {
 
         const string ToolTipUsername = "Your minecraft.net username or email",
                      ToolTipPassword = "Your minecraft.net password",
-                     ToolTipRemember = "Save your username and password for next time. Note that password is stored in plain text.",
+                     ToolTipRemember =
+                         "Save your username and password for next time. Note that password is stored in plain text.",
                      ToolTipUri = "Server's Minecraft.net URL or a DirectConnect (mc://) link. Optional.",
-                     ToolTipResume = "Try to reuse the last-used credentials, to connect to the most-recently-joined server.";
+                     ToolTipResume =
+                         "Try to reuse the last-used credentials, to connect to the most-recently-joined server.";
 
 
         void SetToolTips() {
@@ -145,7 +152,7 @@ namespace ChargedMinersLauncher {
 
 
         // log close reason
-        private void OnFormClosed( object sender, FormClosedEventArgs e ) {
+        void OnFormClosed( object sender, FormClosedEventArgs e ) {
             Log( "Closed: " + e.CloseReason );
         }
 
@@ -155,6 +162,7 @@ namespace ChargedMinersLauncher {
         #region UI Event Hooks
 
         MinecraftNetSession signInSession;
+
 
         void SignInFieldChanged( object sender, EventArgs e ) {
             lSignInStatus.Text = "";
@@ -232,7 +240,7 @@ namespace ChargedMinersLauncher {
         }
 
 
-        private void bResume_Click( object sender, EventArgs e ) {
+        void bResume_Click( object sender, EventArgs e ) {
             launchMode = LaunchMode.Resume;
             loginCompleted = true;
             if( updateCheckCompleted ) {
@@ -243,7 +251,7 @@ namespace ChargedMinersLauncher {
         }
 
 
-        private void tDirectUrl_TextChanged( object sender, EventArgs e ) {
+        void tDirectUrl_TextChanged( object sender, EventArgs e ) {
             // check the URL field
             Match match = PlayLinkDirect.Match( tDirectUrl.Text );
             if( match.Success ) {
@@ -274,7 +282,8 @@ namespace ChargedMinersLauncher {
         }
 
 
-        private void bResetSettings_Click( object sender, EventArgs e ) {
+        void bResetSettings_Click( object sender, EventArgs e ) {
+            Log( "[ResetSettings]" );
             File.Delete( Paths.LauncherSettingsPath );
             File.Delete( Paths.GameSettingsPath );
             settingsLoaded = false;
@@ -283,7 +292,8 @@ namespace ChargedMinersLauncher {
         }
 
 
-        private void bDeleteData_Click( object sender, EventArgs e ) {
+        void bDeleteData_Click( object sender, EventArgs e ) {
+            Log( "[DeleteData]" );
             File.Delete( Paths.LauncherSettingsPath );
             File.Delete( Paths.GameSettingsPath );
             File.Delete( Paths.LauncherLogPath );
@@ -296,8 +306,55 @@ namespace ChargedMinersLauncher {
         }
 
 
-        private void bOpenDataDir_Click( object sender, EventArgs e ) {
+        void bOpenDataDir_Click( object sender, EventArgs e ) {
+            Log( "[OpenDataDir]" );
             Process.Start( "file://" + Paths.DataPath );
+        }
+
+
+        void bUploadLog_Click( object sender, EventArgs e ) {
+            Log( "[UploadLog]" );
+            JsonObject files = new JsonObject();
+            if( File.Exists( Paths.GameLogPath ) ) {
+                string content = File.ReadAllText( Paths.GameLogPath );
+                files.Add( "log.txt",
+                           new JsonObject { { "content", content } } );
+            }
+            if( File.Exists( Paths.LauncherLogPath ) ) {
+                string content = File.ReadAllText( Paths.LauncherLogPath );
+                files.Add( "launcher.log",
+                           new JsonObject { { "content", content } } );
+            }
+            if( File.Exists( Paths.LauncherLogPath + ".old" ) ) {
+                string content = File.ReadAllText( Paths.LauncherLogPath + ".old" );
+                files.Add( "launcher.log.old",
+                           new JsonObject { { "content", content } } );
+            }
+            if( files.Count == 0 ) {
+                lToolStatus.Text = "No log files to submit";
+                return;
+            }
+
+            JsonObject request = new JsonObject {
+                { "description", "Charged-Miners log upload" },
+                { "public", false },
+                { "files", files }
+            };
+            WebClient logClient = new WebClient();
+            string dataString = request.Serialize();
+            byte[] data = Encoding.UTF8.GetBytes( dataString );
+            try {
+                byte[] responseData = logClient.UploadData( "https://api.github.com/gists", data );
+                string responseString = Encoding.UTF8.GetString( responseData );
+                JsonObject response = new JsonObject( responseString );
+                tPastebinUrl.Text = response.GetString( "html_url" );
+                tPastebinUrl.Select();
+                tPastebinUrl.SelectAll();
+                lToolStatus.Text = "Log files uploaded! Please copy the given URL.";
+            } catch( WebException ex ) {
+                Log( "UploadLog ERROR: " + ex );
+                lToolStatus.Text = "Log file upload failed! " + ex.Message;
+            }
         }
 
         #endregion
@@ -310,6 +367,7 @@ namespace ChargedMinersLauncher {
         static readonly Uri UpdateUri = new Uri( "http://cloud.github.com/downloads/Charged/Miners/" );
         readonly WebClient binaryDownloader = new WebClient();
         VersionInfo latestVersion;
+
 
         void CheckUpdates( object sender, DoWorkEventArgs e ) {
             try {
@@ -441,9 +499,11 @@ namespace ChargedMinersLauncher {
             PlayLinkHash =
                 new Regex( @"^http://(www\.)?minecraft.net/classic/play/([0-9a-fA-F]{28,32})/?(\?override=(true|1))?$" ),
             PlayLinkDirect =
-                new Regex( @"^mc://((localhost|(\d{1,3}\.){3}\d{1,3}|([a-zA-Z0-9\-]+\.)+([a-zA-Z0-9\-]+))(:\d{1,5})?)/([a-zA-Z0-9_\.]{2,16})/(.*)$" ),
+                new Regex(
+                    @"^mc://((localhost|(\d{1,3}\.){3}\d{1,3}|([a-zA-Z0-9\-]+\.)+([a-zA-Z0-9\-]+))(:\d{1,5})?)/([a-zA-Z0-9_\.]{2,16})/(.*)$" ),
             PlayLinkIPPort =
-                new Regex( @"^http://(www\.)?minecraft.net/classic/play/?\?ip=(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})&port=(\d{1,5})$" );
+                new Regex(
+                    @"^http://(www\.)?minecraft.net/classic/play/?\?ip=(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})&port=(\d{1,5})$" );
 
 
         void SignIn( object sender, DoWorkEventArgs e ) {

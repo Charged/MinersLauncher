@@ -70,6 +70,7 @@
   <ItemGroup>
     <Compile Include="FormState.cs" />
     <Compile Include="GameUpdateMode.cs" />
+    <Compile Include="JsonObject.cs" />
     <Compile Include="LaunchMode.cs" />
     <Compile Include="Paths.cs" />
     <Compile Include="RuntimeInfo.cs" />

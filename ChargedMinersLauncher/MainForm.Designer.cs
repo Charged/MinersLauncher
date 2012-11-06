@@ -55,6 +55,7 @@
             this.tDirectUrl = new System.Windows.Forms.TextBox();
             this.lDirectUrl = new System.Windows.Forms.Label();
             this.tabOptions = new System.Windows.Forms.TabPage();
+            this.lOptionsSaved = new System.Windows.Forms.Label();
             this.lGameUpdates = new System.Windows.Forms.Label();
             this.cGameUpdates = new System.Windows.Forms.ComboBox();
             this.xRememberServer = new System.Windows.Forms.CheckBox();
@@ -63,6 +64,7 @@
             this.cStartingTab = new System.Windows.Forms.ComboBox();
             this.xRememberUsername = new System.Windows.Forms.CheckBox();
             this.tabTools = new System.Windows.Forms.TabPage();
+            this.lToolStatus = new System.Windows.Forms.Label();
             this.tPastebinUrl = new System.Windows.Forms.TextBox();
             this.bDeleteData = new System.Windows.Forms.Button();
             this.bResetSettings = new System.Windows.Forms.Button();
@@ -77,8 +79,6 @@
             this.bUpdateNo = new System.Windows.Forms.Button();
             this.bUpdateYes = new System.Windows.Forms.Button();
             this.lUpdatePrompt = new System.Windows.Forms.Label();
-            this.lOptionsSaved = new System.Windows.Forms.Label();
-            this.lToolStatus = new System.Windows.Forms.Label();
             this.flow.SuspendLayout();
             this.tabs.SuspendLayout();
             this.tabSignIn.SuspendLayout();
@@ -447,6 +447,18 @@
             this.tabOptions.Text = "Options";
             this.tabOptions.UseVisualStyleBackColor = true;
             // 
+            // lOptionsSaved
+            // 
+            this.lOptionsSaved.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.lOptionsSaved.ForeColor = System.Drawing.SystemColors.ControlDarkDark;
+            this.lOptionsSaved.Location = new System.Drawing.Point(6, 126);
+            this.lOptionsSaved.Name = "lOptionsSaved";
+            this.lOptionsSaved.Size = new System.Drawing.Size(260, 30);
+            this.lOptionsSaved.TabIndex = 26;
+            this.lOptionsSaved.Text = "lOptionsSaved";
+            this.lOptionsSaved.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            // 
             // lGameUpdates
             // 
             this.lGameUpdates.AutoSize = true;
@@ -543,6 +555,18 @@
             this.tabTools.Text = "Tools";
             this.tabTools.UseVisualStyleBackColor = true;
             // 
+            // lToolStatus
+            // 
+            this.lToolStatus.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.lToolStatus.ForeColor = System.Drawing.SystemColors.ControlDarkDark;
+            this.lToolStatus.Location = new System.Drawing.Point(6, 90);
+            this.lToolStatus.Name = "lToolStatus";
+            this.lToolStatus.Size = new System.Drawing.Size(260, 66);
+            this.lToolStatus.TabIndex = 27;
+            this.lToolStatus.Text = "lToolStatus";
+            this.lToolStatus.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            // 
             // tPastebinUrl
             // 
             this.tPastebinUrl.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
@@ -581,6 +605,7 @@
             this.bUploadLog.TabIndex = 2;
             this.bUploadLog.Text = "Upload logfile";
             this.bUploadLog.UseVisualStyleBackColor = true;
+            this.bUploadLog.Click += new System.EventHandler(this.bUploadLog_Click);
             // 
             // bOpenDataDir
             // 
@@ -689,30 +714,6 @@
             this.lUpdatePrompt.Text = "An update for ChargedMiners is available.\r\nWould you like to download and apply i" +
     "t?";
             this.lUpdatePrompt.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
-            // 
-            // lOptionsSaved
-            // 
-            this.lOptionsSaved.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.lOptionsSaved.ForeColor = System.Drawing.SystemColors.ControlDarkDark;
-            this.lOptionsSaved.Location = new System.Drawing.Point(6, 126);
-            this.lOptionsSaved.Name = "lOptionsSaved";
-            this.lOptionsSaved.Size = new System.Drawing.Size(260, 30);
-            this.lOptionsSaved.TabIndex = 26;
-            this.lOptionsSaved.Text = "lOptionsSaved";
-            this.lOptionsSaved.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
-            // 
-            // lToolStatus
-            // 
-            this.lToolStatus.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.lToolStatus.ForeColor = System.Drawing.SystemColors.ControlDarkDark;
-            this.lToolStatus.Location = new System.Drawing.Point(6, 90);
-            this.lToolStatus.Name = "lToolStatus";
-            this.lToolStatus.Size = new System.Drawing.Size(260, 66);
-            this.lToolStatus.TabIndex = 27;
-            this.lToolStatus.Text = "lToolStatus";
-            this.lToolStatus.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
             // MainForm
             // 
