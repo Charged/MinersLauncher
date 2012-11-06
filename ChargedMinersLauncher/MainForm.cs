@@ -44,6 +44,18 @@ namespace ChargedMinersLauncher {
             FormClosed += OnFormClosed;
 
             LoadLauncherSettings();
+
+            switch( (StartingTab)cStartingTab.SelectedIndex ) {
+                case StartingTab.Direct:
+                    tabs.SelectedTab = tabDirect;
+                    break;
+                case StartingTab.Resume:
+                    tabs.SelectedTab = tabResume;
+                    break;
+                case StartingTab.SignIn:
+                    tabs.SelectedTab = tabSignIn;
+                    break;
+            }
         }
 
 
@@ -82,7 +94,7 @@ namespace ChargedMinersLauncher {
             settings.Set( "gameUpdateMode", (GameUpdateMode)cGameUpdates.SelectedIndex );
             settings.Set( "startingTab", (StartingTab)cStartingTab.SelectedIndex );
             settings.Save( Paths.LauncherSettingsPath );
-            lOptionsSaved.Text = "Changes saved";
+            lOptionsSaved.Text = "Changes saved.";
         }
 
 
@@ -123,7 +135,11 @@ namespace ChargedMinersLauncher {
             // To bypass HTTPS certificate validation
             ServicePointManager.ServerCertificateValidationCallback += delegate { return true; };
 
-            versionCheckWorker.RunWorkerAsync();
+            if( (GameUpdateMode)cGameUpdates.SelectedIndex == GameUpdateMode.Never ) {
+                updateCheckCompleted = true;
+            } else {
+                versionCheckWorker.RunWorkerAsync();
+            }
         }
 
 
@@ -619,9 +635,18 @@ namespace ChargedMinersLauncher {
                 }
 
             } else if( !latestVersion.Md5.Equals( localHashString, StringComparison.OrdinalIgnoreCase ) ) {
-                // local CM binaries are outdated; prompt to update
-                State = FormState.PromptingToUpdate;
-
+                // local CM binaries are outdated
+                switch( (GameUpdateMode)cGameUpdates.SelectedIndex ) {
+                    case GameUpdateMode.Always:
+                        ApplyUpdate(); // update automatically
+                        break;
+                    case GameUpdateMode.Ask:
+                        State = FormState.PromptingToUpdate; // prompt
+                        break;
+                    case GameUpdateMode.Never:
+                        StartChargedMiners(); // skip update
+                        break;
+                }
             } else {
                 // local CM binaries are up to date; run
                 StartChargedMiners();
