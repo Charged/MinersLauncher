@@ -816,6 +816,7 @@ namespace ChargedMinersLauncher {
 
             // hide the form, to avoid stealing focus from CM window
             Hide();
+            Refresh();
             
             string param;
             switch( launchMode ) {
