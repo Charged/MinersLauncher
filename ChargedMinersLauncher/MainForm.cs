@@ -134,6 +134,11 @@ namespace ChargedMinersLauncher {
             } else {
                 versionCheckWorker.RunWorkerAsync();
             }
+
+            // focus on the "password" field if "remember username" was checked but "remember password" was not
+            if( tabs.SelectedTab == tabSignIn && tSignInUsername.Text.Length > 0 && tSignInPassword.Text.Length == 0 ) {
+                tSignInPassword.Select();
+            }
         }
 
 
@@ -563,11 +568,13 @@ namespace ChargedMinersLauncher {
                 case LoginResult.MigratedAccount:
                     lSignInStatus.Text = "Migrated account. Use your email to sign in.";
                     SelectedPanel = tabs;
+                    tSignInUsername.Select();
                     break;
 
                 case LoginResult.WrongUsernameOrPass:
                     lSignInStatus.Text = "Wrong username or password.";
                     SelectedPanel = tabs;
+                    tSignInPassword.Select();
                     break;
 
                 case LoginResult.UnrecognizedResponse:
