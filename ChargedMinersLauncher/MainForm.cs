@@ -149,28 +149,43 @@ namespace ChargedMinersLauncher {
 
         ToolTip toolTip;
 
-        const string ToolTipUsername = "Your minecraft.net username or email",
-                     ToolTipPassword = "Your minecraft.net password",
+        const string ToolTipSignInUsername = "Your minecraft.net username or email",
+                     ToolTipSignInPassword = "Your minecraft.net password",
+                     ToolTipSignInUrl = "Server's Minecraft.net URL or a DirectConnect (mc://) link. Optional.",
                      ToolTipRememberUsername = "Save your username for next time.",
-                     ToolTipRememberPassword = "Save your password for next time. Note that password is stored in plain text.",
-                     ToolTipSignInUri = "Server's Minecraft.net URL or a DirectConnect (mc://) link. Optional.",
-                     ToolTipDirectUri = "Server's DirectConnect (mc://) link.",
-                     ToolTipResume = "Try to reuse the last-used credentials, to connect to the most-recently-joined server.";
+                     ToolTipRememberPassword =
+                         "Save your password for next time. Note that password is stored in plain text.",
+                     ToolTipDirectUrl = "Server's DirectConnect (mc://) link.",
+                     ToolTipResume =
+                         "Try to reuse the last-used credentials, to connect to the most-recently-joined server.",
+                     ToolTipResetSettings = "Resets Charged-Miners and Launcher settings to defaults.",
+                     ToolTipDeleteData = "Deletes all private data: settings, logs, stored login data, etc.",
+                     ToolTipOpenDataDir = "Opens up Charged-Miners' data directory.",
+                     ToolTipUploadLog =
+                         "Uploads your Charged-Miners and launcher log files, which contain debugging information, for easy sharing.";
 
 
         void SetToolTips() {
             toolTip = new ToolTip();
-            toolTip.SetToolTip( tSignInUsername, ToolTipUsername );
-            toolTip.SetToolTip( lSignInUsername, ToolTipUsername );
-            toolTip.SetToolTip( tSignInPassword, ToolTipPassword );
-            toolTip.SetToolTip( lSignInPassword, ToolTipPassword );
+            toolTip.SetToolTip( tSignInUsername, ToolTipSignInUsername );
+            toolTip.SetToolTip( lSignInUsername, ToolTipSignInUsername );
+            toolTip.SetToolTip( tSignInPassword, ToolTipSignInPassword );
+            toolTip.SetToolTip( lSignInPassword, ToolTipSignInPassword );
+            toolTip.SetToolTip( tSignInUrl, ToolTipSignInUrl );
+            toolTip.SetToolTip( lSignInUrl, ToolTipSignInUrl );
+
+            toolTip.SetToolTip( bResume, ToolTipResume );
+
+            toolTip.SetToolTip( tDirectUrl, ToolTipDirectUrl );
+            toolTip.SetToolTip( lDirectUrl, ToolTipDirectUrl );
+
             toolTip.SetToolTip( xRememberUsername, ToolTipRememberUsername );
             toolTip.SetToolTip( xRememberPassword, ToolTipRememberPassword );
-            toolTip.SetToolTip( tSignInUrl, ToolTipSignInUri );
-            toolTip.SetToolTip( lSignInUrl, ToolTipSignInUri );
-            toolTip.SetToolTip( tDirectUrl, ToolTipDirectUri );
-            toolTip.SetToolTip( lDirectUrl, ToolTipDirectUri );
-            toolTip.SetToolTip( bResume, ToolTipResume );
+
+            toolTip.SetToolTip( bResetSettings, ToolTipResetSettings );
+            toolTip.SetToolTip( bDeleteData, ToolTipDeleteData );
+            toolTip.SetToolTip( bOpenDataDir, ToolTipOpenDataDir );
+            toolTip.SetToolTip( bUploadLog, ToolTipUploadLog );
         }
 
 
@@ -880,6 +895,7 @@ namespace ChargedMinersLauncher {
                 Process.Start( latestVersion.Name, param );
                 Application.Exit();
             } catch( Exception ex ) {
+                Log( "StartChargedMiners ERROR: " + ex );
                 State = FormState.UnrecoverableError;
                 lStatus.Text = "Error launching Charged-Miners.";
                 lStatus2.Text = ex.GetType().Name + Environment.NewLine + ex.Message;
