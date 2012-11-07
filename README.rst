@@ -4,7 +4,7 @@ Charged-Miners Launcher
 
 GUI launcher for Charged-Miners client: https://github.com/Charged/Miners
 
-.. image:: http://i.imgur.com/Vx6XI.png
+.. image:: http://i.imgur.com/FNy8v.png
 
 Handles software updates and login for Charged-Miners.
 Requires Microsoft.NET Framework 3.5.
