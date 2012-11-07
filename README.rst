@@ -15,6 +15,13 @@ Latest binaries can be found at https://github.com/Charged/Miners/downloads
 ---------------
  Version history
 ---------------
+- 1.1
+    New user interface! Now with tabs.
+
+    Added more options (starting tab, how to install game updates, whether to remember username/password/server).
+
+    Added some tools (resetting settings, clearing all data, opening data directory, submitting logs).
+
 - 1.03
     Allowed more kinds of mc:// URLs. Port number is now optional, and hostnames can be used in place of IPs.
 
