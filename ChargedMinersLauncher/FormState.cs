@@ -5,7 +5,7 @@ namespace ChargedMinersLauncher {
         AtSignInForm,
         SigningIn,
         WaitingForUpdater,
-        PlatformNotSupportedError,
+        UnrecoverableError,
         PromptingToUpdate,
         DownloadingBinary,
     };

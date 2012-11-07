@@ -12,6 +12,8 @@ using System.Windows.Forms;
 
 namespace ChargedMinersLauncher {
     public sealed partial class MainForm : Form {
+        #region Startup / Shutdown
+
         public MainForm() {
             // Start logging
             if( File.Exists( Paths.LauncherLogPath ) ) {
@@ -59,8 +61,6 @@ namespace ChargedMinersLauncher {
         }
 
 
-        #region Startup
-
         bool settingsLoaded;
 
 
@@ -84,9 +84,14 @@ namespace ChargedMinersLauncher {
         }
 
 
+        const string UnsupportedPlatformHeader = "Unsupported platform.",
+                     UnsupportedPlatformText = "Charged-Miners is only available for Windows, Linux, and MacOS X.";
+
         void OnShown( object sender, EventArgs e ) {
             if( !Paths.IsPlatformSupported ) {
-                State = FormState.PlatformNotSupportedError;
+                State = FormState.UnrecoverableError;
+                lStatus.Text = UnsupportedPlatformHeader;
+                lStatus2.Text = UnsupportedPlatformText;
                 return;
             }
 
@@ -179,7 +184,7 @@ namespace ChargedMinersLauncher {
 
         #region UI Event Hooks
 
-        // Sign-In tab
+        // ==== Sign-In tab ====
         void SignInFieldChanged( object sender, EventArgs e ) {
             lSignInStatus.Text = "";
 
@@ -257,7 +262,7 @@ namespace ChargedMinersLauncher {
         }
 
 
-        // Resume tab
+        // ==== Resume tab ====
         void bResume_Click( object sender, EventArgs e ) {
             Log( "[Resume]" );
             launchMode = LaunchMode.Resume;
@@ -269,24 +274,13 @@ namespace ChargedMinersLauncher {
             }
         }
 
-        private void bDirectConnect_Click( object sender, EventArgs e ) {
-            Log( "[DirectConnect]" );
-            launchMode = LaunchMode.Direct;
-            loginCompleted = true;
-            if( updateCheckCompleted ) {
-                OnSignInAndUpdateCheckCompleted();
-            } else {
-                State = FormState.WaitingForUpdater;
-            }
-        }
 
-
-        // Direct tab
+        // ==== Direct tab ====
         void tDirectUrl_TextChanged( object sender, EventArgs e ) {
             // check the URL field
             Match match = PlayLinkDirect.Match( tDirectUrl.Text );
             if( match.Success ) {
-                // "mc://" url
+                // Acceptable "mc://" url
                 tDirectServerIP.Text = match.Groups[1].Value;
                 tDirectUsername.Text = match.Groups[7].Value;
                 tDirectUrl.BackColor = SystemColors.Window;
@@ -295,6 +289,7 @@ namespace ChargedMinersLauncher {
                 bDirectConnect.Enabled = true;
 
             } else {
+                // Unacceptable or missing URL
                 tDirectServerIP.Text = "?";
                 tDirectUsername.Text = "?";
                 tDirectUrl.BackColor = Color.Yellow;
@@ -313,7 +308,19 @@ namespace ChargedMinersLauncher {
         }
 
 
-        // Options tab
+        void bDirectConnect_Click( object sender, EventArgs e ) {
+            Log( "[DirectConnect]" );
+            launchMode = LaunchMode.Direct;
+            loginCompleted = true;
+            if( updateCheckCompleted ) {
+                OnSignInAndUpdateCheckCompleted();
+            } else {
+                State = FormState.WaitingForUpdater;
+            }
+        }
+
+
+        // ==== Options tab ====
         void SaveLauncherSettings( object sender, EventArgs e ) {
             if( !settingsLoaded ) return;
             Log( "SaveLauncherSettings" );
@@ -328,6 +335,7 @@ namespace ChargedMinersLauncher {
         }
 
 
+        // ==== Tools tab ====
         void bResetSettings_Click( object sender, EventArgs e ) {
             Log( "[ResetSettings]" );
             File.Delete( Paths.LauncherSettingsPath );
@@ -658,11 +666,14 @@ namespace ChargedMinersLauncher {
 
         void OnSignInAndUpdateCheckCompleted() {
             Log( "OnSignInAndUpdateCheckCompleted" );
-            if( latestVersion == null ) {
-                // no CM version found for this platform; notify, then terminate
-                State = FormState.PlatformNotSupportedError;
-
-            } else if( !File.Exists( latestVersion.Name ) ) {
+            if( !File.Exists( latestVersion.Name ) ) {
+                if( latestVersion == null ) {
+                    // no CM version found for this platform; notify, then terminate
+                    State = FormState.UnrecoverableError;
+                    lStatus.Text = UnsupportedPlatformHeader;
+                    lStatus2.Text = UnsupportedPlatformText;
+                    return;
+                }
                 // no local CM binaries: download them
                 if( downloadComplete ) {
                     ApplyUpdate();
@@ -726,11 +737,9 @@ namespace ChargedMinersLauncher {
                         bCancel.Visible = false;
                         break;
 
-                    case FormState.PlatformNotSupportedError:
+                    case FormState.UnrecoverableError:
                         AcceptButton = bCancel;
                         CancelButton = null;
-                        lStatus.Text = "Failed to initialize";
-                        lStatus2.Text = "Charged-Miners is not available for this platform.";
                         pbSigningIn.Style = ProgressBarStyle.Continuous;
                         pbSigningIn.Value = 100;
                         bCancel.Text = "OK";
@@ -806,7 +815,7 @@ namespace ChargedMinersLauncher {
                     signInWorker.CancelAsync();
                     lStatus2.Text = "Canceling...";
                     break;
-                case FormState.PlatformNotSupportedError:
+                case FormState.UnrecoverableError:
                     Environment.ExitCode = 1;
                     Application.Exit();
                     break;
@@ -841,7 +850,8 @@ namespace ChargedMinersLauncher {
             // hide the form, to avoid stealing focus from CM window
             Hide();
             Refresh();
-            
+
+            // build CM parameter string
             string param;
             switch( launchMode ) {
                 case LaunchMode.Direct:
@@ -861,13 +871,19 @@ namespace ChargedMinersLauncher {
                 default:
                     throw new Exception( "LaunchMode not set" );
             }
-
             if( RuntimeInfo.IsWindows ) {
                 param += String.Format( " LAUNCHER_PATH=\"{0}\"", Paths.LauncherPath );
             }
 
-            Process.Start( latestVersion.Name, param );
-            Application.Exit();
+            // launch CM
+            try {
+                Process.Start( latestVersion.Name, param );
+                Application.Exit();
+            } catch( Exception ex ) {
+                State = FormState.UnrecoverableError;
+                lStatus.Text = "Error launching Charged-Miners.";
+                lStatus2.Text = ex.GetType().Name + Environment.NewLine + ex.Message;
+            }
         }
 
 
