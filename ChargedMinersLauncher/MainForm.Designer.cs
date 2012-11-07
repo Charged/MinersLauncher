@@ -408,6 +408,7 @@
             this.bDirectConnect.TabIndex = 2;
             this.bDirectConnect.Text = "Connect";
             this.bDirectConnect.UseVisualStyleBackColor = true;
+            this.bDirectConnect.Click += new System.EventHandler(this.bDirectConnect_Click);
             // 
             // tDirectUrl
             // 

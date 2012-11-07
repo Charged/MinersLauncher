@@ -243,8 +243,9 @@ namespace ChargedMinersLauncher {
 
 
         void bSignIn_Click( object sender, EventArgs e ) {
+            Log( "[SignIn]" );
             string minecraftUsername;
-            if( tSignInUsername.Text == storedLoginUsername ) {
+            if( xRememberUsername.Checked && tSignInUsername.Text == storedLoginUsername ) {
                 minecraftUsername = storedMinecraftUsername;
             } else {
                 minecraftUsername = tSignInUsername.Text;
@@ -258,7 +259,19 @@ namespace ChargedMinersLauncher {
 
         // Resume tab
         void bResume_Click( object sender, EventArgs e ) {
+            Log( "[Resume]" );
             launchMode = LaunchMode.Resume;
+            loginCompleted = true;
+            if( updateCheckCompleted ) {
+                OnSignInAndUpdateCheckCompleted();
+            } else {
+                State = FormState.WaitingForUpdater;
+            }
+        }
+
+        private void bDirectConnect_Click( object sender, EventArgs e ) {
+            Log( "[DirectConnect]" );
+            launchMode = LaunchMode.Direct;
             loginCompleted = true;
             if( updateCheckCompleted ) {
                 OnSignInAndUpdateCheckCompleted();
@@ -279,13 +292,13 @@ namespace ChargedMinersLauncher {
                 tDirectUrl.BackColor = SystemColors.Window;
                 launchMode = LaunchMode.Direct;
                 lDirectStatus.Text = "";
-                bResume.Enabled = true;
+                bDirectConnect.Enabled = true;
 
             } else {
                 tDirectServerIP.Text = "?";
                 tDirectUsername.Text = "?";
                 tDirectUrl.BackColor = Color.Yellow;
-                bResume.Enabled = false;
+                bDirectConnect.Enabled = false;
                 if( PlayLinkHash.IsMatch( tDirectUrl.Text ) || PlayLinkIPPort.IsMatch( tDirectUrl.Text ) ) {
                     // minecraft.net play link
                     lDirectStatus.Text = "You must sign in to connect to servers via minecraft.net links.";
