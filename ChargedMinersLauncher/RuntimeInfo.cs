@@ -16,14 +16,33 @@ namespace ChargedMinersLauncher {
 
         static RuntimeInfo() {
             IsMono = Type.GetType( "Mono.Runtime" ) != null;
-            int p = (int)Environment.OSVersion.Platform;
-            IsUnix = ( p == 4 ) || ( p == 6 ) || ( p == 128 );
-            IsWindows = Path.DirectorySeparatorChar == '\\';
 
-            Is32Bit = IntPtr.Size == 4;
-            Is64Bit = IntPtr.Size == 8;
+            switch( Environment.OSVersion.Platform ) {
+                case PlatformID.MacOSX:
+                    IsMacOSX = true;
+                    IsUnix = true;
+                    break;
 
-            if( IsUnix ) {
+                case (PlatformID)128:
+                case PlatformID.Unix:
+                    IsUnix = true;
+                    break;
+
+                case PlatformID.Win32NT:
+                case PlatformID.Win32S:
+                case PlatformID.Win32Windows:
+                case PlatformID.WinCE:
+                    IsWindows = true;
+                    break;
+
+                default:
+                    return;
+            }
+
+            Is32Bit = (IntPtr.Size == 4);
+            Is64Bit = (IntPtr.Size == 8);
+
+            if( IsUnix && !IsMacOSX ) {
                 Process uname = new Process {
                     StartInfo = {
                         FileName = "uname",
@@ -37,11 +56,8 @@ namespace ChargedMinersLauncher {
 
                 output = output.ToUpper().Replace( "\n", "" ).Trim();
 
-                IsMacOSX = output == "DARWIN";
-                IsLinux = output == "LINUX";
-            } else {
-                IsMacOSX = false;
-                IsLinux = false;
+                IsMacOSX = (output == "DARWIN");
+                IsLinux = (output == "LINUX");
             }
         }
     }
