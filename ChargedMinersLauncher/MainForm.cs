@@ -436,6 +436,7 @@ namespace ChargedMinersLauncher {
         static readonly Uri UpdateUri = new Uri( "http://cloud.github.com/downloads/Charged/Miners/" );
         readonly WebClient binaryDownloader = new WebClient();
         VersionInfo latestVersion;
+        Exception updaterException;
 
 
         void CheckUpdates( object sender, DoWorkEventArgs e ) {
@@ -464,15 +465,14 @@ namespace ChargedMinersLauncher {
 
                 // check if alternative binary download is available
                 latestVersion = versionList.Get( Paths.AlternativeBinary );
-
-                // if not, fail
-                if( latestVersion == null ) return;
-
-                // check if local alt binary exists
-                if( File.Exists( Paths.AlternativeBinary ) ) {
-                    localHashString = ComputeLocalHash( Paths.AlternativeBinary );
-                } // else download alt binary
+                if( latestVersion != null ) {
+                    // check if local alt binary exists
+                    if( File.Exists( Paths.AlternativeBinary ) ) {
+                        localHashString = ComputeLocalHash( Paths.AlternativeBinary );
+                    } // else download alt binary
+                }
             } catch( Exception ex ) {
+                updaterException = ex;
                 Log( "CheckUpdates ERROR: " + ex );
             }
         }
@@ -681,23 +681,35 @@ namespace ChargedMinersLauncher {
 
         void OnSignInAndUpdateCheckCompleted() {
             Log( "OnSignInAndUpdateCheckCompleted" );
+
             if( latestVersion == null ) {
-                // no CM version found for this platform; notify, then terminate
-                State = FormState.UnrecoverableError;
-                lStatus.Text = UnsupportedPlatformHeader;
-                lStatus2.Text = UnsupportedPlatformText;
+                // Updater failed!
+                if( File.Exists( Paths.PrimaryBinary ) || File.Exists( Paths.AlternativeBinary ) ) {
+                    // Start whatever we have locally
+                    StartChargedMiners();
+                } else {
+                    // no CM version found for this platform; notify, then terminate
+                    State = FormState.UnrecoverableError;
+                    lStatus.Text = "Could not download Charged-Miners!";
+                    if( updaterException != null ) {
+                        lStatus2.Text = updaterException.GetType().Name + Environment.NewLine + updaterException.Message;
+                    } else {
+                        lStatus2.Text = "Unknown error occured, or no binaries are available for your platform.";
+                    }
+                }
                 return;
             }
 
+            // no local CM binaries: download them
             if( !File.Exists( latestVersion.Name ) ) {
-                // no local CM binaries: download them
                 if( downloadComplete ) {
                     ApplyUpdate();
                 } else {
                     State = FormState.DownloadingBinary;
                 }
 
-            } else if( !latestVersion.Md5.Equals( localHashString, StringComparison.OrdinalIgnoreCase ) ) {
+            } else if( latestVersion != null &&
+                       !latestVersion.Md5.Equals( localHashString, StringComparison.OrdinalIgnoreCase ) ) {
                 // local CM binaries are outdated
                 switch( (GameUpdateMode)cGameUpdates.SelectedIndex ) {
                     case GameUpdateMode.Always:
@@ -865,22 +877,26 @@ namespace ChargedMinersLauncher {
             bCancel.Visible = false;
             Log( "StartChargedMiners" );
 
+            // determine which binary to call
+            string binaryFileName;
+            if( File.Exists( Paths.PrimaryBinary ) ) {
+                binaryFileName = Paths.PrimaryBinary;
+            } else {
+                binaryFileName = Paths.AlternativeBinary;
+            }
+
             // if we are on unix, set +x on Charge binaries
             if( RuntimeInfo.IsUnix ) {
                 Process chmod = new Process {
                     StartInfo = {
                         FileName = "chmod",
-                        Arguments = "a+x " + latestVersion.Name,
+                        Arguments = "a+x " + binaryFileName,
                         UseShellExecute = true
                     }
                 };
                 chmod.Start();
                 chmod.WaitForExit();
             }
-
-            // hide the form, to avoid stealing focus from CM window
-            Hide();
-            Refresh();
 
             // build CM parameter string
             string param;
@@ -906,9 +922,13 @@ namespace ChargedMinersLauncher {
                 param += String.Format( " LAUNCHER_PATH=\"{0}\"", Paths.LauncherPath );
             }
 
+            // hide the form, to avoid stealing focus from CM window
+            Hide();
+            Refresh();
+
             // launch CM
             try {
-                Process.Start( latestVersion.Name, param );
+                Process.Start( binaryFileName, param );
                 Application.Exit();
             } catch( Exception ex ) {
                 Log( "StartChargedMiners ERROR: " + ex );
