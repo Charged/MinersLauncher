@@ -28,8 +28,6 @@ namespace ChargedMinersLauncher {
             lOptionsSaved.Text = "";
             lToolStatus.Text = "";
 
-            State = FormState.AtSignInForm;
-
             // hook up event handlers
             signInWorker.DoWork += SignIn;
             signInWorker.RunWorkerCompleted += OnSignInCompleted;
@@ -102,6 +100,8 @@ namespace ChargedMinersLauncher {
             SignInFieldChanged( tSignInUsername, EventArgs.Empty );
             tDirectUrl_TextChanged( tDirectUrl, EventArgs.Empty );
 
+            State = FormState.AtSignInForm;
+
             // Load "Resume" information from CM's settings file
             if( File.Exists( Paths.GameSettingsPath ) ) {
                 SettingsFile gameSettings = new SettingsFile();
@@ -138,11 +138,6 @@ namespace ChargedMinersLauncher {
                 updateCheckCompleted = true;
             } else {
                 versionCheckWorker.RunWorkerAsync();
-            }
-
-            // focus on the "password" field if "remember username" was checked but "remember password" was not
-            if( tabs.SelectedTab == tabSignIn && tSignInUsername.Text.Length > 0 && tSignInPassword.Text.Length == 0 ) {
-                tSignInPassword.Select();
             }
         }
 
@@ -735,11 +730,11 @@ namespace ChargedMinersLauncher {
                 Log( "State = " + value );
                 switch( value ) {
                     case FormState.AtSignInForm:
-                        tabs_SelectedIndexChanged( tabs, EventArgs.Empty );
                         CancelButton = null;
                         lStatus.Text = "";
                         lStatus2.Text = "";
                         SelectedPanel = tabs;
+                        tabs_SelectedIndexChanged( tabs, EventArgs.Empty );
                         break;
 
                     case FormState.SigningIn:
@@ -822,10 +817,19 @@ namespace ChargedMinersLauncher {
             if( tabs.Visible ) {
                 if( tabs.SelectedTab == tabSignIn ) {
                     AcceptButton = bSignIn;
+                    if( tSignInUsername.Text.Length == 0 ) {
+                        tSignInUsername.Focus();
+                    } else if( tSignInPassword.Text.Length == 0 ) {
+                        tSignInPassword.Focus();
+                    } else {
+                        tSignInUrl.Focus();
+                    }
                 } else if( tabs.SelectedTab == tabResume ) {
                     AcceptButton = bResume;
+                    bResume.Focus();
                 } else if( tabs.SelectedTab == tabDirect ) {
                     AcceptButton = bDirectConnect;
+                    tDirectUrl.Focus();
                 } else {
                     AcceptButton = null;
                 }
