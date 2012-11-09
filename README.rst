@@ -15,7 +15,18 @@ Latest binaries can be found at https://github.com/Charged/Miners/downloads
 ---------------
  Version history
 ---------------
-- 1.1
+- 1.11
+    Fixed "Resume" button remaining enabled even if resuming is not available.
+
+    Fixed incorrect assembly version in metadata.
+
+    Fixed buttons not getting appropriate focus when changing tabs.
+
+    Fixed a rare NullReferenceExeception in the updater.
+
+    Launcher now works without an internet connection, or when update site is timing out.
+
+- 1.10
     New user interface! Now with tabs.
 
     Added more options (starting tab, how to install game updates, whether to remember username/password/server).
