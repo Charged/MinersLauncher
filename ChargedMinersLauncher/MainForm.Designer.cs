@@ -115,6 +115,7 @@
             this.tabs.SelectedIndex = 0;
             this.tabs.Size = new System.Drawing.Size(280, 185);
             this.tabs.TabIndex = 0;
+            this.tabs.SelectedIndexChanged += new System.EventHandler(this.tabs_SelectedIndexChanged);
             // 
             // tabSignIn
             // 
@@ -259,7 +260,8 @@
             // bResume
             // 
             this.bResume.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.bResume.Location = new System.Drawing.Point(186, 129);
+            this.bResume.Enabled = false;
+            this.bResume.Location = new System.Drawing.Point(186, 130);
             this.bResume.Name = "bResume";
             this.bResume.Size = new System.Drawing.Size(80, 23);
             this.bResume.TabIndex = 0;
@@ -402,7 +404,7 @@
             // 
             this.bDirectConnect.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.bDirectConnect.Enabled = false;
-            this.bDirectConnect.Location = new System.Drawing.Point(186, 129);
+            this.bDirectConnect.Location = new System.Drawing.Point(186, 130);
             this.bDirectConnect.Name = "bDirectConnect";
             this.bDirectConnect.Size = new System.Drawing.Size(80, 23);
             this.bDirectConnect.TabIndex = 2;
@@ -729,7 +731,7 @@
             this.MinimumSize = new System.Drawing.Size(285, 212);
             this.Name = "MainForm";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
-            this.Text = "Charged-Miners Launcher 1.1";
+            this.Text = "Charged-Miners Launcher 1.11";
             this.flow.ResumeLayout(false);
             this.tabs.ResumeLayout(false);
             this.tabSignIn.ResumeLayout(false);

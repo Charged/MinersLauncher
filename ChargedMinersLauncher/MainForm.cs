@@ -87,6 +87,7 @@ namespace ChargedMinersLauncher {
         const string UnsupportedPlatformHeader = "Unsupported platform.",
                      UnsupportedPlatformText = "Charged-Miners is only available for Windows, Linux, and MacOS X.";
 
+
         void OnShown( object sender, EventArgs e ) {
             if( !Paths.IsPlatformSupported ) {
                 State = FormState.UnrecoverableError;
@@ -124,7 +125,6 @@ namespace ChargedMinersLauncher {
                         tResumeUsername.Text = "?";
                         tResumeServerIP.Text = "?";
                         tResumeServerName.Text = "?";
-                        bResume.Enabled = false;
                     }
                 }
             }
@@ -681,14 +681,15 @@ namespace ChargedMinersLauncher {
 
         void OnSignInAndUpdateCheckCompleted() {
             Log( "OnSignInAndUpdateCheckCompleted" );
+            if( latestVersion == null ) {
+                // no CM version found for this platform; notify, then terminate
+                State = FormState.UnrecoverableError;
+                lStatus.Text = UnsupportedPlatformHeader;
+                lStatus2.Text = UnsupportedPlatformText;
+                return;
+            }
+
             if( !File.Exists( latestVersion.Name ) ) {
-                if( latestVersion == null ) {
-                    // no CM version found for this platform; notify, then terminate
-                    State = FormState.UnrecoverableError;
-                    lStatus.Text = UnsupportedPlatformHeader;
-                    lStatus2.Text = UnsupportedPlatformText;
-                    return;
-                }
                 // no local CM binaries: download them
                 if( downloadComplete ) {
                     ApplyUpdate();
@@ -722,7 +723,7 @@ namespace ChargedMinersLauncher {
                 Log( "State = " + value );
                 switch( value ) {
                     case FormState.AtSignInForm:
-                        AcceptButton = bSignIn;
+                        tabs_SelectedIndexChanged( tabs, EventArgs.Empty );
                         CancelButton = null;
                         lStatus.Text = "";
                         lStatus2.Text = "";
@@ -800,6 +801,21 @@ namespace ChargedMinersLauncher {
                     tabs.Visible = false;
                     panelStatus.Visible = false;
                     panelUpdatePrompt.Visible = true;
+                }
+            }
+        }
+
+
+        void tabs_SelectedIndexChanged( object sender, EventArgs e ) {
+            if( tabs.Visible ) {
+                if( tabs.SelectedTab == tabSignIn ) {
+                    AcceptButton = bSignIn;
+                } else if( tabs.SelectedTab == tabResume ) {
+                    AcceptButton = bResume;
+                } else if( tabs.SelectedTab == tabDirect ) {
+                    AcceptButton = bDirectConnect;
+                } else {
+                    AcceptButton = null;
                 }
             }
         }
