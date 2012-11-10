@@ -46,8 +46,8 @@ namespace ChargedMinersLauncher {
         }
 
 
-        public void Login( bool remember ) {
-            LoadCookie( remember );
+        public void Login( bool rememberSession ) {
+            LoadCookie( rememberSession );
 
             string loginPage = DownloadString( LoginSecureUri, MinecraftNet );
             if( LoggedInAs.IsMatch( loginPage ) ) {
@@ -65,7 +65,7 @@ namespace ChargedMinersLauncher {
                                                 Uri.EscapeDataString( LoginUsername ),
                                                 Uri.EscapeDataString( Password ),
                                                 Uri.EscapeDataString( authToken ) );
-            if( remember ) {
+            if( rememberSession ) {
                 loginString += "&remember=true";
             }
 

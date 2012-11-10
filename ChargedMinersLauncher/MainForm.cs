@@ -570,7 +570,7 @@ namespace ChargedMinersLauncher {
 
         void SignIn( object sender, DoWorkEventArgs e ) {
             try {
-                signInSession.Login( xRememberUsername.Checked );
+                signInSession.Login( xRememberUsername.Checked && xRememberPassword.Checked );
             } catch( WebException ex ) {
                 signInSession.LoginException = ex;
                 signInSession.Status = LoginResult.Error;
