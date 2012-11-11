@@ -523,7 +523,6 @@
             this.cStartingTab.Items.AddRange(new object[] {
             "Sign In",
             "Resume",
-            "URL",
             "Direct"});
             this.cStartingTab.Location = new System.Drawing.Point(88, 6);
             this.cStartingTab.Name = "cStartingTab";
