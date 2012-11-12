@@ -561,11 +561,9 @@ namespace ChargedMinersLauncher {
             PlayLinkHash =
                 new Regex( @"^http://(www\.)?minecraft.net/classic/play/([0-9a-fA-F]{28,32})/?(\?override=(true|1))?$" ),
             PlayLinkDirect =
-                new Regex(
-                    @"^mc://((localhost|(\d{1,3}\.){3}\d{1,3}|([a-zA-Z0-9\-]+\.)+([a-zA-Z0-9\-]+))(:\d{1,5})?)/([a-zA-Z0-9_\.]{2,16})/(.*)$" ),
+                new Regex( @"^mc://((localhost|(\d{1,3}\.){3}\d{1,3}|([a-zA-Z0-9\-]+\.)+([a-zA-Z0-9\-]+))(:\d{1,5})?)/([a-zA-Z0-9_\.]{2,16})/(.*)$" ),
             PlayLinkIPPort =
-                new Regex(
-                    @"^http://(www\.)?minecraft.net/classic/play/?\?ip=(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})&port=(\d{1,5})$" );
+                new Regex( @"^http://(www\.)?minecraft.net/classic/play\?ip=(localhost|(\d{1,3}\.){3}\d{1,3}|([a-zA-Z0-9\-]+\.)+([a-zA-Z0-9\-]+))&port=(\d{1,5})$" );
 
 
         void SignIn( object sender, DoWorkEventArgs e ) {
