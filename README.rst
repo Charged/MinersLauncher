@@ -16,15 +16,17 @@ Latest binaries can be found at https://github.com/Charged/Miners/downloads
  Version history
 ---------------
 - 1.11
-    Fixed "Resume" button remaining enabled even if resuming is not available.
+    Launcher now works without an internet connection, or when update site is timing out.
 
-    Fixed incorrect assembly version in metadata.
+    Fixed "Resume" button remaining enabled even if resuming is not available.
 
     Fixed buttons not getting appropriate focus when changing tabs.
 
     Fixed a rare NullReferenceExeception in the updater.
 
-    Launcher now works without an internet connection, or when update site is timing out.
+    Fixed "Direct" starting tab preference not being saved.
+
+    Allowed hostnames (e.g. "localhost") in minecraft.net IP/port links.
 
 - 1.10
     New user interface! Now with tabs.
