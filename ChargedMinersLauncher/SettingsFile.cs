@@ -65,6 +65,11 @@ namespace ChargedMinersLauncher {
         }
 
 
+        public void Set( string key, bool value ) {
+            settings[key] = value.ToString().ToLowerInvariant();
+        }
+
+
         public void Set( string key, object value ) {
             settings[key] = value.ToString();
         }

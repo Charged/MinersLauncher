@@ -79,6 +79,7 @@
             this.bUpdateNo = new System.Windows.Forms.Button();
             this.bUpdateYes = new System.Windows.Forms.Button();
             this.lUpdatePrompt = new System.Windows.Forms.Label();
+            this.xFailSafe = new System.Windows.Forms.CheckBox();
             this.flow.SuspendLayout();
             this.tabs.SuspendLayout();
             this.tabSignIn.SuspendLayout();
@@ -543,6 +544,7 @@
             // 
             // tabTools
             // 
+            this.tabTools.Controls.Add(this.xFailSafe);
             this.tabTools.Controls.Add(this.lToolStatus);
             this.tabTools.Controls.Add(this.tPastebinUrl);
             this.tabTools.Controls.Add(this.bDeleteData);
@@ -717,6 +719,17 @@
     "t?";
             this.lUpdatePrompt.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
+            // xFailSafe
+            // 
+            this.xFailSafe.AutoSize = true;
+            this.xFailSafe.Location = new System.Drawing.Point(137, 39);
+            this.xFailSafe.Name = "xFailSafe";
+            this.xFailSafe.Size = new System.Drawing.Size(127, 17);
+            this.xFailSafe.TabIndex = 6;
+            this.xFailSafe.Text = "Enable fail-safe mode";
+            this.xFailSafe.UseVisualStyleBackColor = true;
+            this.xFailSafe.CheckedChanged += new System.EventHandler(this.xFailSafe_CheckedChanged);
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -806,6 +819,7 @@
         private System.Windows.Forms.Label lDirectStatus;
         private System.Windows.Forms.Label lOptionsSaved;
         private System.Windows.Forms.Label lToolStatus;
+        private System.Windows.Forms.CheckBox xFailSafe;
     }
 }
 

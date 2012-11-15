@@ -830,6 +830,13 @@ namespace ChargedMinersLauncher {
                     tDirectUrl.Focus();
                 } else {
                     AcceptButton = null;
+                    if( tabs.SelectedTab == tabTools ) {
+                        SettingsFile sf = new SettingsFile();
+                        if( File.Exists( Paths.GameSettingsPath ) ) {
+                            sf.Load( Paths.GameSettingsPath );
+                        }
+                        xFailSafe.Checked = sf.GetBool( "mc.failsafe", false );
+                    }
                 }
             }
         }
@@ -953,6 +960,19 @@ namespace ChargedMinersLauncher {
 #endif
                 File.AppendAllText( Paths.LauncherLogPath, fullMsg );
             }
+        }
+
+        private void xFailSafe_CheckedChanged( object sender, EventArgs e ) {
+            SettingsFile sf = new SettingsFile();
+            if( File.Exists( Paths.GameSettingsPath ) ) {
+                sf.Load( Paths.GameSettingsPath );
+            }
+            bool failSafeEnabled = sf.GetBool( "mc.failsafe", false );
+            if( failSafeEnabled != xFailSafe.Checked ) {
+                sf.Set( "mc.failsafe", xFailSafe.Checked );
+                sf.Save( Paths.GameSettingsPath );
+            }
+            lToolStatus.Text = "Fail-safe mode " + ( xFailSafe.Checked ? "enabled" : "disabled" ) + ".";
         }
     }
 }
