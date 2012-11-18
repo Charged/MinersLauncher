@@ -15,6 +15,13 @@ Latest binaries can be found at https://github.com/Charged/Miners/downloads
 ---------------
  Version history
 ---------------
+- 1.12
+    Added "Enable fail-safe mode" checkbox to "Tools" tab.
+
+    "Cancel" button now actually works when signing in.
+
+    Fixed a rare login problem when "remember password" is turned off.
+
 - 1.11
     Launcher now works without an internet connection, or when update site is timing out.
 
