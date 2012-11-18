@@ -64,6 +64,7 @@
             this.cStartingTab = new System.Windows.Forms.ComboBox();
             this.xRememberUsername = new System.Windows.Forms.CheckBox();
             this.tabTools = new System.Windows.Forms.TabPage();
+            this.xFailSafe = new System.Windows.Forms.CheckBox();
             this.lToolStatus = new System.Windows.Forms.Label();
             this.tPastebinUrl = new System.Windows.Forms.TextBox();
             this.bDeleteData = new System.Windows.Forms.Button();
@@ -79,7 +80,6 @@
             this.bUpdateNo = new System.Windows.Forms.Button();
             this.bUpdateYes = new System.Windows.Forms.Button();
             this.lUpdatePrompt = new System.Windows.Forms.Label();
-            this.xFailSafe = new System.Windows.Forms.CheckBox();
             this.flow.SuspendLayout();
             this.tabs.SuspendLayout();
             this.tabSignIn.SuspendLayout();
@@ -559,6 +559,17 @@
             this.tabTools.Text = "Tools";
             this.tabTools.UseVisualStyleBackColor = true;
             // 
+            // xFailSafe
+            // 
+            this.xFailSafe.AutoSize = true;
+            this.xFailSafe.Location = new System.Drawing.Point(137, 39);
+            this.xFailSafe.Name = "xFailSafe";
+            this.xFailSafe.Size = new System.Drawing.Size(127, 17);
+            this.xFailSafe.TabIndex = 6;
+            this.xFailSafe.Text = "Enable fail-safe mode";
+            this.xFailSafe.UseVisualStyleBackColor = true;
+            this.xFailSafe.CheckedChanged += new System.EventHandler(this.xFailSafe_CheckedChanged);
+            // 
             // lToolStatus
             // 
             this.lToolStatus.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
@@ -719,17 +730,6 @@
     "t?";
             this.lUpdatePrompt.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
-            // xFailSafe
-            // 
-            this.xFailSafe.AutoSize = true;
-            this.xFailSafe.Location = new System.Drawing.Point(137, 39);
-            this.xFailSafe.Name = "xFailSafe";
-            this.xFailSafe.Size = new System.Drawing.Size(127, 17);
-            this.xFailSafe.TabIndex = 6;
-            this.xFailSafe.Text = "Enable fail-safe mode";
-            this.xFailSafe.UseVisualStyleBackColor = true;
-            this.xFailSafe.CheckedChanged += new System.EventHandler(this.xFailSafe_CheckedChanged);
-            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -743,7 +743,7 @@
             this.MinimumSize = new System.Drawing.Size(285, 212);
             this.Name = "MainForm";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
-            this.Text = "Charged-Miners Launcher 1.11";
+            this.Text = "Charged-Miners Launcher 1.12";
             this.flow.ResumeLayout(false);
             this.tabs.ResumeLayout(false);
             this.tabSignIn.ResumeLayout(false);
