@@ -798,6 +798,7 @@ namespace ChargedMinersLauncher {
                     panelStatus.Visible = false;
                     panelUpdatePrompt.Visible = false;
                     tabs.Visible = true;
+                    tabs_SelectedIndexChanged( tabs, EventArgs.Empty );
                 } else if( value == panelStatus ) {
                     panelUpdatePrompt.Visible = false;
                     tabs.Visible = false;
