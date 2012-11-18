@@ -12,9 +12,12 @@ using System.Windows.Forms;
 
 namespace ChargedMinersLauncher {
     public sealed partial class MainForm : Form {
+        static MainForm instance;
         #region Startup / Shutdown
 
         public MainForm() {
+            instance = this;
+
             // Start logging
             if( File.Exists( Paths.LauncherLogPath ) ) {
                 File.Delete( Paths.LauncherLogPath + ".old" );
@@ -31,7 +34,6 @@ namespace ChargedMinersLauncher {
             // hook up event handlers
             signInWorker.DoWork += SignIn;
             signInWorker.RunWorkerCompleted += OnSignInCompleted;
-            signInWorker.WorkerSupportsCancellation = true;
 
             versionCheckWorker.DoWork += CheckUpdates;
             versionCheckWorker.RunWorkerCompleted += OnUpdateCheckCompleted;
@@ -577,11 +579,6 @@ namespace ChargedMinersLauncher {
 
 
         void OnSignInCompleted( object sender, RunWorkerCompletedEventArgs e ) {
-            if( e.Cancelled ) {
-                Log( "OnSignInCompleted Canceled" );
-                State = FormState.AtSignInForm;
-                return;
-            }
             Log( "OnSignInCompleted " + signInSession.Status );
             switch( signInSession.Status ) {
                 case LoginResult.Success:
@@ -595,23 +592,24 @@ namespace ChargedMinersLauncher {
                     break;
 
                 case LoginResult.MigratedAccount:
+                    State = FormState.AtSignInForm;
                     lSignInStatus.Text = "Migrated account. Use your email to sign in.";
-                    SelectedPanel = tabs;
                     tSignInUsername.Select();
                     break;
 
                 case LoginResult.WrongUsernameOrPass:
+                    State = FormState.AtSignInForm;
                     lSignInStatus.Text = "Wrong username or password.";
-                    SelectedPanel = tabs;
                     tSignInPassword.Select();
                     break;
 
                 case LoginResult.UnrecognizedResponse:
+                    State = FormState.AtSignInForm;
                     lSignInStatus.Text = "Could not understand minecraft.net response.";
-                    SelectedPanel = tabs;
                     break;
 
                 case LoginResult.Error:
+                    State = FormState.AtSignInForm;
                     Exception ex = signInSession.LoginException;
                     if( ex != null ) {
                         Log( "LoginException: " + ex );
@@ -619,8 +617,11 @@ namespace ChargedMinersLauncher {
                     } else {
                         lSignInStatus.Text = "An unknown error occurred.";
                     }
-                    SelectedPanel = tabs;
                     break;
+                case LoginResult.Canceled:
+                    State = FormState.AtSignInForm;
+                    lSignInStatus.Text = "Sign-in canceled.";
+                    return;
             }
         }
 
@@ -865,7 +866,7 @@ namespace ChargedMinersLauncher {
             Log( "[Cancel] " + State );
             switch( State ) {
                 case FormState.SigningIn:
-                    signInWorker.CancelAsync();
+                    signInSession.CancelAsync();
                     lStatus2.Text = "Canceling...";
                     break;
                 case FormState.UnrecoverableError:
@@ -880,6 +881,17 @@ namespace ChargedMinersLauncher {
         }
 
         #endregion
+
+
+        internal static void SetStatus( string text ) {
+            if( instance.lStatus2.InvokeRequired ) {
+                instance.lStatus2.BeginInvoke( (Action)delegate {
+                    instance.lStatus2.Text = text;
+                } );
+            } else {
+                instance.lStatus2.Text = text;
+            }
+        }
 
 
         void StartChargedMiners() {

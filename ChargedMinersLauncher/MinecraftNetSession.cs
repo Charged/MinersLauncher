@@ -5,18 +5,24 @@ using System.Net;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Threading;
 
 namespace ChargedMinersLauncher {
     sealed class MinecraftNetSession {
         const string MinecraftNet = "http://minecraft.net/",
-                     LoginSecureUri = "https://minecraft.net/login";
+                     LoginSecureUri = "https://minecraft.net/login",
+                     LogoutUri = "http://minecraft.net/logout";
+
+        volatile bool cancel;
+        const int MaxTries = 3;
 
         static readonly Regex
             LoginAuthToken = new Regex( @"<input type=""hidden"" name=""authenticityToken"" value=""([0-9a-f]+)"">" ),
             LoggedInAs = new Regex( @"<span class=""logged-in"">\s*Logged in as ([a-zA-Z0-9_\.]{2,16})" );
 
         const string MigratedAccountMessage = "Your account has been migrated",
-                     WrongUsernameOrPasswordMessage = "Oops, unknown username or password.";
+                     WrongUsernameOrPasswordMessage = "Oops, unknown username or password.",
+                     NormalLoginMessage = "When logging in with a Mojang account, use your e-mail address as username.";
 
         public string LoginUsername { get; private set; }
         public string MinercraftUsername { get; private set; }
@@ -47,43 +53,86 @@ namespace ChargedMinersLauncher {
 
 
         public void Login( bool rememberSession ) {
-            LoadCookie( rememberSession );
-
-            string loginPage = DownloadString( LoginSecureUri, MinecraftNet );
-            if( LoggedInAs.IsMatch( loginPage ) ) {
-                // if player is already logged, restored from a previous session
-                MainForm.Log( "Login: Restored session for " + MinercraftUsername );
-                MinercraftUsername = LoggedInAs.Match( loginPage ).Groups[1].Value;
-                Status = LoginResult.Success;
-                SaveCookie();
+            if( cancel ) {
+                Status = LoginResult.Canceled;
+                cancel = false;
                 return;
             }
 
-            string authToken = LoginAuthToken.Match( loginPage ).Groups[1].Value;
+            LoadCookie( rememberSession );
+            MainForm.SetStatus( "Connecting to Minecraft.net..." );
 
-            string loginString = String.Format( "username={0}&password={1}&authenticityToken={2}",
-                                                Uri.EscapeDataString( LoginUsername ),
-                                                Uri.EscapeDataString( Password ),
-                                                Uri.EscapeDataString( authToken ) );
-            if( rememberSession ) {
-                loginString += "&remember=true";
+            for( int retry = 0; retry < MaxTries; retry++ ) {
+                string loginPage = DownloadString( LoginSecureUri, MinecraftNet );
+                if( LoggedInAs.IsMatch( loginPage ) ) {
+                    // if player is already logged, restored from a previous session
+                    MainForm.Log( "Login: Restored session for " + MinercraftUsername );
+                    MinercraftUsername = LoggedInAs.Match( loginPage ).Groups[1].Value;
+                    Status = LoginResult.Success;
+                    SaveCookie();
+                    return;
+                }
+
+                if( cancel ) {
+                    Status = LoginResult.Canceled;
+                    cancel = false;
+                    return;
+                }
+
+                MainForm.SetStatus( "Sending login information..." );
+                string authToken = LoginAuthToken.Match( loginPage ).Groups[1].Value;
+
+                string loginString = String.Format( "username={0}&password={1}&authenticityToken={2}",
+                                                    Uri.EscapeDataString( LoginUsername ),
+                                                    Uri.EscapeDataString( Password ),
+                                                    Uri.EscapeDataString( authToken ) );
+                if( rememberSession ) {
+                    loginString += "&remember=true";
+                }
+
+                string loginResponse = UploadString( LoginSecureUri, LoginSecureUri, loginString );
+
+                if( cancel ) {
+                    Status = LoginResult.Canceled;
+                    cancel = false;
+                    return;
+                }
+
+                if( loginResponse.Contains( WrongUsernameOrPasswordMessage ) ) {
+                    Status = LoginResult.WrongUsernameOrPass;
+
+                } else if( LoggedInAs.IsMatch( loginResponse ) ) {
+                    MinercraftUsername = LoggedInAs.Match( loginResponse ).Groups[1].Value;
+                    Status = LoginResult.Success;
+                    SaveCookie();
+
+                } else if( loginResponse.Contains( MigratedAccountMessage ) ) {
+                    Status = LoginResult.MigratedAccount;
+
+                } else if( loginResponse.Contains( NormalLoginMessage ) ) {
+                    MainForm.SetStatus( "Retrying..." );
+                    MainForm.Log( "Login: Retry #" + ( retry + 1 ) );
+                    DownloadString( LogoutUri, MinecraftNet );
+                    if( cancel ) {
+                        Status = LoginResult.Canceled;
+                        cancel = false;
+                        return;
+                    }
+                    continue;
+
+                } else {
+                    MainForm.Log( "Login: Unrecognized response: " + loginResponse );
+                    Status = LoginResult.UnrecognizedResponse;
+                }
+                return;
             }
+            MainForm.Log( "Login: Out of retries." );
+            Status = LoginResult.Error;
+        }
 
-            string loginResponse = UploadString( LoginSecureUri, LoginSecureUri, loginString );
-            if( loginResponse.Contains( WrongUsernameOrPasswordMessage ) ) {
-                Status = LoginResult.WrongUsernameOrPass;
 
-            } else if( LoggedInAs.IsMatch( loginResponse ) ) {
-                MinercraftUsername = LoggedInAs.Match( loginResponse ).Groups[1].Value;
-                Status = LoginResult.Success;
-                SaveCookie();
-
-            } else if( loginResponse.Contains( MigratedAccountMessage ) ) {
-                Status = LoginResult.MigratedAccount;
-
-            } else {
-                Status = LoginResult.UnrecognizedResponse;
-            }
+        public void CancelAsync() {
+            cancel = true;
         }
 
 
