@@ -24,6 +24,7 @@ namespace ChargedMinersLauncher {
                 File.Move( Paths.LauncherLogPath, Paths.LauncherLogPath + ".old" );
             }
             Log( "---- " + DateTime.Now.ToLongDateString() + " ----" );
+            Log( "Charged-Miners Launcher 1.13 dev" );
 
             // Set up the GUI
             InitializeComponent();
@@ -187,7 +188,7 @@ namespace ChargedMinersLauncher {
 
 
         // log close reason
-        void OnFormClosed( object sender, FormClosedEventArgs e ) {
+        static void OnFormClosed( object sender, FormClosedEventArgs e ) {
             Log( "Closed: " + e.CloseReason );
         }
 
@@ -606,6 +607,11 @@ namespace ChargedMinersLauncher {
                 case LoginResult.UnrecognizedResponse:
                     State = FormState.AtSignInForm;
                     lSignInStatus.Text = "Could not understand minecraft.net response.";
+                    break;
+
+                case LoginResult.NoPlaySession:
+                    State = FormState.AtSignInForm;
+                    lSignInStatus.Text = "Could not start a play session.";
                     break;
 
                 case LoginResult.Error:

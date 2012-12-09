@@ -5,7 +5,6 @@ using System.Net;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading;
 
 namespace ChargedMinersLauncher {
     sealed class MinecraftNetSession {
@@ -14,15 +13,13 @@ namespace ChargedMinersLauncher {
                      LogoutUri = "http://minecraft.net/logout";
 
         volatile bool cancel;
-        const int MaxTries = 3;
 
         static readonly Regex
             LoginAuthToken = new Regex( @"<input type=""hidden"" name=""authenticityToken"" value=""([0-9a-f]+)"">" ),
             LoggedInAs = new Regex( @"<span class=""logged-in"">\s*Logged in as ([a-zA-Z0-9_\.]{2,16})" );
 
         const string MigratedAccountMessage = "Your account has been migrated",
-                     WrongUsernameOrPasswordMessage = "Oops, unknown username or password.",
-                     NormalLoginMessage = "When logging in with a Mojang account, use your e-mail address as username.";
+                     WrongUsernameOrPasswordMessage = "Oops, unknown username or password.";
 
         public string LoginUsername { get; private set; }
         public string MinercraftUsername { get; private set; }
@@ -30,15 +27,10 @@ namespace ChargedMinersLauncher {
         public LoginResult Status { get; set; }
         public Exception LoginException { get; set; }
 
-        public string PlaySessionCookie {
+        public Cookie PlaySessionCookie {
             get {
                 CookieCollection cookies = cookieJar.GetCookies( new Uri( MinecraftNet ) );
-                var cookie = cookies["PLAY_SESSION"];
-                if( cookie != null ) {
-                    return cookie.Value;
-                } else {
-                    throw new WebException( "PLAY_SESSION cookie missing!" );
-                }
+                return cookies["PLAY_SESSION"];
             }
         }
 
@@ -69,7 +61,7 @@ namespace ChargedMinersLauncher {
             // See if we're already logged in
             if( LoggedInAs.IsMatch( loginPage ) ) {
                 string loggedInUsername = LoggedInAs.Match( loginPage ).Groups[1].Value;
-                if( rememberSession &&
+                if( rememberSession && PlaySessionCookie != null &&
                     MinercraftUsername.Equals( loggedInUsername, StringComparison.OrdinalIgnoreCase ) ) {
                     // If player is already logged in with the right account: reuse a previous session
                     MinercraftUsername = loggedInUsername;
@@ -78,7 +70,8 @@ namespace ChargedMinersLauncher {
                     SaveCookie();
                     return;
                 } else {
-                    // If we're not supposed to reuse session, or if old username is different: relog
+                    // If we're not supposed to reuse session, if old username is different,
+                    // or if there is no play session cookie set - relog
                     MainForm.SetStatus( "Switching accounts..." );
                     DownloadString( LogoutUri, MinecraftNet );
                     loginPage = DownloadString( LoginSecureUri, LogoutUri );
@@ -127,6 +120,11 @@ namespace ChargedMinersLauncher {
 
             } else if( LoggedInAs.IsMatch( loginResponse ) ) {
                 MinercraftUsername = LoggedInAs.Match( loginResponse ).Groups[1].Value;
+                if( PlaySessionCookie == null ) {
+                    MainForm.Log( "Login: No play session." );
+                    Status = LoginResult.NoPlaySession;
+                    return;
+                }
                 Status = LoginResult.Success;
                 SaveCookie();
 

@@ -6,6 +6,7 @@ namespace ChargedMinersLauncher {
         WrongUsernameOrPass,
         MigratedAccount,
         UnrecognizedResponse,
+        NoPlaySession,
         Error,
         Canceled
     }
