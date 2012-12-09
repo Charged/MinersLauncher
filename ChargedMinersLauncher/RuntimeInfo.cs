@@ -1,7 +1,6 @@
 // Part of ChargedMinersLauncher | Copyright (c) 2012 Jakob Bornecrantz <wallbraker@gmail.com> | Stolen from SirCmpwn | BSD-3 | See LICENSE.txt
 using System;
 using System.Diagnostics;
-using System.IO;
 
 namespace ChargedMinersLauncher {
     static class RuntimeInfo {

@@ -936,11 +936,11 @@ namespace ChargedMinersLauncher {
                     param = tResumeUri.Text;
                     break;
                 case LaunchMode.SignIn:
-                    param = "PLAY_SESSION=" + signInSession.PlaySessionCookie;
+                    param = "PLAY_SESSION=" + signInSession.PlaySessionCookie.Value;
                     break;
                 case LaunchMode.SignInWithUri:
                     param = String.Format( "PLAY_SESSION={0} {1}",
-                                           signInSession.PlaySessionCookie,
+                                           signInSession.PlaySessionCookie.Value,
                                            tSignInUrl.Text );
                     break;
                 default:
