@@ -2,7 +2,7 @@
 
 namespace ChargedMinersLauncher {
     enum FormState {
-        AtSignInForm,
+        AtMainForm,
         SigningIn,
         WaitingForUpdater,
         UnrecoverableError,

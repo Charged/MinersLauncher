@@ -103,7 +103,7 @@ namespace ChargedMinersLauncher {
             SignInFieldChanged( tSignInUsername, EventArgs.Empty );
             tDirectUrl_TextChanged( tDirectUrl, EventArgs.Empty );
 
-            State = FormState.AtSignInForm;
+            State = FormState.AtMainForm;
 
             // Load "Resume" information from CM's settings file
             if( File.Exists( Paths.GameSettingsPath ) ) {
@@ -593,29 +593,29 @@ namespace ChargedMinersLauncher {
                     break;
 
                 case LoginResult.MigratedAccount:
-                    State = FormState.AtSignInForm;
+                    State = FormState.AtMainForm;
                     lSignInStatus.Text = "Migrated account. Use your email to sign in.";
                     tSignInUsername.Select();
                     break;
 
                 case LoginResult.WrongUsernameOrPass:
-                    State = FormState.AtSignInForm;
+                    State = FormState.AtMainForm;
                     lSignInStatus.Text = "Wrong username or password.";
                     tSignInPassword.Select();
                     break;
 
                 case LoginResult.UnrecognizedResponse:
-                    State = FormState.AtSignInForm;
+                    State = FormState.AtMainForm;
                     lSignInStatus.Text = "Could not understand minecraft.net response.";
                     break;
 
                 case LoginResult.NoPlaySession:
-                    State = FormState.AtSignInForm;
+                    State = FormState.AtMainForm;
                     lSignInStatus.Text = "Could not start a play session.";
                     break;
 
                 case LoginResult.Error:
-                    State = FormState.AtSignInForm;
+                    State = FormState.AtMainForm;
                     Exception ex = signInSession.LoginException;
                     if( ex != null ) {
                         Log( "LoginException: " + ex );
@@ -625,7 +625,7 @@ namespace ChargedMinersLauncher {
                     }
                     break;
                 case LoginResult.Canceled:
-                    State = FormState.AtSignInForm;
+                    State = FormState.AtMainForm;
                     lSignInStatus.Text = "Sign-in canceled.";
                     return;
             }
@@ -734,7 +734,7 @@ namespace ChargedMinersLauncher {
             set {
                 Log( "State = " + value );
                 switch( value ) {
-                    case FormState.AtSignInForm:
+                    case FormState.AtMainForm:
                         CancelButton = null;
                         lStatus.Text = "";
                         lStatus2.Text = "";

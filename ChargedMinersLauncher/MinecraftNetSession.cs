@@ -121,7 +121,11 @@ namespace ChargedMinersLauncher {
             } else if( LoggedInAs.IsMatch( loginResponse ) ) {
                 MinercraftUsername = LoggedInAs.Match( loginResponse ).Groups[1].Value;
                 if( PlaySessionCookie == null ) {
-                    MainForm.Log( "Login: No play session." );
+                    CookieCollection cookies = cookieJar.GetCookies( new Uri( MinecraftNet ) );
+                    MainForm.Log( "Login: No play session. There are " + cookies.Count + " cookies saved:" );
+                    foreach( Cookie cookie in cookies ) {
+                        MainForm.Log( "  " + cookie.ToString() );
+                    }
                     Status = LoginResult.NoPlaySession;
                     return;
                 }
