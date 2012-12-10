@@ -3,7 +3,6 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
-using System.Linq;
 using System.Runtime.Serialization;
 using System.Text;
 
@@ -877,7 +876,12 @@ namespace ChargedMinersLauncher {
             if( data[key] is T[] ) {
                 return (T[])data[key];
             } else {
-                return ( (object[])data[key] ).Cast<T>().ToArray();
+                object[] rawData = (object[])data[key];
+                T[] castData = new T[rawData.Length];
+                for( int i = 0; i < rawData.Length; i++ ) {
+                    castData[i] = (T)rawData[i];
+                }
+                return castData;
             }
         }
 

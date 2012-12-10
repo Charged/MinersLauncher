@@ -621,6 +621,7 @@ namespace ChargedMinersLauncher {
                         lSignInStatus.Text = "An unknown error occurred.";
                     }
                     break;
+
                 case LoginResult.Canceled:
                     State = FormState.AtMainForm;
                     lSignInStatus.Text = "Sign-in canceled.";
@@ -888,7 +889,7 @@ namespace ChargedMinersLauncher {
 
         internal static void SetStatus( string text ) {
             if( instance.lStatus2.InvokeRequired ) {
-                instance.lStatus2.BeginInvoke( (Action)delegate {
+                instance.lStatus2.BeginInvoke( (MethodInvoker)delegate {
                     instance.lStatus2.Text = text;
                 } );
             } else {
