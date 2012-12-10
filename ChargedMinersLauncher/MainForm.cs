@@ -570,16 +570,14 @@ namespace ChargedMinersLauncher {
 
 
         void SignIn( object sender, DoWorkEventArgs e ) {
-            try {
-                signInSession.Login( xRememberUsername.Checked && xRememberPassword.Checked );
-            } catch( WebException ex ) {
-                signInSession.LoginException = ex;
-                signInSession.Status = LoginResult.Error;
-            }
+            signInSession.Login( xRememberUsername.Checked && xRememberPassword.Checked );
         }
 
 
         void OnSignInCompleted( object sender, RunWorkerCompletedEventArgs e ) {
+            if( e.Error != null ) {
+                signInSession.Status = LoginResult.Error;
+            }
             Log( "OnSignInCompleted " + signInSession.Status );
             switch( signInSession.Status ) {
                 case LoginResult.Success:
@@ -616,10 +614,9 @@ namespace ChargedMinersLauncher {
 
                 case LoginResult.Error:
                     State = FormState.AtMainForm;
-                    Exception ex = signInSession.LoginException;
-                    if( ex != null ) {
-                        Log( "LoginException: " + ex );
-                        lSignInStatus.Text = "Error: " + ex.Message;
+                    if( e.Error != null ) {
+                        Log( "LoginException: " + e.Error );
+                        lSignInStatus.Text = "Error: " + e.Error.Message;
                     } else {
                         lSignInStatus.Text = "An unknown error occurred.";
                     }
