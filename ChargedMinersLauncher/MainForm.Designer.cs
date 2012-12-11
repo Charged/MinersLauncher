@@ -27,10 +27,10 @@
             this.flow = new System.Windows.Forms.FlowLayoutPanel();
             this.tabs = new System.Windows.Forms.TabControl();
             this.tabSignIn = new System.Windows.Forms.TabPage();
+            this.xSignInUsername = new System.Windows.Forms.ComboBox();
             this.lSignInStatus = new System.Windows.Forms.Label();
             this.tSignInUrl = new System.Windows.Forms.TextBox();
             this.lSignInUrl = new System.Windows.Forms.Label();
-            this.tSignInUsername = new System.Windows.Forms.TextBox();
             this.tSignInPassword = new System.Windows.Forms.TextBox();
             this.lSignInUsername = new System.Windows.Forms.Label();
             this.lSignInPassword = new System.Windows.Forms.Label();
@@ -80,6 +80,7 @@
             this.bUpdateNo = new System.Windows.Forms.Button();
             this.bUpdateYes = new System.Windows.Forms.Button();
             this.lUpdatePrompt = new System.Windows.Forms.Label();
+            this.xMultiUser = new System.Windows.Forms.CheckBox();
             this.flow.SuspendLayout();
             this.tabs.SuspendLayout();
             this.tabSignIn.SuspendLayout();
@@ -120,10 +121,10 @@
             // 
             // tabSignIn
             // 
+            this.tabSignIn.Controls.Add(this.xSignInUsername);
             this.tabSignIn.Controls.Add(this.lSignInStatus);
             this.tabSignIn.Controls.Add(this.tSignInUrl);
             this.tabSignIn.Controls.Add(this.lSignInUrl);
-            this.tabSignIn.Controls.Add(this.tSignInUsername);
             this.tabSignIn.Controls.Add(this.tSignInPassword);
             this.tabSignIn.Controls.Add(this.lSignInUsername);
             this.tabSignIn.Controls.Add(this.lSignInPassword);
@@ -135,6 +136,14 @@
             this.tabSignIn.TabIndex = 0;
             this.tabSignIn.Text = "Sign In";
             this.tabSignIn.UseVisualStyleBackColor = true;
+            // 
+            // xSignInUsername
+            // 
+            this.xSignInUsername.FormattingEnabled = true;
+            this.xSignInUsername.Location = new System.Drawing.Point(79, 6);
+            this.xSignInUsername.Name = "xSignInUsername";
+            this.xSignInUsername.Size = new System.Drawing.Size(187, 21);
+            this.xSignInUsername.TabIndex = 1;
             // 
             // lSignInStatus
             // 
@@ -167,16 +176,6 @@
             this.lSignInUrl.TabIndex = 4;
             this.lSignInUrl.Text = "URL\r\n(optional)";
             this.lSignInUrl.TextAlign = System.Drawing.ContentAlignment.TopRight;
-            // 
-            // tSignInUsername
-            // 
-            this.tSignInUsername.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.tSignInUsername.Location = new System.Drawing.Point(79, 6);
-            this.tSignInUsername.Name = "tSignInUsername";
-            this.tSignInUsername.Size = new System.Drawing.Size(187, 20);
-            this.tSignInUsername.TabIndex = 1;
-            this.tSignInUsername.TextChanged += new System.EventHandler(this.SignInFieldChanged);
             // 
             // tSignInPassword
             // 
@@ -435,6 +434,7 @@
             // 
             // tabOptions
             // 
+            this.tabOptions.Controls.Add(this.xMultiUser);
             this.tabOptions.Controls.Add(this.lOptionsSaved);
             this.tabOptions.Controls.Add(this.lGameUpdates);
             this.tabOptions.Controls.Add(this.cGameUpdates);
@@ -502,9 +502,9 @@
             this.xRememberPassword.AutoSize = true;
             this.xRememberPassword.Location = new System.Drawing.Point(6, 83);
             this.xRememberPassword.Name = "xRememberPassword";
-            this.xRememberPassword.Size = new System.Drawing.Size(125, 17);
+            this.xRememberPassword.Size = new System.Drawing.Size(136, 17);
             this.xRememberPassword.TabIndex = 5;
-            this.xRememberPassword.Text = "Remember password";
+            this.xRememberPassword.Text = "Remember password(s)";
             this.xRememberPassword.UseVisualStyleBackColor = true;
             this.xRememberPassword.CheckedChanged += new System.EventHandler(this.SaveLauncherSettings);
             // 
@@ -730,6 +730,17 @@
     "t?";
             this.lUpdatePrompt.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
+            // xMultiUser
+            // 
+            this.xMultiUser.AutoSize = true;
+            this.xMultiUser.Location = new System.Drawing.Point(176, 60);
+            this.xMultiUser.Name = "xMultiUser";
+            this.xMultiUser.Size = new System.Drawing.Size(90, 17);
+            this.xMultiUser.TabIndex = 8;
+            this.xMultiUser.Text = "Multiple users";
+            this.xMultiUser.UseVisualStyleBackColor = true;
+            this.xMultiUser.CheckedChanged += new System.EventHandler(this.SaveLauncherSettings);
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -776,7 +787,6 @@
         private System.Windows.Forms.Label lStatus;
         private System.Windows.Forms.Button bSignIn;
         private System.Windows.Forms.Label lSignInPassword;
-        private System.Windows.Forms.TextBox tSignInUsername;
         private System.Windows.Forms.Label lSignInUsername;
         private System.Windows.Forms.TextBox tSignInPassword;
         private System.Windows.Forms.TabControl tabs;
@@ -820,6 +830,8 @@
         private System.Windows.Forms.Label lOptionsSaved;
         private System.Windows.Forms.Label lToolStatus;
         private System.Windows.Forms.CheckBox xFailSafe;
+        private System.Windows.Forms.ComboBox xSignInUsername;
+        private System.Windows.Forms.CheckBox xMultiUser;
     }
 }
 

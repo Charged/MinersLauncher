@@ -1,5 +1,6 @@
 ﻿// Part of ChargedMinersLauncher | Copyright (c) 2012 Matvei Stefarov <me@matvei.org> | BSD-3 | See LICENSE.txt
 using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Drawing;
@@ -72,11 +73,13 @@ namespace ChargedMinersLauncher {
                 settings.Load( Paths.LauncherSettingsPath );
             }
             bool saveUsername = settings.GetBool( "rememberUsername", true );
+            bool multiUser = settings.GetBool( "multiUser", false );
             bool savePassword = settings.GetBool( "rememberPassword", false );
             bool saveUrl = settings.GetBool( "rememberServer", true );
             GameUpdateMode gameUpdateMode = settings.GetEnum( "gameUpdateMode", GameUpdateMode.Ask );
             StartingTab startingTab = settings.GetEnum( "startingTab", StartingTab.SignIn );
             xRememberUsername.Checked = saveUsername;
+            xMultiUser.Checked = multiUser;
             xRememberPassword.Checked = savePassword;
             xRememberServer.Checked = saveUrl;
             cGameUpdates.SelectedIndex = (int)gameUpdateMode;
@@ -100,7 +103,7 @@ namespace ChargedMinersLauncher {
             LoadLoginInfo();
 
             // trigger input validation
-            SignInFieldChanged( tSignInUsername, EventArgs.Empty );
+            SignInFieldChanged( xSignInUsername, EventArgs.Empty );
             tDirectUrl_TextChanged( tDirectUrl, EventArgs.Empty );
 
             State = FormState.AtMainForm;
@@ -165,7 +168,7 @@ namespace ChargedMinersLauncher {
 
         void SetToolTips() {
             toolTip = new ToolTip();
-            toolTip.SetToolTip( tSignInUsername, ToolTipSignInUsername );
+            toolTip.SetToolTip( xSignInUsername, ToolTipSignInUsername );
             toolTip.SetToolTip( lSignInUsername, ToolTipSignInUsername );
             toolTip.SetToolTip( tSignInPassword, ToolTipSignInPassword );
             toolTip.SetToolTip( lSignInPassword, ToolTipSignInPassword );
@@ -203,11 +206,11 @@ namespace ChargedMinersLauncher {
 
             bool canSignIn = false;
             // check the username field
-            if( UsernameRegex.IsMatch( tSignInUsername.Text ) || EmailRegex.IsMatch( tSignInUsername.Text ) ) {
-                tSignInUsername.BackColor = SystemColors.Window;
+            if( UsernameRegex.IsMatch( xSignInUsername.Text ) || EmailRegex.IsMatch( xSignInUsername.Text ) ) {
+                xSignInUsername.BackColor = SystemColors.Window;
                 canSignIn = true;
             } else {
-                tSignInUsername.BackColor = Color.Yellow;
+                xSignInUsername.BackColor = Color.Yellow;
                 lSignInStatus.Text = "Invalid username/email.";
             }
 
@@ -226,7 +229,7 @@ namespace ChargedMinersLauncher {
             Match match = PlayLinkDirect.Match( tSignInUrl.Text );
             if( match.Success ) {
                 // "mc://" url
-                if( match.Groups[7].Value.Equals( tSignInUsername.Text, StringComparison.OrdinalIgnoreCase ) ) {
+                if( match.Groups[7].Value.Equals( xSignInUsername.Text, StringComparison.OrdinalIgnoreCase ) ) {
                     tSignInUrl.BackColor = SystemColors.Window;
                     launchMode = LaunchMode.SignInWithUri;
                 } else {
@@ -263,12 +266,12 @@ namespace ChargedMinersLauncher {
         void bSignIn_Click( object sender, EventArgs e ) {
             Log( "[SignIn]" );
             string minecraftUsername;
-            if( xRememberUsername.Checked && tSignInUsername.Text == storedLoginUsername ) {
+            if( xRememberUsername.Checked && xSignInUsername.Text == storedLoginUsername ) {
                 minecraftUsername = storedMinecraftUsername;
             } else {
-                minecraftUsername = tSignInUsername.Text;
+                minecraftUsername = xSignInUsername.Text;
             }
-            signInSession = new MinecraftNetSession( tSignInUsername.Text, minecraftUsername, tSignInPassword.Text );
+            signInSession = new MinecraftNetSession( xSignInUsername.Text, minecraftUsername, tSignInPassword.Text );
 
             State = FormState.SigningIn;
             signInWorker.RunWorkerAsync();
@@ -339,12 +342,28 @@ namespace ChargedMinersLauncher {
             Log( "SaveLauncherSettings" );
             SettingsFile settings = new SettingsFile();
             settings.Set( "rememberUsername", xRememberUsername.Checked );
+            settings.Set( "multiUser", xMultiUser.Checked );
             settings.Set( "rememberPassword", xRememberPassword.Checked );
             settings.Set( "rememberServer", xRememberServer.Checked );
             settings.Set( "gameUpdateMode", (GameUpdateMode)cGameUpdates.SelectedIndex );
             settings.Set( "startingTab", (StartingTab)cStartingTab.SelectedIndex );
             settings.Save( Paths.LauncherSettingsPath );
-            lOptionsSaved.Text = "Changes saved.";
+
+            if( sender == xRememberUsername ) {
+                lOptionsSaved.Text = "\"Remember username\" preference saved.";
+            } else if( sender == xMultiUser ) {
+                lOptionsSaved.Text = "\"Multiple users\" preference saved.";
+            } else if( sender == xRememberPassword ) {
+                lOptionsSaved.Text = "\"Remember password\" preference saved.";
+            } else if( sender == xRememberServer ) {
+                lOptionsSaved.Text = "\"Remember server\" preference saved.";
+            } else if( sender == cGameUpdates ) {
+                lOptionsSaved.Text = "\"Game updates\" preference saved.";
+            } else if( sender == cStartingTab ) {
+                lOptionsSaved.Text = "\"Starting tab\" preference saved.";
+            } else {
+                lOptionsSaved.Text = "Preferences saved.";
+            }
         }
 
 
@@ -593,7 +612,7 @@ namespace ChargedMinersLauncher {
                 case LoginResult.MigratedAccount:
                     State = FormState.AtMainForm;
                     lSignInStatus.Text = "Migrated account. Use your email to sign in.";
-                    tSignInUsername.Select();
+                    xSignInUsername.Select();
                     break;
 
                 case LoginResult.WrongUsernameOrPass:
@@ -636,7 +655,7 @@ namespace ChargedMinersLauncher {
                     string[] loginData = File.ReadAllLines( Paths.PasswordSaveFile );
                     if( xRememberUsername.Checked ) {
                         storedLoginUsername = loginData[0];
-                        tSignInUsername.Text = storedLoginUsername;
+                        xSignInUsername.Text = storedLoginUsername;
                         storedMinecraftUsername = loginData.Length > 2 ? loginData[2] : storedLoginUsername;
                     }
                     if( xRememberPassword.Checked ) {
@@ -821,8 +840,8 @@ namespace ChargedMinersLauncher {
             if( tabs.Visible ) {
                 if( tabs.SelectedTab == tabSignIn ) {
                     AcceptButton = bSignIn;
-                    if( tSignInUsername.Text.Length == 0 ) {
-                        tSignInUsername.Focus();
+                    if( xSignInUsername.Text.Length == 0 ) {
+                        xSignInUsername.Focus();
                     } else if( tSignInPassword.Text.Length == 0 ) {
                         tSignInPassword.Focus();
                     } else {
