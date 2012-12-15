@@ -154,16 +154,13 @@ namespace ChargedMinersLauncher {
                      ToolTipSignInPassword = "Your minecraft.net password",
                      ToolTipSignInUrl = "Server's Minecraft.net URL or a DirectConnect (mc://) link. Optional.",
                      ToolTipRememberUsername = "Save your username for next time.",
-                     ToolTipRememberPassword =
-                         "Save your password for next time. Note that password is stored in plain text.",
+                     ToolTipRememberPassword = "Save your password for next time. Note that password is stored in plain text.",
                      ToolTipDirectUrl = "Server's DirectConnect (mc://) link.",
-                     ToolTipResume =
-                         "Try to reuse the last-used credentials, to connect to the most-recently-joined server.",
+                     ToolTipResume = "Try to reuse the last-used credentials, to connect to the most-recently-joined server.",
                      ToolTipResetSettings = "Resets Charged-Miners and Launcher settings to defaults.",
                      ToolTipDeleteData = "Deletes all private data: settings, logs, stored login data, etc.",
                      ToolTipOpenDataDir = "Opens up Charged-Miners' data directory.",
-                     ToolTipUploadLog =
-                         "Uploads your Charged-Miners and launcher log files, which contain debugging information, for easy sharing.";
+                     ToolTipUploadLog = "Uploads your Charged-Miners and launcher log files, which contain debugging information, for easy sharing.";
 
 
         void SetToolTips() {
@@ -450,7 +447,7 @@ namespace ChargedMinersLauncher {
 
         readonly BackgroundWorker versionCheckWorker = new BackgroundWorker();
         string localHashString;
-        static readonly Uri UpdateUri = new Uri( "http://cloud.github.com/downloads/Charged/Miners/" );
+        static readonly Uri UpdateUri = new Uri("http://cdn.charged-miners.com/releases/");
         readonly WebClient binaryDownloader = new WebClient();
         VersionInfo latestVersion;
         Exception updaterException;
