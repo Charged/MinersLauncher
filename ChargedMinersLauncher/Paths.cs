@@ -23,7 +23,7 @@ namespace ChargedMinersLauncher {
         public static string LauncherSettingsPath { get; private set; }
         public static string LauncherLogPath { get; private set; }
 
-        public static bool IsPlatformSupported { get; set; }
+        public static bool IsPlatformSupported { get; private set; }
 
 
         static Paths() {

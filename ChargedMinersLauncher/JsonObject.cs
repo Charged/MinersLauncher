@@ -29,7 +29,7 @@ namespace ChargedMinersLauncher {
         /// <exception cref="ArgumentNullException"> If inputString is null. </exception>
         public JsonObject( string inputString ) {
             if( inputString == null ) throw new ArgumentNullException( "inputString" );
-            ReadJSONObject( inputString, 0 );
+            ReadJsonObject( inputString, 0 );
             Token token = FindNextToken();
             if( token != Token.None ) {
                 ThrowUnexpected( token, "None" );
@@ -39,7 +39,7 @@ namespace ChargedMinersLauncher {
         }
 
 
-        int ReadJSONObject( string inputString, int offset ) {
+        int ReadJsonObject( string inputString, int offset ) {
             str = inputString;
             index = offset;
             Token token = FindNextToken();
@@ -173,7 +173,7 @@ namespace ChargedMinersLauncher {
             switch( FindNextToken() ) {
                 case Token.BeginObject:
                     JsonObject newObj = new JsonObject();
-                    index = newObj.ReadJSONObject( str, index );
+                    index = newObj.ReadJsonObject( str, index );
                     return newObj;
 
                 case Token.String:
@@ -437,38 +437,20 @@ namespace ChargedMinersLauncher {
 
         #region Serialization
 
-        sealed class JSONSerializer {
-            readonly int indent = 2;
-            readonly bool compact;
-            int indentLevel;
+        sealed class JsonSerializer {
             readonly StringBuilder sb = new StringBuilder();
-
-            public JSONSerializer() {}
-
-
-            public JSONSerializer( int indent ) {
-                this.indent = indent;
-                compact = ( indent < 0 );
-            }
 
 
             public string Serialize( JsonObject obj ) {
                 sb.Length = 0;
-                indentLevel = 0;
                 SerializeInternal( obj );
                 return sb.ToString();
-            }
-
-
-            void Indent() {
-                sb.Append( '\r' ).Append( '\n' ).Append( ' ', indentLevel * indent );
             }
 
 
             void SerializeInternal( JsonObject obj ) {
                 sb.Append( '{' );
                 if( obj.data.Count > 0 ) {
-                    indentLevel++;
                     bool first = true;
                     foreach( var kvp in obj.data ) {
                         if( first ) {
@@ -476,15 +458,9 @@ namespace ChargedMinersLauncher {
                         } else {
                             sb.Append( ',' );
                         }
-                        if( !compact ) Indent();
                         WriteString( kvp.Key );
                         sb.Append( ':' );
-                        if( !compact ) sb.Append( ' ' );
                         WriteValue( kvp.Value );
-                    }
-                    indentLevel--;
-                    if( !compact ) {
-                        Indent();
                     }
                 }
                 sb.Append( '}' );
@@ -584,7 +560,6 @@ namespace ChargedMinersLauncher {
                         first = false;
                     } else {
                         sb.Append( ',' );
-                        if( !compact ) sb.Append( ' ' );
                     }
                     WriteValue( array.GetValue( i ) );
                 }
@@ -595,16 +570,7 @@ namespace ChargedMinersLauncher {
 
         /// <summary> Serializes this JSONObject with default settings. </summary>
         public string Serialize() {
-            return new JSONSerializer().Serialize( this );
-        }
-
-
-        /// <summary> Serializes this JSONObject with custom indentation. </summary>
-        /// <param name="indent"> Number of spaces to use for indentation.
-        /// If zero or positive, padding and line breaks are added.
-        /// If negative, serialization is done as compactly as possible. </param>
-        public string Serialize( int indent ) {
-            return new JSONSerializer( indent ).Serialize( this );
+            return new JsonSerializer().Serialize( this );
         }
 
         #endregion
@@ -612,373 +578,10 @@ namespace ChargedMinersLauncher {
 
         #region Has/Get/TryGet shortcuts
 
-        // ==== non-cast ====
-        public bool Has( string key ) {
-            if( key == null ) throw new ArgumentNullException( "key" );
-            return data.ContainsKey( key );
-        }
-
-
-        public bool HasNull( string key ) {
-            if( key == null ) throw new ArgumentNullException( "key" );
-            object boxedVal;
-            if( !data.TryGetValue( key, out boxedVal ) ) {
-                return false;
-            }
-            return ( boxedVal == null );
-        }
-
-
-        public object Get( string key ) {
-            if( key == null ) throw new ArgumentNullException( "key" );
-            return data[key];
-        }
-
-
-        public bool TryGet( string key, out object val ) {
-            if( key == null ) throw new ArgumentNullException( "key" );
-            return data.TryGetValue( key, out val );
-        }
-
-
         // ==== strings ====
         public string GetString( string key ) {
             if( key == null ) throw new ArgumentNullException( "key" );
             return (string)data[key];
-        }
-
-
-        public bool TryGetString( string key, out string val ) {
-            if( key == null ) throw new ArgumentNullException( "key" );
-            object boxedVal;
-            if( !data.TryGetValue( key, out boxedVal ) ) {
-                val = null;
-                return false;
-            }
-            val = ( boxedVal as string );
-            return ( val != null );
-        }
-
-
-        public bool TryGetStringOrNull( string key, out string val ) {
-            if( key == null ) throw new ArgumentNullException( "key" );
-            val = null;
-            object boxedVal;
-            if( !data.TryGetValue( key, out boxedVal ) ) {
-                return false;
-            }
-            if( boxedVal == null ) {
-                return true;
-            }
-            val = ( boxedVal as string );
-            return ( val != null );
-        }
-
-
-        public bool HasString( string key ) {
-            if( key == null ) throw new ArgumentNullException( "key" );
-            object boxedVal;
-            if( !data.TryGetValue( key, out boxedVal ) ) {
-                return false;
-            }
-            return ( boxedVal as string != null );
-        }
-
-
-        public bool HasStringOrNull( string key ) {
-            if( key == null ) throw new ArgumentNullException( "key" );
-            object boxedVal;
-            if( !data.TryGetValue( key, out boxedVal ) ) {
-                return false;
-            }
-            return ( boxedVal == null ) || ( boxedVal as string != null );
-        }
-
-
-        // ==== integers ====
-        public int GetInt( string key ) {
-            if( key == null ) throw new ArgumentNullException( "key" );
-            return (int)data[key];
-        }
-
-
-        public bool TryGetInt( string key, out int val ) {
-            if( key == null ) throw new ArgumentNullException( "key" );
-            val = 0;
-            object boxedVal;
-            if( !data.TryGetValue( key, out boxedVal ) ) {
-                return false;
-            }
-            if( !( boxedVal is int ) ) return false;
-            val = (int)boxedVal;
-            return true;
-        }
-
-
-        public bool HasInt( string key ) {
-            if( key == null ) throw new ArgumentNullException( "key" );
-            object boxedVal;
-            if( !data.TryGetValue( key, out boxedVal ) ) {
-                return false;
-            }
-            return ( boxedVal is int );
-        }
-
-
-        // ==== longs ====
-        public long GetLong( string key ) {
-            if( key == null ) throw new ArgumentNullException( "key" );
-            return (long)data[key];
-        }
-
-
-        public bool TryGetLong( string key, out long val ) {
-            if( key == null ) throw new ArgumentNullException( "key" );
-            val = 0;
-            object boxedVal;
-            if( !data.TryGetValue( key, out boxedVal ) ) {
-                return false;
-            }
-            if( !( boxedVal is long ) ) return false;
-            val = (long)boxedVal;
-            return true;
-        }
-
-
-        public bool HasLong( string key ) {
-            if( key == null ) throw new ArgumentNullException( "key" );
-            object boxedVal;
-            if( !data.TryGetValue( key, out boxedVal ) ) {
-                return false;
-            }
-            return ( boxedVal is long );
-        }
-
-
-        // ==== double ====
-        public double GetDouble( string key ) {
-            if( key == null ) throw new ArgumentNullException( "key" );
-            return (double)data[key];
-        }
-
-
-        public bool TryGetDouble( string key, out double val ) {
-            if( key == null ) throw new ArgumentNullException( "key" );
-            val = 0;
-            object boxedVal;
-            if( !data.TryGetValue( key, out boxedVal ) ) {
-                return false;
-            }
-            if( !( boxedVal is double ) ) return false;
-            val = (double)boxedVal;
-            return true;
-        }
-
-
-        public bool HasDouble( string key ) {
-            if( key == null ) throw new ArgumentNullException( "key" );
-            object boxedVal;
-            if( !data.TryGetValue( key, out boxedVal ) ) {
-                return false;
-            }
-            return ( boxedVal is double );
-        }
-
-
-        // ==== boolean ====
-        public bool GetBool( string key ) {
-            if( key == null ) throw new ArgumentNullException( "key" );
-            return (bool)data[key];
-        }
-
-
-        public bool TryGetBool( string key, out bool val ) {
-            if( key == null ) throw new ArgumentNullException( "key" );
-            val = false;
-            object boxedVal;
-            if( !data.TryGetValue( key, out boxedVal ) ) {
-                return false;
-            }
-            if( !( boxedVal is bool ) ) return false;
-            val = (bool)boxedVal;
-            return true;
-        }
-
-
-        public bool HasBool( string key ) {
-            if( key == null ) throw new ArgumentNullException( "key" );
-            object boxedVal;
-            if( !data.TryGetValue( key, out boxedVal ) ) {
-                return false;
-            }
-            return ( boxedVal is bool );
-        }
-
-
-        // ==== JSONObject ====
-        public JsonObject GetObject( string key ) {
-            if( key == null ) throw new ArgumentNullException( "key" );
-            return (JsonObject)data[key];
-        }
-
-
-        public bool TryGetObject( string key, out JsonObject val ) {
-            if( key == null ) throw new ArgumentNullException( "key" );
-            object boxedVal;
-            if( !data.TryGetValue( key, out boxedVal ) ) {
-                val = null;
-                return false;
-            }
-            val = ( boxedVal as JsonObject );
-            return ( val != null );
-        }
-
-
-        public bool TryGetObjectOrNull( string key, out JsonObject val ) {
-            if( key == null ) throw new ArgumentNullException( "key" );
-            val = null;
-            object boxedVal;
-            if( !data.TryGetValue( key, out boxedVal ) ) {
-                return false;
-            }
-            if( boxedVal == null ) {
-                return true;
-            }
-            val = ( boxedVal as JsonObject );
-            return ( val != null );
-        }
-
-
-        public bool HasObject( string key ) {
-            if( key == null ) throw new ArgumentNullException( "key" );
-            object boxedVal;
-            if( !data.TryGetValue( key, out boxedVal ) ) {
-                return false;
-            }
-            return ( boxedVal as JsonObject != null );
-        }
-
-
-        public bool HasObjectOrNull( string key ) {
-            if( key == null ) throw new ArgumentNullException( "key" );
-            object boxedVal;
-            if( !data.TryGetValue( key, out boxedVal ) ) {
-                return false;
-            }
-            return ( boxedVal == null ) || ( boxedVal as JsonObject != null );
-        }
-
-
-        // ==== Array ====
-
-        public T[] GetArray<T>( string key ) {
-            if( key == null ) throw new ArgumentNullException( "key" );
-            if( data[key] is T[] ) {
-                return (T[])data[key];
-            } else {
-                object[] rawData = (object[])data[key];
-                T[] castData = new T[rawData.Length];
-                for( int i = 0; i < rawData.Length; i++ ) {
-                    castData[i] = (T)rawData[i];
-                }
-                return castData;
-            }
-        }
-
-
-        public bool TryGetArray<T>( string key, out T[] val ) {
-            if( key == null ) throw new ArgumentNullException( "key" );
-            object boxedVal;
-            if( !data.TryGetValue( key, out boxedVal ) ) {
-                val = null;
-                return false;
-            }
-            try {
-                val = GetArray<T>( key );
-                return true;
-            } catch( InvalidCastException ) {
-                val = null;
-                return false;
-            }
-        }
-
-
-        public bool TryGetArrayOrNull<T>( string key, out T[] val ) {
-            if( key == null ) throw new ArgumentNullException( "key" );
-            val = null;
-            object boxedVal;
-            if( !data.TryGetValue( key, out boxedVal ) ) {
-                return false;
-            }
-            if( boxedVal == null ) {
-                return true;
-            }
-            try {
-                val = GetArray<T>( key );
-                return true;
-            } catch( InvalidCastException ) {
-                val = null;
-                return false;
-            }
-        }
-
-
-        public bool HasArray( string key ) {
-            if( key == null ) throw new ArgumentNullException( "key" );
-            object boxedVal;
-            if( !data.TryGetValue( key, out boxedVal ) ) {
-                return false;
-            }
-            return ( boxedVal as object[] != null );
-        }
-
-
-        public bool HasArrayOrNull( string key ) {
-            if( key == null ) throw new ArgumentNullException( "key" );
-            object boxedVal;
-            if( !data.TryGetValue( key, out boxedVal ) ) {
-                return false;
-            }
-            return ( boxedVal == null ) || ( boxedVal as object[] != null );
-        }
-
-
-        // ==== Enum ====
-        public T GetEnum<T>( string key ) {
-            if( key == null ) throw new ArgumentNullException( "key" );
-            return (T)Enum.Parse( typeof( T ), data[key].ToString() );
-        }
-
-
-        public bool TryGetEnum<TEnum>( string key, bool ignoreCase, out TEnum val ) where TEnum : struct {
-            if( key == null ) throw new ArgumentNullException( "key" );
-            object boxedVal;
-            if( data.TryGetValue( key, out boxedVal ) ) {
-                try {
-                    TEnum enumVal = (TEnum)Enum.Parse( typeof( TEnum ), boxedVal.ToString(), ignoreCase );
-                    if( Enum.IsDefined( typeof( TEnum ), enumVal ) ) {
-                        val = enumVal;
-                        return true;
-                    }
-                } catch( ArgumentException ) {} catch( OverflowException ) {}
-            }
-            val = default( TEnum );
-            return false;
-        }
-
-
-        public bool HasEnum<TEnum>( string key, bool ignoreCase ) where TEnum : struct {
-            if( key == null ) throw new ArgumentNullException( "key" );
-            object boxedVal;
-            if( data.TryGetValue( key, out boxedVal ) ) {
-                try {
-                    TEnum enumVal = (TEnum)Enum.Parse( typeof( TEnum ), boxedVal.ToString(), ignoreCase );
-                    if( Enum.IsDefined( typeof( TEnum ), enumVal ) ) {
-                        return true;
-                    }
-                } catch( ArgumentException ) {} catch( OverflowException ) {}
-            }
-            return false;
         }
 
         #endregion
@@ -987,7 +590,7 @@ namespace ChargedMinersLauncher {
         #region IDictionary / ICollection / ICloneable members
 
         /// <summary> Creates a JsonObject from an existing JsonObject or string-object dictionary. </summary>
-        public JsonObject( IEnumerable<KeyValuePair<string, object>> other ) {
+        JsonObject( IEnumerable<KeyValuePair<string, object>> other ) {
             foreach( var kvp in other ) {
                 Add( kvp );
             }
@@ -1050,24 +653,6 @@ namespace ChargedMinersLauncher {
         }
 
 
-        public void Add( string key, int obj ) {
-            if( key == null ) throw new ArgumentNullException( "key" );
-            data.Add( key, obj );
-        }
-
-
-        public void Add( string key, long obj ) {
-            if( key == null ) throw new ArgumentNullException( "key" );
-            data.Add( key, obj );
-        }
-
-
-        public void Add( string key, double obj ) {
-            if( key == null ) throw new ArgumentNullException( "key" );
-            data.Add( key, obj );
-        }
-
-
         public void Add( string key, bool obj ) {
             if( key == null ) throw new ArgumentNullException( "key" );
             data.Add( key, obj );
@@ -1075,12 +660,6 @@ namespace ChargedMinersLauncher {
 
 
         public void Add( string key, string obj ) {
-            if( key == null ) throw new ArgumentNullException( "key" );
-            data.Add( key, obj );
-        }
-
-
-        public void Add( string key, Array obj ) {
             if( key == null ) throw new ArgumentNullException( "key" );
             data.Add( key, obj );
         }
