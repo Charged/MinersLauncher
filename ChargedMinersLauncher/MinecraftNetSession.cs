@@ -44,7 +44,7 @@ namespace ChargedMinersLauncher {
 
 
         public void Login( bool rememberSession ) {
-            LoadCookie( rememberSession );
+            bool restoredSession = LoadCookie( rememberSession );
             MainForm.SetStatus( "Connecting to Minecraft.net..." );
 
             // check if cancel is needed
@@ -80,8 +80,18 @@ namespace ChargedMinersLauncher {
             // Extract authenticityToken from the login page
             Match authTokenMatch = LoginAuthToken.Match( loginPage );
             if( !authTokenMatch.Success ) {
-                MainForm.Log( "Login: Unrecognized page: " + loginPage );
-                Status = LoginResult.UnrecognizedResponse;
+                if( restoredSession ) {
+                    // restoring session failed; log out and retry
+                    DownloadString( LogoutUri, MinecraftNet );
+                    ResetCookies();
+                    MainForm.Log( "Login: Unrecognized page; retrying" );
+                    Login( rememberSession );
+                    return;
+                } else {
+                    // something unexpected happened, panic!
+                    MainForm.Log( "Login: Unrecognized page: " + loginPage );
+                    Status = LoginResult.UnrecognizedResponse;
+                }
                 return;
             }
             string authToken = authTokenMatch.Groups[1].Value;
@@ -147,7 +157,7 @@ namespace ChargedMinersLauncher {
 
 
         // Handle saved minecraft.net sessions
-        void LoadCookie( bool remember ) {
+        bool LoadCookie( bool remember ) {
             if( File.Exists( Paths.CookieContainerFile ) ) {
                 if( remember ) {
                     // load a saved session
@@ -162,25 +172,31 @@ namespace ChargedMinersLauncher {
                                                      StringComparison.OrdinalIgnoreCase );
                         if( start != -1 ) {
                             MainForm.Log( "LoadCookie: Loaded saved session for " + MinercraftUsername );
-                            return;
+                            return true;
                         }
                     }
 
                     // if saved session was not for the current username, discard it
                     MainForm.Log( "LoadCookie: Discarded a saved session (username mismatch)" );
-                    cookieJar = new CookieContainer();
+                    ResetCookies();
 
                 } else {
                     // discard a saved session
                     MainForm.Log( "LoadCookie: Discarded a saved session" );
-                    File.Delete( Paths.CookieContainerFile );
-                    cookieJar = new CookieContainer();
+                    ResetCookies();
                 }
 
             } else {
                 // no session saved
-                cookieJar = new CookieContainer();
+                ResetCookies();
             }
+            return false;
+        }
+
+
+        void ResetCookies() {
+            File.Delete( Paths.CookieContainerFile );
+            cookieJar = new CookieContainer();
         }
 
 
