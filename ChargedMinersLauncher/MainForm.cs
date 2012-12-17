@@ -1,5 +1,6 @@
 ﻿// Part of ChargedMinersLauncher | Copyright (c) 2012 Matvei Stefarov <me@matvei.org> | BSD-3 | See LICENSE.txt
 using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Drawing;
@@ -99,7 +100,7 @@ namespace ChargedMinersLauncher {
                 return;
             }
 
-            LoadLoginInfo();
+            LoadSignInInfo();
 
             // trigger input validation
             SignInFieldChanged( xSignInUsername, EventArgs.Empty );
@@ -381,9 +382,11 @@ namespace ChargedMinersLauncher {
             File.Delete( Paths.LauncherLogPath );
             File.Delete( Paths.GameLogPath );
             File.Delete( Path.Combine( Paths.DataPath, Paths.CookieContainerFile ) );
-            File.Delete( Path.Combine( Paths.DataPath, Paths.PasswordSaveFile ) );
+            File.Delete( Path.Combine( Paths.DataPath, Paths.LegacyPasswordSaveFile ) );
+            File.Delete( Path.Combine( Paths.DataPath, Paths.AccountListFile ) );
             settingsLoaded = false;
             LoadLauncherSettings();
+            LoadSignInInfo();
             lToolStatus.Text = "All settings, logs, and saved data were deleted.";
         }
 
@@ -437,6 +440,20 @@ namespace ChargedMinersLauncher {
                 Log( "UploadLog ERROR: " + ex );
                 lToolStatus.Text = "Log file upload failed! " + ex.Message;
             }
+        }
+
+
+        void xFailSafe_CheckedChanged( object sender, EventArgs e ) {
+            SettingsFile sf = new SettingsFile();
+            if( File.Exists( Paths.GameSettingsPath ) ) {
+                sf.Load( Paths.GameSettingsPath );
+            }
+            bool failSafeEnabled = sf.GetBool( "mc.failsafe", false );
+            if( failSafeEnabled != xFailSafe.Checked ) {
+                sf.Set( "mc.failsafe", xFailSafe.Checked );
+                sf.Save( Paths.GameSettingsPath );
+            }
+            lToolStatus.Text = "Fail-safe mode " + ( xFailSafe.Checked ? "enabled" : "disabled" ) + ".";
         }
 
         #endregion
@@ -645,21 +662,10 @@ namespace ChargedMinersLauncher {
         }
 
 
-        void LoadLoginInfo() {
+        void LoadSignInInfo() {
             try {
-                if( File.Exists( Paths.PasswordSaveFile ) ) {
-                    string[] loginData = File.ReadAllLines( Paths.PasswordSaveFile );
-                    if( xRememberUsername.Checked ) {
-                        storedLoginUsername = loginData[0];
-                        xSignInUsername.Text = storedLoginUsername;
-                        storedMinecraftUsername = loginData.Length > 2 ? loginData[2] : storedLoginUsername;
-                    }
-                    if( xRememberPassword.Checked ) {
-                        tSignInPassword.Text = loginData[1];
-                    }
-                    if( xRememberServer.Checked ) {
-                        tSignInUrl.Text = loginData.Length > 3 ? loginData[3] : "";
-                    }
+                if( File.Exists( Paths.LegacyPasswordSaveFile ) ) {
+                    LoadLegacyPasswordSaveFile();
                 }
             } catch( Exception ) {
                 lSignInStatus.Text = "Could not load saved login information.";
@@ -667,17 +673,89 @@ namespace ChargedMinersLauncher {
         }
 
 
+        void LoadLegacyPasswordSaveFile() {
+            SignInAccount account = new SignInAccount();
+            string[] loginData = File.ReadAllLines( Paths.LegacyPasswordSaveFile );
+            if( xRememberServer.Checked ) {
+                account.LastUrl = ( loginData.Length > 3 ? loginData[3] : "" );
+            } else {
+                account.LastUrl = "";
+            }
+            if( xRememberUsername.Checked ) {
+                account.SignInUsername = loginData[0];
+                account.PlayerName = ( loginData.Length > 2 ? loginData[2] : storedLoginUsername );
+            } else {
+                File.Delete( Paths.LegacyPasswordSaveFile );
+                return;
+            }
+            if( xRememberPassword.Checked ) {
+                account.Password = loginData[1];
+            } else {
+                account.Password = "";
+            }
+            AddAccount( account );
+            account.SignInDate = DateTime.UtcNow;
+            File.Delete( Paths.LegacyPasswordSaveFile );
+        }
+
+
+        readonly Dictionary<string, SignInAccount> storedAccounts = new Dictionary<string, SignInAccount>();
+        SignInAccount activeAccount;
+
+        void AddAccount( SignInAccount newAccount ) {
+            storedAccounts.Add( newAccount.SignInUsername.ToLowerInvariant(), newAccount );
+            SaveAccounts();
+        }
+
+
+        void RemoveActiveAccount() {
+            storedAccounts.Remove( activeAccount.SignInUsername.ToLower() );
+            SaveAccounts();
+            activeAccount = null;
+        }
+
+
+        void LoadAccount( SignInAccount account ) {
+            xSignInUsername.Text = account.SignInUsername;
+            if( xRememberPassword.Checked ) {
+                tSignInPassword.Text = account.Password;
+            } else {
+                tSignInPassword.Text = "";
+            }
+            if( xRememberServer.Checked ) {
+                tSignInUrl.Text = account.LastUrl;
+            }
+        }
+
+
+        void SaveAccounts() {
+            SettingsFile sf = new SettingsFile();
+            int i = 0;
+            foreach( SignInAccount account in storedAccounts.Values ) {
+                sf.Set( "SignInName" + i, account.SignInUsername );
+                sf.Set( "PlayerName" + i, account.PlayerName );
+                sf.Set( "Password" + i, account.Password );
+                sf.Set( "LastUrl" + i, account.LastUrl );
+                sf.Set( "SignInDate" + i, account.SignInDate.Ticks );
+                i++;
+            }
+            sf.Set( "AccountCount", i );
+            sf.Save( Paths.AccountListFile );
+        }
+
+
         void SaveLoginInfo() {
             if( xRememberUsername.Checked || xRememberPassword.Checked || xRememberServer.Checked ) {
-                File.WriteAllLines( Paths.PasswordSaveFile, new[] {
-                    xRememberUsername.Checked ? signInSession.LoginUsername : "",
-                    xRememberPassword.Checked ? signInSession.Password : "",
-                    xRememberUsername.Checked ? signInSession.MinercraftUsername : "",
-                    xRememberServer.Checked ? tSignInUrl.Text : ""
-                } );
+                File.WriteAllLines( Paths.LegacyPasswordSaveFile,
+                                    new[] {
+                                        xRememberUsername.Checked ? signInSession.LoginUsername : "",
+                                        xRememberPassword.Checked ? signInSession.Password : "",
+                                        xRememberUsername.Checked ? signInSession.MinercraftUsername : "",
+                                        xRememberServer.Checked ? tSignInUrl.Text : ""
+                                    } );
             } else {
-                if( File.Exists( Paths.PasswordSaveFile ) ) {
-                    File.Delete( Paths.PasswordSaveFile );
+                if( File.Exists( Paths.LegacyPasswordSaveFile ) ) {
+                    File.Delete( Paths.LegacyPasswordSaveFile );
                 }
             }
         }
@@ -992,19 +1070,6 @@ namespace ChargedMinersLauncher {
 #endif
                 File.AppendAllText( Paths.LauncherLogPath, fullMsg );
             }
-        }
-
-        private void xFailSafe_CheckedChanged( object sender, EventArgs e ) {
-            SettingsFile sf = new SettingsFile();
-            if( File.Exists( Paths.GameSettingsPath ) ) {
-                sf.Load( Paths.GameSettingsPath );
-            }
-            bool failSafeEnabled = sf.GetBool( "mc.failsafe", false );
-            if( failSafeEnabled != xFailSafe.Checked ) {
-                sf.Set( "mc.failsafe", xFailSafe.Checked );
-                sf.Save( Paths.GameSettingsPath );
-            }
-            lToolStatus.Text = "Fail-safe mode " + ( xFailSafe.Checked ? "enabled" : "disabled" ) + ".";
         }
     }
 }

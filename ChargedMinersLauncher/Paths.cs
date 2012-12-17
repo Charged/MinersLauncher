@@ -8,13 +8,15 @@ namespace ChargedMinersLauncher {
         public static readonly string PrimaryBinary,
                                       AlternativeBinary;
 
-        const string ChargeBinaryFormatWindows = "Charge.{0}.exe";
-        const string ChargeBinaryFormatMacOSX = "Charge.{0}.MacOSX";
-        const string ChargeBinaryFormatLinux = "Charge.{0}.Linux";
-        const string ChargeBinaryFormat32Bit = "i386";
-        const string ChargeBinaryFormat64Bit = "x86_64";
-        public const string PasswordSaveFile = "saved-login.dat";
-        public const string CookieContainerFile = "saved-session.dat";
+        const string ChargeBinaryFormatWindows = "Charge.{0}.exe",
+                     ChargeBinaryFormatMacOSX = "Charge.{0}.MacOSX",
+                     ChargeBinaryFormatLinux = "Charge.{0}.Linux",
+                     ChargeBinaryFormat32Bit = "i386",
+                     ChargeBinaryFormat64Bit = "x86_64";
+
+        public const string LegacyPasswordSaveFile = "saved-login.dat",
+                            AccountListFile = "accounts.ini",
+                            CookieContainerFile = "saved-session.dat";
 
         public static string LauncherPath { get; private set; }
         public static string DataPath { get; private set; }
