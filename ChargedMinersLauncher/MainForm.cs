@@ -25,7 +25,7 @@ namespace ChargedMinersLauncher {
                 File.Move( Paths.LauncherLogPath, Paths.LauncherLogPath + ".old" );
             }
             Log( "---- " + DateTime.Now.ToLongDateString() + " ----" );
-            Log( "Charged-Miners Launcher 1.13 dev" );
+            Log( "Charged-Miners Launcher 1.2 dev" );
 
             // Set up the GUI
             InitializeComponent();
