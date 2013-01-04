@@ -9,7 +9,6 @@ namespace ChargedMinersLauncher {
 
         public void AddAccount( SignInAccount newAccount ) {
             storedAccounts.Add( newAccount.SignInUsername.ToLowerInvariant(), newAccount );
-            SaveAccounts();
         }
 
 
@@ -35,28 +34,32 @@ namespace ChargedMinersLauncher {
 
         public void LoadAccounts() {
             storedAccounts.Clear();
-            SettingsFile sf = new SettingsFile();
             string[] fileNames = Directory.GetFiles( Paths.DataDirectory, "*.account" );
             foreach( string fileName in fileNames ) {
-                sf.Load( fileName );
-                SignInAccount newAccount = new SignInAccount {
-                    SignInUsername = sf.GetString( "SignInUsername", "" ),
-                    PlayerName = sf.GetString( "PlayerName", "" ),
-                    Password = sf.GetString( "Password", "" ),
-                    LastUrl = sf.GetString( "LastUrl", "" )
-                };
-                if( newAccount.Password.Length > 0 ) {
-                    newAccount.Password = PasswordSecurity.DecryptPassword( newAccount.Password );
+                try {
+                    SettingsFile sf = new SettingsFile();
+                    sf.Load( fileName );
+                    SignInAccount newAccount = new SignInAccount {
+                        SignInUsername = sf.GetString( "SignInUsername", "" ),
+                        PlayerName = sf.GetString( "PlayerName", "" ),
+                        Password = sf.GetString( "Password", "" ),
+                        LastUrl = sf.GetString( "LastUrl", "" )
+                    };
+                    if( newAccount.Password.Length > 0 ) {
+                        newAccount.Password = PasswordSecurity.DecryptPassword( newAccount.Password );
+                    }
+                    string tickString = sf.GetString( "SignInDate", "0" );
+                    long ticks;
+                    if( Int64.TryParse( tickString, out ticks ) && ticks > DateTime.MinValue.Ticks &&
+                        ticks <= DateTime.MaxValue.Ticks ) {
+                        newAccount.SignInDate = new DateTime( ticks );
+                    } else {
+                        newAccount.SignInDate = DateTime.MinValue;
+                    }
+                    AddAccount( newAccount );
+                } catch( Exception ex ) {
+                    MainForm.Log( "AccountManager.LoadAccounts: " + ex );
                 }
-                string tickString = sf.GetString( "SignInDate", "0" );
-                long ticks;
-                if( Int64.TryParse( tickString, out ticks ) && ticks > DateTime.MinValue.Ticks &&
-                    ticks <= DateTime.MaxValue.Ticks ) {
-                    newAccount.SignInDate = new DateTime( ticks );
-                } else {
-                    newAccount.SignInDate = DateTime.MinValue;
-                }
-                AddAccount( newAccount );
             }
             SaveAccounts();
         }
@@ -89,6 +92,13 @@ namespace ChargedMinersLauncher {
             return storedAccounts.Values
                                  .OrderByDescending( acct => acct.SignInDate )
                                  .ToArray();
+        }
+
+
+        public SignInAccount GetMostRecentlyUsedAccount() {
+            return storedAccounts.Values
+                                 .OrderByDescending( acct => acct.SignInDate )
+                                 .FirstOrDefault();
         }
     }
 }

@@ -14,6 +14,7 @@ namespace ChargedMinersLauncher {
 
 
         public void Load( string fileName ) {
+            settings.Clear();
             string[] lines = File.ReadAllLines( fileName );
             foreach( string line in lines ) {
                 if( line == null ) break;

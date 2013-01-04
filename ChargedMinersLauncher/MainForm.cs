@@ -366,6 +366,9 @@ namespace ChargedMinersLauncher {
                 lOptionsSaved.Text = "\"Remember username\" preference saved.";
             } else if( sender == xMultiUser ) {
                 lOptionsSaved.Text = "\"Multiple users\" preference saved.";
+                if( !xMultiUser.Checked ) {
+                    bDeleteActiveAccount.Enabled = false;
+                }
             } else if( sender == xRememberPassword ) {
                 lOptionsSaved.Text = "\"Remember password\" preference saved.";
             } else if( sender == xRememberServer ) {
@@ -750,11 +753,13 @@ namespace ChargedMinersLauncher {
             if( !accounts.HasAccount( oldAccount.SignInUsername ) ) {
                 accounts.AddAccount( oldAccount );
             }
+            accounts.SaveAccounts();
             File.Delete( Paths.LegacyPasswordSaveFile );
         }
 
 
-        void LoadAccount( SignInAccount account ) {
+        void SelectActiveAccount( SignInAccount account ) {
+            activeAccount = account;
             cSignInUsername.Text = account.SignInUsername;
             if( xRememberPassword.Checked ) {
                 tSignInPassword.Text = account.Password;
@@ -788,13 +793,15 @@ namespace ChargedMinersLauncher {
             string givenUsername = cSignInUsername.Text;
             SignInAccount acct = accounts.FindAccount( givenUsername );
             if( acct != null ) {
-                activeAccount = acct;
-                LoadAccount( acct );
+                SelectActiveAccount( acct );
+                bDeleteActiveAccount.Enabled = true;
+                bDeleteActiveAccount.Text = "Forget account\n" + acct.SignInUsername;
             } else {
                 if( activeAccount != null ) {
                     tSignInPassword.Text = "";
                 }
                 activeAccount = null;
+                bDeleteActiveAccount.Enabled = false;
             }
         }
 
@@ -1117,6 +1124,14 @@ namespace ChargedMinersLauncher {
 #endif
                 File.AppendAllText( Paths.LauncherLogFile, fullMsg );
             }
+        }
+
+        private void bDeleteActiveAccount_Click( object sender, EventArgs e ) {
+            accounts.RemoveAccount( activeAccount );
+            lOptionsSaved.Text = "Removed information for selected account.";
+            cSignInUsername.Text = "";
+            tSignInPassword.Text = "";
+            tSignInUrl.Text = "";
         }
     }
 }

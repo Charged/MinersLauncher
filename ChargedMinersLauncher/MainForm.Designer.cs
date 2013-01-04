@@ -81,6 +81,7 @@
             this.bUpdateNo = new System.Windows.Forms.Button();
             this.bUpdateYes = new System.Windows.Forms.Button();
             this.lUpdatePrompt = new System.Windows.Forms.Label();
+            this.bDeleteActiveAccount = new System.Windows.Forms.Button();
             this.flow.SuspendLayout();
             this.tabs.SuspendLayout();
             this.tabSignIn.SuspendLayout();
@@ -436,6 +437,7 @@
             // 
             // tabOptions
             // 
+            this.tabOptions.Controls.Add(this.bDeleteActiveAccount);
             this.tabOptions.Controls.Add(this.xMultiUser);
             this.tabOptions.Controls.Add(this.lOptionsSaved);
             this.tabOptions.Controls.Add(this.lGameUpdates);
@@ -743,6 +745,16 @@
     "t?";
             this.lUpdatePrompt.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
+            // bDeleteActiveAccount
+            // 
+            this.bDeleteActiveAccount.Location = new System.Drawing.Point(176, 83);
+            this.bDeleteActiveAccount.Name = "bDeleteActiveAccount";
+            this.bDeleteActiveAccount.Size = new System.Drawing.Size(90, 40);
+            this.bDeleteActiveAccount.TabIndex = 9;
+            this.bDeleteActiveAccount.Text = "Forget account\r\n{0}";
+            this.bDeleteActiveAccount.UseVisualStyleBackColor = true;
+            this.bDeleteActiveAccount.Click += new System.EventHandler(this.bDeleteActiveAccount_Click);
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -834,6 +846,7 @@
         private System.Windows.Forms.CheckBox xFailSafe;
         private System.Windows.Forms.ComboBox cSignInUsername;
         private System.Windows.Forms.CheckBox xMultiUser;
+        private System.Windows.Forms.Button bDeleteActiveAccount;
     }
 }
 
