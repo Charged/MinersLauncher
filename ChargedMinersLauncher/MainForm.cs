@@ -31,7 +31,7 @@ namespace ChargedMinersLauncher {
             // Set up the GUI
             InitializeComponent();
             SetToolTips();
-            lOptionsSaved.Text = "";
+            lOptionsStatus.Text = "";
             lToolStatus.Text = "";
 
             // hook up event handlers
@@ -176,7 +176,8 @@ namespace ChargedMinersLauncher {
                          "Uploads your Charged-Miners and launcher log files, which contain debugging information, for easy sharing.",
                      ToolTipMultiAccount =
                          "Whether Charged-Miners launcher should remember all used accounts, or just the most-recent one.",
-                     ToolTipForgetAccount = "Forget any stored information about the currently-selected account.";
+                     ToolTipForgetAccount = "Forget any stored information about the currently-selected account.",
+                     ToolTipFailSafe = "Start Charged-Miners in compatible, fail-safe mode. Use this if you're crashing while loading.";
 
 
         void SetToolTips() {
@@ -196,12 +197,13 @@ namespace ChargedMinersLauncher {
             toolTip.SetToolTip( xRememberUsername, ToolTipRememberUsername );
             toolTip.SetToolTip( xRememberPassword, ToolTipRememberPassword );
             toolTip.SetToolTip( xMultiUser, ToolTipMultiAccount );
-            toolTip.SetToolTip( bForgetActiveAccount, ToolTipForgetAccount );
+            toolTip.SetToolTip( xFailSafe, ToolTipFailSafe );
 
             toolTip.SetToolTip( bResetSettings, ToolTipResetSettings );
             toolTip.SetToolTip( bDeleteData, ToolTipDeleteData );
             toolTip.SetToolTip( bOpenDataDir, ToolTipOpenDataDir );
             toolTip.SetToolTip( bUploadLog, ToolTipUploadLog );
+            toolTip.SetToolTip( bForgetActiveAccount, ToolTipForgetAccount );
         }
 
 
@@ -385,20 +387,48 @@ namespace ChargedMinersLauncher {
             settings.Save( Paths.LauncherSettingsFile );
 
             if( sender == xRememberUsername ) {
-                lOptionsSaved.Text = "\"Remember username\" preference saved.";
+                if( xRememberUsername.Checked ) {
+                    lOptionsStatus.Text = "Usernames will now be remembered.";
+                    xRememberPassword.Enabled = true;
+                    xMultiUser.Enabled = true;
+                } else {
+                    lOptionsStatus.Text = "Usernames will no longer be remembered.";
+                    xRememberPassword.Checked = false;
+                    xRememberPassword.Enabled = false;
+                    xMultiUser.Checked = false;
+                    xMultiUser.Enabled = false;
+                }
+
+            } else if( sender == xRememberPassword ) {
+                if( xRememberPassword.Checked ) {
+                    lOptionsStatus.Text = "Passwords will now be remembered.";
+                } else {
+                    lOptionsStatus.Text = "Passwords will no longer be remembered.";
+                }
+
+            } else if( sender == xRememberServer ) {
+                if( xRememberServer.Checked ) {
+                    lOptionsStatus.Text = "Last-joined server will now be remembered.";
+                } else {
+                    lOptionsStatus.Text = "Last-joined server will no longer be remembered.";
+                }
+
             } else if( sender == xMultiUser ) {
                 LoadAccounts();
-                lOptionsSaved.Text = "\"Multiple users\" preference saved.";
-            } else if( sender == xRememberPassword ) {
-                lOptionsSaved.Text = "\"Remember password\" preference saved.";
-            } else if( sender == xRememberServer ) {
-                lOptionsSaved.Text = "\"Remember server\" preference saved.";
+                if( xMultiUser.Checked ) {
+                    lOptionsStatus.Text = "All users will now be remembered.";
+                } else {
+                    lOptionsStatus.Text = "Only most-recent user will now be remembered.";
+                }
+
             } else if( sender == cGameUpdates ) {
-                lOptionsSaved.Text = "\"Game updates\" preference saved.";
+                lOptionsStatus.Text = "\"Game updates\" preference saved.";
+
             } else if( sender == cStartingTab ) {
-                lOptionsSaved.Text = "\"Starting tab\" preference saved.";
+                lOptionsStatus.Text = "\"Starting tab\" preference saved.";
+
             } else {
-                lOptionsSaved.Text = "Preferences saved.";
+                lOptionsStatus.Text = "Preferences saved.";
             }
         }
 
@@ -526,7 +556,7 @@ namespace ChargedMinersLauncher {
                 sf.Set( "mc.failsafe", xFailSafe.Checked );
                 sf.Save( Paths.GameSettingsFile );
             }
-            lToolStatus.Text = "Fail-safe mode " + ( xFailSafe.Checked ? "enabled" : "disabled" ) + ".";
+            lOptionsStatus.Text = "Fail-safe mode " + (xFailSafe.Checked ? "enabled" : "disabled") + ".";
         }
 
         #endregion

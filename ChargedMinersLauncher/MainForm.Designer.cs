@@ -57,7 +57,7 @@
             this.tabOptions = new System.Windows.Forms.TabPage();
             this.xFailSafe = new System.Windows.Forms.CheckBox();
             this.xMultiUser = new System.Windows.Forms.CheckBox();
-            this.lOptionsSaved = new System.Windows.Forms.Label();
+            this.lOptionsStatus = new System.Windows.Forms.Label();
             this.lGameUpdates = new System.Windows.Forms.Label();
             this.cGameUpdates = new System.Windows.Forms.ComboBox();
             this.xRememberServer = new System.Windows.Forms.CheckBox();
@@ -439,7 +439,7 @@
             // 
             this.tabOptions.Controls.Add(this.xFailSafe);
             this.tabOptions.Controls.Add(this.xMultiUser);
-            this.tabOptions.Controls.Add(this.lOptionsSaved);
+            this.tabOptions.Controls.Add(this.lOptionsStatus);
             this.tabOptions.Controls.Add(this.lGameUpdates);
             this.tabOptions.Controls.Add(this.cGameUpdates);
             this.tabOptions.Controls.Add(this.xRememberServer);
@@ -477,17 +477,17 @@
             this.xMultiUser.UseVisualStyleBackColor = true;
             this.xMultiUser.CheckedChanged += new System.EventHandler(this.SaveLauncherSettings);
             // 
-            // lOptionsSaved
+            // lOptionsStatus
             // 
-            this.lOptionsSaved.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
+            this.lOptionsStatus.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.lOptionsSaved.ForeColor = System.Drawing.SystemColors.ControlDarkDark;
-            this.lOptionsSaved.Location = new System.Drawing.Point(6, 126);
-            this.lOptionsSaved.Name = "lOptionsSaved";
-            this.lOptionsSaved.Size = new System.Drawing.Size(260, 30);
-            this.lOptionsSaved.TabIndex = 7;
-            this.lOptionsSaved.Text = "lOptionsSaved";
-            this.lOptionsSaved.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            this.lOptionsStatus.ForeColor = System.Drawing.SystemColors.ControlDarkDark;
+            this.lOptionsStatus.Location = new System.Drawing.Point(6, 126);
+            this.lOptionsStatus.Name = "lOptionsStatus";
+            this.lOptionsStatus.Size = new System.Drawing.Size(260, 30);
+            this.lOptionsStatus.TabIndex = 7;
+            this.lOptionsStatus.Text = "lOptionsStatus";
+            this.lOptionsStatus.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
             // lGameUpdates
             // 
@@ -515,6 +515,8 @@
             // xRememberServer
             // 
             this.xRememberServer.AutoSize = true;
+            this.xRememberServer.Checked = true;
+            this.xRememberServer.CheckState = System.Windows.Forms.CheckState.Checked;
             this.xRememberServer.Location = new System.Drawing.Point(6, 106);
             this.xRememberServer.Name = "xRememberServer";
             this.xRememberServer.Size = new System.Drawing.Size(159, 17);
@@ -560,6 +562,8 @@
             // xRememberUsername
             // 
             this.xRememberUsername.AutoSize = true;
+            this.xRememberUsername.Checked = true;
+            this.xRememberUsername.CheckState = System.Windows.Forms.CheckState.Checked;
             this.xRememberUsername.Location = new System.Drawing.Point(6, 60);
             this.xRememberUsername.Name = "xRememberUsername";
             this.xRememberUsername.Size = new System.Drawing.Size(126, 17);
@@ -842,7 +846,7 @@
         private System.Windows.Forms.TextBox tResumeUri;
         private System.Windows.Forms.Label lResumeUri;
         private System.Windows.Forms.Label lDirectStatus;
-        private System.Windows.Forms.Label lOptionsSaved;
+        private System.Windows.Forms.Label lOptionsStatus;
         private System.Windows.Forms.Label lToolStatus;
         private System.Windows.Forms.ComboBox cSignInUsername;
         private System.Windows.Forms.CheckBox xMultiUser;
