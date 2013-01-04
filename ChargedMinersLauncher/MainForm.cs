@@ -777,6 +777,16 @@ namespace ChargedMinersLauncher {
         }
 
 
+        // Used by worker threads to update "Signing In..." status in a thread-safe manner.
+        internal static void SetSignInStatus( string text ) {
+            if( instance.lStatus2.InvokeRequired ) {
+                instance.lStatus2.BeginInvoke( (MethodInvoker)delegate { instance.lStatus2.Text = text; } );
+            } else {
+                instance.lStatus2.Text = text;
+            }
+        }
+
+
         void LoadAccounts() {
             try {
                 // load stored account information
@@ -818,8 +828,9 @@ namespace ChargedMinersLauncher {
             if( xRememberUsername.Checked ) {
                 string[] loginData = File.ReadAllLines( Paths.LegacyPasswordSaveFile );
 
-                SignInAccount oldAccount = new SignInAccount();
-                oldAccount.SignInUsername = loginData[0];
+                SignInAccount oldAccount = new SignInAccount {
+                    SignInUsername = loginData[0]
+                };
                 oldAccount.PlayerName = ( loginData.Length > 2 ? loginData[2] : oldAccount.SignInUsername );
 
                 if( xRememberPassword.Checked ) {
@@ -1137,16 +1148,6 @@ namespace ChargedMinersLauncher {
         }
 
         #endregion
-
-
-        // Used by worker threads to update "Signing In..." status in a thread-safe manner.
-        internal static void SetStatus( string text ) {
-            if( instance.lStatus2.InvokeRequired ) {
-                instance.lStatus2.BeginInvoke( (MethodInvoker)delegate { instance.lStatus2.Text = text; } );
-            } else {
-                instance.lStatus2.Text = text;
-            }
-        }
 
 
         void StartChargedMiners() {

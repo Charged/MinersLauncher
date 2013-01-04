@@ -45,7 +45,7 @@ namespace ChargedMinersLauncher {
 
         public void Login( bool rememberSession ) {
             bool restoredSession = LoadCookie( rememberSession );
-            MainForm.SetStatus( "Connecting to Minecraft.net..." );
+            MainForm.SetSignInStatus( "Connecting to Minecraft.net..." );
 
             // check if cancel is needed
             if( cancel ) {
@@ -71,7 +71,7 @@ namespace ChargedMinersLauncher {
                 } else {
                     // If we're not supposed to reuse session, if old username is different,
                     // or if there is no play session cookie set - relog
-                    MainForm.SetStatus( "Switching accounts..." );
+                    MainForm.SetSignInStatus( "Switching accounts..." );
                     DownloadString( LogoutUri, MinecraftNet );
                     loginPage = DownloadString( LoginSecureUri, LogoutUri );
                 }
@@ -113,7 +113,7 @@ namespace ChargedMinersLauncher {
             }
 
             // POST to the login form
-            MainForm.SetStatus( "Sending login information..." );
+            MainForm.SetSignInStatus( "Sending login information..." );
             string loginResponse = UploadString( LoginSecureUri, LoginSecureUri, loginString );
 
             // check if cancel is needed
