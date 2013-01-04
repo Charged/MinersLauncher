@@ -73,7 +73,7 @@
     <Compile Include="RuntimeInfo.cs" />
     <Compile Include="SettingsFile.cs" />
     <Compile Include="SignInAccount.cs" />
-    <Compile Include="SimplerAES.cs" />
+    <Compile Include="PasswordSecurity.cs" />
     <Compile Include="StartingTab.cs" />
     <Compile Include="VersionInfo.cs" />
     <Compile Include="VersionsTxt.cs" />
