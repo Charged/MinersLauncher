@@ -20,19 +20,23 @@ namespace ChargedMinersLauncher {
 
         public void RemoveAccount( SignInAccount account ) {
             storedAccounts.Remove( account.SignInUsername.ToLower() );
-            RemoveAllAccounts();
+            RemoveAllAccountFiles();
             SaveAllAccounts();
         }
 
 
         public void RemoveAllAccounts() {
             storedAccounts.Clear();
+            RemoveAllAccountFiles();
+        }
+
+
+        public void RemoveAllAccountFiles() {
             string[] fileNames = Directory.GetFiles( Paths.DataDirectory, "*.account" );
             foreach( string fileName in fileNames ) {
                 File.Delete( fileName );
             }
         }
-
 
         public void LoadAccounts() {
             storedAccounts.Clear();
@@ -68,6 +72,7 @@ namespace ChargedMinersLauncher {
 
 
         public void SaveAllAccounts() {
+            RemoveAllAccountFiles();
             foreach( SignInAccount account in storedAccounts.Values ) {
                 account.Save();
             }

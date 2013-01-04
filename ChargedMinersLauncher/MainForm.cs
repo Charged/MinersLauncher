@@ -1,6 +1,5 @@
 ﻿// Part of ChargedMinersLauncher | Copyright (c) 2012 Matvei Stefarov <me@matvei.org> | BSD-3 | See LICENSE.txt
 using System;
-using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Drawing;
@@ -433,15 +432,17 @@ namespace ChargedMinersLauncher {
         }
 
 
-        private void bForgetActiveAccount_Click( object sender, EventArgs e ) {
-            accounts.RemoveAccount( activeAccount );
-            lToolStatus.Text = "Removed information for selected account.";
-            cSignInUsername.Text = "";
-            tSignInPassword.Text = "";
-            tSignInUrl.Text = "";
-            LoadAccounts();
-            bForgetActiveAccount.Enabled = false;
-            bForgetActiveAccount.Text = "Forget account: (no account selected)";
+        void xFailSafe_CheckedChanged( object sender, EventArgs e ) {
+            SettingsFile sf = new SettingsFile();
+            if( File.Exists( Paths.GameSettingsFile ) ) {
+                sf.Load( Paths.GameSettingsFile );
+            }
+            bool failSafeEnabled = sf.GetBool( "mc.failsafe", false );
+            if( failSafeEnabled != xFailSafe.Checked ) {
+                sf.Set( "mc.failsafe", xFailSafe.Checked );
+                sf.Save( Paths.GameSettingsFile );
+            }
+            lOptionsStatus.Text = "Fail-safe mode " + (xFailSafe.Checked ? "enabled" : "disabled") + ".";
         }
 
 
@@ -546,17 +547,15 @@ namespace ChargedMinersLauncher {
         }
 
 
-        void xFailSafe_CheckedChanged( object sender, EventArgs e ) {
-            SettingsFile sf = new SettingsFile();
-            if( File.Exists( Paths.GameSettingsFile ) ) {
-                sf.Load( Paths.GameSettingsFile );
-            }
-            bool failSafeEnabled = sf.GetBool( "mc.failsafe", false );
-            if( failSafeEnabled != xFailSafe.Checked ) {
-                sf.Set( "mc.failsafe", xFailSafe.Checked );
-                sf.Save( Paths.GameSettingsFile );
-            }
-            lOptionsStatus.Text = "Fail-safe mode " + (xFailSafe.Checked ? "enabled" : "disabled") + ".";
+        private void bForgetActiveAccount_Click( object sender, EventArgs e ) {
+            accounts.RemoveAccount( activeAccount );
+            lToolStatus.Text = "Removed information for selected account.";
+            cSignInUsername.Text = "";
+            tSignInPassword.Text = "";
+            tSignInUrl.Text = "";
+            LoadAccounts();
+            bForgetActiveAccount.Enabled = false;
+            bForgetActiveAccount.Text = "Forget account: (no account selected)";
         }
 
         #endregion
@@ -862,12 +861,11 @@ namespace ChargedMinersLauncher {
             }
 
             activeAccount.SignInDate = DateTime.UtcNow;
-            if( xMultiUser.Checked ) {
-                accounts.SaveAllAccounts();
-            } else {
+            if( !xMultiUser.Checked ) {
                 accounts.RemoveAllAccounts();
-                activeAccount.Save();
+                accounts.AddAccount( activeAccount );
             }
+            accounts.SaveAllAccounts();
         }
 
 
