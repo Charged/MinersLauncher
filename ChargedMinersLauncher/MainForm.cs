@@ -282,6 +282,7 @@ namespace ChargedMinersLauncher {
             }
 
             bSignIn.Enabled = canSignIn;
+            // let user know whether username/password will be remembered
             if( canSignIn && lSignInStatus.Text == "" ) {
                 if( xRememberUsername.Checked ) {
                     lSignInStatus.ForeColor = StatusNotifyColor;
@@ -550,7 +551,8 @@ namespace ChargedMinersLauncher {
         }
 
 
-        private void bForgetActiveAccount_Click( object sender, EventArgs e ) {
+        void bForgetActiveAccount_Click( object sender, EventArgs e ) {
+            Log( "[ForgetAccount]" );
             accounts.RemoveAccount( activeAccount );
             lToolStatus.Text = "Removed information for selected account.";
             cSignInUsername.Text = "";
@@ -638,8 +640,9 @@ namespace ChargedMinersLauncher {
                 DownloadBegin();
             }
 
-            if( loginCompleted )
+            if( loginCompleted ) {
                 OnSignInAndUpdateCheckCompleted();
+            }
         }
 
 
@@ -686,7 +689,7 @@ namespace ChargedMinersLauncher {
         #endregion
 
 
-        #region Sign-In
+        #region Sign-In and Accounts
 
         MinecraftNetSession signInSession;
         LaunchMode launchMode;
@@ -776,12 +779,15 @@ namespace ChargedMinersLauncher {
 
         void LoadAccounts() {
             try {
+                // load stored account information
                 accounts.LoadAccounts();
                 if( File.Exists( Paths.LegacyPasswordSaveFile ) ) {
                     LoadLegacyPasswordSaveFile();
                 }
+
                 cSignInUsername.Items.Clear();
                 if( xMultiUser.Checked ) {
+                    // Multiple accounts! Add them all to the menu, recently-used first.
                     SignInAccount[] accountsByDate = accounts.GetAccountsBySignInDate();
                     foreach( SignInAccount account in accountsByDate ) {
                         cSignInUsername.Items.Add( account.SignInUsername );
@@ -791,12 +797,15 @@ namespace ChargedMinersLauncher {
                     } else {
                         SelectActiveAccount( null );
                     }
+
                 } else {
+                    // Single account. Add most-recently-used one to the menu.
                     SelectActiveAccount( accounts.GetMostRecentlyUsedAccount() );
                     if( activeAccount != null ) {
                         cSignInUsername.Items.Add( activeAccount.SignInUsername );
                     }
                 }
+
             } catch( Exception ex ) {
                 Log( "LoadAccounts: " + ex );
                 lSignInStatus.Text = "Could not load saved login information.";
@@ -804,35 +813,38 @@ namespace ChargedMinersLauncher {
         }
 
 
+        // Load account info from the old password file (saved-login.dat). Delete it after done.
         void LoadLegacyPasswordSaveFile() {
-            SignInAccount oldAccount = new SignInAccount();
-            string[] loginData = File.ReadAllLines( Paths.LegacyPasswordSaveFile );
-            if( xRememberServer.Checked ) {
-                oldAccount.LastUrl = ( loginData.Length > 3 ? loginData[3] : "" );
-            } else {
-                oldAccount.LastUrl = "";
-            }
             if( xRememberUsername.Checked ) {
+                string[] loginData = File.ReadAllLines( Paths.LegacyPasswordSaveFile );
+
+                SignInAccount oldAccount = new SignInAccount();
                 oldAccount.SignInUsername = loginData[0];
                 oldAccount.PlayerName = ( loginData.Length > 2 ? loginData[2] : oldAccount.SignInUsername );
-            } else {
-                File.Delete( Paths.LegacyPasswordSaveFile );
-                return;
+
+                if( xRememberPassword.Checked ) {
+                    oldAccount.Password = loginData[1];
+                } else {
+                    oldAccount.Password = "";
+                }
+
+                if( xRememberServer.Checked ) {
+                    oldAccount.LastUrl = ( loginData.Length > 3 ? loginData[3] : "" );
+                } else {
+                    oldAccount.LastUrl = "";
+                }
+
+                oldAccount.SignInDate = DateTime.UtcNow;
+                if( !accounts.HasAccount( oldAccount.SignInUsername ) ) {
+                    accounts.AddAccount( oldAccount );
+                }
+                accounts.SaveAllAccounts();
             }
-            if( xRememberPassword.Checked ) {
-                oldAccount.Password = loginData[1];
-            } else {
-                oldAccount.Password = "";
-            }
-            oldAccount.SignInDate = DateTime.UtcNow;
-            if( !accounts.HasAccount( oldAccount.SignInUsername ) ) {
-                accounts.AddAccount( oldAccount );
-            }
-            accounts.SaveAllAccounts();
             File.Delete( Paths.LegacyPasswordSaveFile );
         }
 
 
+        // Set given account as the active one.
         void SelectActiveAccount( SignInAccount account ) {
             activeAccount = account;
             if( account == null ) {
@@ -847,7 +859,7 @@ namespace ChargedMinersLauncher {
                 } else {
                     tSignInPassword.Text = "";
                 }
-                if( xRememberServer.Checked ) {
+                if( xRememberServer.Checked && account.LastUrl.Length > 0 ) {
                     tSignInUrl.Text = account.LastUrl;
                 }
             }
@@ -856,6 +868,7 @@ namespace ChargedMinersLauncher {
 
         void SaveAccounts() {
             if( activeAccount == null ) {
+                // If currenty-entered account information is not on record, add it to AccountManager
                 activeAccount = new SignInAccount {
                     SignInUsername = cSignInUsername.Text,
                     Password = tSignInPassword.Text,
@@ -867,6 +880,7 @@ namespace ChargedMinersLauncher {
 
             activeAccount.SignInDate = DateTime.UtcNow;
             if( !xMultiUser.Checked ) {
+                // If no multi-user, clear all accounts except active one
                 accounts.RemoveAllAccounts();
                 accounts.AddAccount( activeAccount );
             }
@@ -879,9 +893,12 @@ namespace ChargedMinersLauncher {
             string givenUsername = cSignInUsername.Text;
             SignInAccount acct = accounts.FindAccount( givenUsername );
             if( acct != null ) {
+                // Recognized account! Load info from it.
                 SelectActiveAccount( acct );
             } else {
+                // Unrecognized account
                 if( activeAccount != null ) {
+                    // Reset password when going from known to unknown account
                     tSignInPassword.Text = "";
                 }
                 activeAccount = null;
@@ -891,6 +908,8 @@ namespace ChargedMinersLauncher {
         }
 
 
+        // After selecting a username from the drop-down list,
+        // go to next field that needs to be entered (password or URL)
         void cSignInUsername_SelectedIndexChanged( object sender, EventArgs e ) {
             if( tSignInPassword.TextLength == 0 ) {
                 tSignInPassword.Focus();
@@ -1119,6 +1138,7 @@ namespace ChargedMinersLauncher {
         #endregion
 
 
+        // Used by worker threads to update "Signing In..." status in a thread-safe manner.
         internal static void SetStatus( string text ) {
             if( instance.lStatus2.InvokeRequired ) {
                 instance.lStatus2.BeginInvoke( (MethodInvoker)delegate { instance.lStatus2.Text = text; } );
