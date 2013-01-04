@@ -7,6 +7,7 @@ namespace ChargedMinersLauncher {
     class AccountManager {
         readonly Dictionary<string, SignInAccount> storedAccounts = new Dictionary<string, SignInAccount>();
 
+
         public void AddAccount( SignInAccount newAccount ) {
             storedAccounts.Add( newAccount.SignInUsername.ToLowerInvariant(), newAccount );
         }
@@ -91,9 +92,7 @@ namespace ChargedMinersLauncher {
 
 
         public SignInAccount GetMostRecentlyUsedAccount() {
-            return storedAccounts.Values
-                                 .OrderByDescending( acct => acct.SignInDate )
-                                 .FirstOrDefault();
+            return GetAccountsBySignInDate().FirstOrDefault();
         }
     }
 }

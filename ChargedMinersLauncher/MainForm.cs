@@ -173,7 +173,10 @@ namespace ChargedMinersLauncher {
                      ToolTipDeleteData = "Deletes all private data: settings, logs, stored login data, etc.",
                      ToolTipOpenDataDir = "Opens up Charged-Miners' data directory.",
                      ToolTipUploadLog =
-                         "Uploads your Charged-Miners and launcher log files, which contain debugging information, for easy sharing.";
+                         "Uploads your Charged-Miners and launcher log files, which contain debugging information, for easy sharing.",
+                     ToolTipMultiAccount =
+                         "Whether Charged-Miners launcher should remember all used accounts, or just the most-recent one.",
+                     ToolTipForgetAccount = "Forget any stored information about the currently-selected account.";
 
 
         void SetToolTips() {
@@ -192,6 +195,8 @@ namespace ChargedMinersLauncher {
 
             toolTip.SetToolTip( xRememberUsername, ToolTipRememberUsername );
             toolTip.SetToolTip( xRememberPassword, ToolTipRememberPassword );
+            toolTip.SetToolTip( xMultiUser, ToolTipMultiAccount );
+            toolTip.SetToolTip( bForgetActiveAccount, ToolTipForgetAccount );
 
             toolTip.SetToolTip( bResetSettings, ToolTipResetSettings );
             toolTip.SetToolTip( bDeleteData, ToolTipDeleteData );
@@ -210,6 +215,9 @@ namespace ChargedMinersLauncher {
 
         #region UI Event Hooks
 
+        static readonly Color InvalidFieldColor = Color.Yellow,
+                              ValidFieldColor = SystemColors.Window;
+
         // ==== Sign-In tab ====
         void SignInFieldChanged( object sender, EventArgs e ) {
             lSignInStatus.Text = "";
@@ -217,22 +225,22 @@ namespace ChargedMinersLauncher {
             bool canSignIn = false;
             // check the username field
             if( UsernameRegex.IsMatch( cSignInUsername.Text ) || EmailRegex.IsMatch( cSignInUsername.Text ) ) {
-                cSignInUsername.BackColor = SystemColors.Window;
+                cSignInUsername.BackColor = ValidFieldColor;
                 canSignIn = true;
             } else {
-                cSignInUsername.BackColor = Color.Yellow;
+                cSignInUsername.BackColor = InvalidFieldColor;
                 lSignInStatus.Text = "Invalid username/email.";
             }
 
             // check the password field
             if( tSignInPassword.Text.Length == 0 ) {
                 canSignIn = false;
-                tSignInPassword.BackColor = Color.Yellow;
+                tSignInPassword.BackColor = InvalidFieldColor;
                 if( sender == tSignInPassword || lSignInStatus.Text.Length == 0 ) {
                     lSignInStatus.Text = "Password is required.";
                 }
             } else {
-                tSignInPassword.BackColor = SystemColors.Window;
+                tSignInPassword.BackColor = ValidFieldColor;
             }
 
             // check the URL field
@@ -240,11 +248,11 @@ namespace ChargedMinersLauncher {
             if( match.Success ) {
                 // "mc://" url
                 if( match.Groups[7].Value.Equals( cSignInUsername.Text, StringComparison.OrdinalIgnoreCase ) ) {
-                    tSignInUrl.BackColor = SystemColors.Window;
+                    tSignInUrl.BackColor = ValidFieldColor;
                     launchMode = LaunchMode.SignInWithUri;
                 } else {
                     canSignIn = false;
-                    tSignInUrl.BackColor = Color.Yellow;
+                    tSignInUrl.BackColor = InvalidFieldColor;
                     if( sender == tSignInUrl || lSignInStatus.Text.Length == 0 ) {
                         lSignInStatus.Text = "Given sign-in username does not match username in direct-connect URL.";
                     }
@@ -253,16 +261,16 @@ namespace ChargedMinersLauncher {
             } else if( PlayLinkHash.IsMatch( tSignInUrl.Text ) || PlayLinkIPPort.IsMatch( tSignInUrl.Text ) ) {
                 // minecraft.net play link
                 launchMode = LaunchMode.SignInWithUri;
-                tSignInUrl.BackColor = SystemColors.Window;
+                tSignInUrl.BackColor = ValidFieldColor;
 
             } else if( tSignInUrl.Text.Length == 0 ) {
                 // no URL given
                 launchMode = LaunchMode.SignIn;
-                tSignInUrl.BackColor = SystemColors.Window;
+                tSignInUrl.BackColor = ValidFieldColor;
 
             } else {
                 // unrecognized URL given
-                tSignInUrl.BackColor = Color.Yellow;
+                tSignInUrl.BackColor = InvalidFieldColor;
                 if( sender == tSignInUrl || lSignInStatus.Text.Length == 0 ) {
                     lSignInStatus.Text = "Unrecognized URL";
                 }
@@ -274,9 +282,9 @@ namespace ChargedMinersLauncher {
                 if( xRememberUsername.Checked ) {
                     lSignInStatus.ForeColor = SystemColors.ControlDarkDark;
                     if( xRememberPassword.Checked ) {
-                        lSignInStatus.Text = "Username and password will be stored.";
+                        lSignInStatus.Text = "Username and password will be remembered.";
                     } else {
-                        lSignInStatus.Text = "Username will be stored.";
+                        lSignInStatus.Text = "Username will be remembered.";
                     }
                 } else {
                     lSignInStatus.ForeColor = Color.Red;
@@ -325,7 +333,7 @@ namespace ChargedMinersLauncher {
                 // Acceptable "mc://" url
                 tDirectServerIP.Text = match.Groups[1].Value;
                 tDirectUsername.Text = match.Groups[7].Value;
-                tDirectUrl.BackColor = SystemColors.Window;
+                tDirectUrl.BackColor = ValidFieldColor;
                 launchMode = LaunchMode.Direct;
                 lDirectStatus.Text = "";
                 bDirectConnect.Enabled = true;
@@ -334,7 +342,7 @@ namespace ChargedMinersLauncher {
                 // Unacceptable or missing URL
                 tDirectServerIP.Text = "?";
                 tDirectUsername.Text = "?";
-                tDirectUrl.BackColor = Color.Yellow;
+                tDirectUrl.BackColor = InvalidFieldColor;
                 bDirectConnect.Enabled = false;
                 if( PlayLinkHash.IsMatch( tDirectUrl.Text ) || PlayLinkIPPort.IsMatch( tDirectUrl.Text ) ) {
                     // minecraft.net play link
@@ -392,6 +400,18 @@ namespace ChargedMinersLauncher {
             } else {
                 lOptionsSaved.Text = "Preferences saved.";
             }
+        }
+
+
+        private void bForgetActiveAccount_Click( object sender, EventArgs e ) {
+            accounts.RemoveAccount( activeAccount );
+            lToolStatus.Text = "Removed information for selected account.";
+            cSignInUsername.Text = "";
+            tSignInPassword.Text = "";
+            tSignInUrl.Text = "";
+            LoadAccounts();
+            bForgetActiveAccount.Enabled = false;
+            bForgetActiveAccount.Text = "Forget account: (no account selected)";
         }
 
 
@@ -782,10 +802,11 @@ namespace ChargedMinersLauncher {
         void SelectActiveAccount( SignInAccount account ) {
             activeAccount = account;
             if( account == null ) {
-                bDeleteActiveAccount.Visible = false;
+                bForgetActiveAccount.Enabled = false;
+                bForgetActiveAccount.Text = "Forget account: (no account selected)";
             } else {
-                bDeleteActiveAccount.Visible = true;
-                bDeleteActiveAccount.Text = "Forget account\n" + activeAccount.SignInUsername;
+                bForgetActiveAccount.Enabled = true;
+                bForgetActiveAccount.Text = "Forget account: " + activeAccount.SignInUsername;
                 cSignInUsername.Text = account.SignInUsername;
                 if( xRememberPassword.Checked ) {
                     tSignInPassword.Text = account.Password;
@@ -831,9 +852,11 @@ namespace ChargedMinersLauncher {
                     tSignInPassword.Text = "";
                 }
                 activeAccount = null;
-                bDeleteActiveAccount.Visible = false;
+                bForgetActiveAccount.Enabled = false;
+                bForgetActiveAccount.Text = "Forget account: (no account selected)";
             }
         }
+
 
         void cSignInUsername_SelectedIndexChanged( object sender, EventArgs e ) {
             if( tSignInPassword.TextLength == 0 ) {
@@ -970,7 +993,6 @@ namespace ChargedMinersLauncher {
                 state = value;
             }
         }
-
         FormState state;
 
 
@@ -1154,16 +1176,6 @@ namespace ChargedMinersLauncher {
 #endif
                 File.AppendAllText( Paths.LauncherLogFile, fullMsg );
             }
-        }
-
-        private void bDeleteActiveAccount_Click( object sender, EventArgs e ) {
-            accounts.RemoveAccount( activeAccount );
-            lOptionsSaved.Text = "Removed information for selected account.";
-            cSignInUsername.Text = "";
-            tSignInPassword.Text = "";
-            tSignInUrl.Text = "";
-            LoadAccounts();
-            bDeleteActiveAccount.Visible = false;
         }
     }
 }

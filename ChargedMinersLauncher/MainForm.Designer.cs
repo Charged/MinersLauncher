@@ -55,6 +55,7 @@
             this.tDirectUrl = new System.Windows.Forms.TextBox();
             this.lDirectUrl = new System.Windows.Forms.Label();
             this.tabOptions = new System.Windows.Forms.TabPage();
+            this.xFailSafe = new System.Windows.Forms.CheckBox();
             this.xMultiUser = new System.Windows.Forms.CheckBox();
             this.lOptionsSaved = new System.Windows.Forms.Label();
             this.lGameUpdates = new System.Windows.Forms.Label();
@@ -65,7 +66,7 @@
             this.cStartingTab = new System.Windows.Forms.ComboBox();
             this.xRememberUsername = new System.Windows.Forms.CheckBox();
             this.tabTools = new System.Windows.Forms.TabPage();
-            this.xFailSafe = new System.Windows.Forms.CheckBox();
+            this.bForgetActiveAccount = new System.Windows.Forms.Button();
             this.lToolStatus = new System.Windows.Forms.Label();
             this.tPastebinUrl = new System.Windows.Forms.TextBox();
             this.bDeleteData = new System.Windows.Forms.Button();
@@ -81,7 +82,6 @@
             this.bUpdateNo = new System.Windows.Forms.Button();
             this.bUpdateYes = new System.Windows.Forms.Button();
             this.lUpdatePrompt = new System.Windows.Forms.Label();
-            this.bDeleteActiveAccount = new System.Windows.Forms.Button();
             this.flow.SuspendLayout();
             this.tabs.SuspendLayout();
             this.tabSignIn.SuspendLayout();
@@ -437,7 +437,7 @@
             // 
             // tabOptions
             // 
-            this.tabOptions.Controls.Add(this.bDeleteActiveAccount);
+            this.tabOptions.Controls.Add(this.xFailSafe);
             this.tabOptions.Controls.Add(this.xMultiUser);
             this.tabOptions.Controls.Add(this.lOptionsSaved);
             this.tabOptions.Controls.Add(this.lGameUpdates);
@@ -455,10 +455,21 @@
             this.tabOptions.Text = "Options";
             this.tabOptions.UseVisualStyleBackColor = true;
             // 
+            // xFailSafe
+            // 
+            this.xFailSafe.AutoSize = true;
+            this.xFailSafe.Location = new System.Drawing.Point(172, 60);
+            this.xFailSafe.Name = "xFailSafe";
+            this.xFailSafe.Size = new System.Drawing.Size(94, 17);
+            this.xFailSafe.TabIndex = 9;
+            this.xFailSafe.Text = "Fail-safe mode";
+            this.xFailSafe.UseVisualStyleBackColor = true;
+            this.xFailSafe.CheckedChanged += new System.EventHandler(this.xFailSafe_CheckedChanged);
+            // 
             // xMultiUser
             // 
             this.xMultiUser.AutoSize = true;
-            this.xMultiUser.Location = new System.Drawing.Point(176, 60);
+            this.xMultiUser.Location = new System.Drawing.Point(172, 83);
             this.xMultiUser.Name = "xMultiUser";
             this.xMultiUser.Size = new System.Drawing.Size(90, 17);
             this.xMultiUser.TabIndex = 8;
@@ -559,7 +570,7 @@
             // 
             // tabTools
             // 
-            this.tabTools.Controls.Add(this.xFailSafe);
+            this.tabTools.Controls.Add(this.bForgetActiveAccount);
             this.tabTools.Controls.Add(this.lToolStatus);
             this.tabTools.Controls.Add(this.tPastebinUrl);
             this.tabTools.Controls.Add(this.bDeleteData);
@@ -574,25 +585,25 @@
             this.tabTools.Text = "Tools";
             this.tabTools.UseVisualStyleBackColor = true;
             // 
-            // xFailSafe
+            // bForgetActiveAccount
             // 
-            this.xFailSafe.AutoSize = true;
-            this.xFailSafe.Location = new System.Drawing.Point(137, 39);
-            this.xFailSafe.Name = "xFailSafe";
-            this.xFailSafe.Size = new System.Drawing.Size(127, 17);
-            this.xFailSafe.TabIndex = 6;
-            this.xFailSafe.Text = "Enable fail-safe mode";
-            this.xFailSafe.UseVisualStyleBackColor = true;
-            this.xFailSafe.CheckedChanged += new System.EventHandler(this.xFailSafe_CheckedChanged);
+            this.bForgetActiveAccount.Enabled = false;
+            this.bForgetActiveAccount.Location = new System.Drawing.Point(6, 6);
+            this.bForgetActiveAccount.Name = "bForgetActiveAccount";
+            this.bForgetActiveAccount.Size = new System.Drawing.Size(260, 23);
+            this.bForgetActiveAccount.TabIndex = 10;
+            this.bForgetActiveAccount.Text = "Forget account {0}";
+            this.bForgetActiveAccount.UseVisualStyleBackColor = true;
+            this.bForgetActiveAccount.Click += new System.EventHandler(this.bForgetActiveAccount_Click);
             // 
             // lToolStatus
             // 
             this.lToolStatus.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.lToolStatus.ForeColor = System.Drawing.SystemColors.ControlDarkDark;
-            this.lToolStatus.Location = new System.Drawing.Point(6, 90);
+            this.lToolStatus.Location = new System.Drawing.Point(6, 119);
             this.lToolStatus.Name = "lToolStatus";
-            this.lToolStatus.Size = new System.Drawing.Size(260, 66);
+            this.lToolStatus.Size = new System.Drawing.Size(260, 37);
             this.lToolStatus.TabIndex = 5;
             this.lToolStatus.Text = "lToolStatus";
             this.lToolStatus.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
@@ -601,7 +612,7 @@
             // 
             this.tPastebinUrl.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.tPastebinUrl.Location = new System.Drawing.Point(137, 66);
+            this.tPastebinUrl.Location = new System.Drawing.Point(137, 95);
             this.tPastebinUrl.Name = "tPastebinUrl";
             this.tPastebinUrl.ReadOnly = true;
             this.tPastebinUrl.Size = new System.Drawing.Size(129, 20);
@@ -609,7 +620,7 @@
             // 
             // bDeleteData
             // 
-            this.bDeleteData.Location = new System.Drawing.Point(137, 6);
+            this.bDeleteData.Location = new System.Drawing.Point(137, 35);
             this.bDeleteData.Name = "bDeleteData";
             this.bDeleteData.Size = new System.Drawing.Size(125, 23);
             this.bDeleteData.TabIndex = 1;
@@ -619,7 +630,7 @@
             // 
             // bResetSettings
             // 
-            this.bResetSettings.Location = new System.Drawing.Point(6, 6);
+            this.bResetSettings.Location = new System.Drawing.Point(6, 35);
             this.bResetSettings.Name = "bResetSettings";
             this.bResetSettings.Size = new System.Drawing.Size(125, 23);
             this.bResetSettings.TabIndex = 0;
@@ -629,7 +640,7 @@
             // 
             // bUploadLog
             // 
-            this.bUploadLog.Location = new System.Drawing.Point(6, 64);
+            this.bUploadLog.Location = new System.Drawing.Point(6, 93);
             this.bUploadLog.Name = "bUploadLog";
             this.bUploadLog.Size = new System.Drawing.Size(125, 23);
             this.bUploadLog.TabIndex = 3;
@@ -639,7 +650,7 @@
             // 
             // bOpenDataDir
             // 
-            this.bOpenDataDir.Location = new System.Drawing.Point(6, 35);
+            this.bOpenDataDir.Location = new System.Drawing.Point(6, 64);
             this.bOpenDataDir.Name = "bOpenDataDir";
             this.bOpenDataDir.Size = new System.Drawing.Size(125, 23);
             this.bOpenDataDir.TabIndex = 2;
@@ -745,16 +756,6 @@
     "t?";
             this.lUpdatePrompt.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
-            // bDeleteActiveAccount
-            // 
-            this.bDeleteActiveAccount.Location = new System.Drawing.Point(176, 83);
-            this.bDeleteActiveAccount.Name = "bDeleteActiveAccount";
-            this.bDeleteActiveAccount.Size = new System.Drawing.Size(90, 40);
-            this.bDeleteActiveAccount.TabIndex = 9;
-            this.bDeleteActiveAccount.Text = "Forget account\r\n{0}";
-            this.bDeleteActiveAccount.UseVisualStyleBackColor = true;
-            this.bDeleteActiveAccount.Click += new System.EventHandler(this.bDeleteActiveAccount_Click);
-            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -768,7 +769,7 @@
             this.MinimumSize = new System.Drawing.Size(285, 212);
             this.Name = "MainForm";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
-            this.Text = "Charged-Miners Launcher 1.13";
+            this.Text = "Charged-Miners Launcher 1.20";
             this.flow.ResumeLayout(false);
             this.tabs.ResumeLayout(false);
             this.tabSignIn.ResumeLayout(false);
@@ -843,10 +844,10 @@
         private System.Windows.Forms.Label lDirectStatus;
         private System.Windows.Forms.Label lOptionsSaved;
         private System.Windows.Forms.Label lToolStatus;
-        private System.Windows.Forms.CheckBox xFailSafe;
         private System.Windows.Forms.ComboBox cSignInUsername;
         private System.Windows.Forms.CheckBox xMultiUser;
-        private System.Windows.Forms.Button bDeleteActiveAccount;
+        private System.Windows.Forms.Button bForgetActiveAccount;
+        private System.Windows.Forms.CheckBox xFailSafe;
     }
 }
 
