@@ -1,4 +1,4 @@
-﻿// Part of ChargedMinersLauncher | Copyright (c) 2012 Jakob Bornecrantz <wallbraker@gmail.com> | BSD-3 | See LICENSE.txt
+﻿// Part of ChargedMinersLauncher | Copyright (c) 2012-2013 Jakob Bornecrantz <wallbraker@gmail.com> | BSD-3 | See LICENSE.txt
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
 

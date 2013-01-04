@@ -1,4 +1,5 @@
-// Part of ChargedMinersLauncher | Copyright (c) 2012 Jakob Bornecrantz <wallbraker@gmail.com> | Stolen from SirCmpwn | BSD-3 | See LICENSE.txt
+// Part of ChargedMinersLauncher | Copyright (c) 2012-2013 Jakob Bornecrantz <wallbraker@gmail.com>
+// With contributions from SirCmpwn | BSD-3 | See LICENSE.txt
 using System;
 using System.Diagnostics;
 
