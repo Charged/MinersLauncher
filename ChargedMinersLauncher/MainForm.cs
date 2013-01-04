@@ -100,7 +100,7 @@ namespace ChargedMinersLauncher {
                 return;
             }
 
-            LoadSignInInfo();
+            LoadAccounts();
 
             // trigger input validation
             SignInFieldChanged( cSignInUsername, EventArgs.Empty );
@@ -270,6 +270,20 @@ namespace ChargedMinersLauncher {
             }
 
             bSignIn.Enabled = canSignIn;
+            if( canSignIn && lSignInStatus.Text == "" ) {
+                if( xRememberUsername.Checked ) {
+                    lSignInStatus.ForeColor = SystemColors.ControlDarkDark;
+                    if( xRememberPassword.Checked ) {
+                        lSignInStatus.Text = "Username and password will be stored.";
+                    } else {
+                        lSignInStatus.Text = "Username will be stored.";
+                    }
+                } else {
+                    lSignInStatus.ForeColor = Color.Red;
+                }
+            } else {
+                lSignInStatus.ForeColor = Color.Red;
+            }
         }
 
 
@@ -365,10 +379,8 @@ namespace ChargedMinersLauncher {
             if( sender == xRememberUsername ) {
                 lOptionsSaved.Text = "\"Remember username\" preference saved.";
             } else if( sender == xMultiUser ) {
+                LoadAccounts();
                 lOptionsSaved.Text = "\"Multiple users\" preference saved.";
-                if( !xMultiUser.Checked ) {
-                    bDeleteActiveAccount.Enabled = false;
-                }
             } else if( sender == xRememberPassword ) {
                 lOptionsSaved.Text = "\"Remember password\" preference saved.";
             } else if( sender == xRememberServer ) {
@@ -406,7 +418,7 @@ namespace ChargedMinersLauncher {
             accounts.RemoveAllAccounts();
             settingsLoaded = false;
             LoadLauncherSettings();
-            LoadSignInInfo();
+            LoadAccounts();
             cSignInUsername.Text = "";
             tSignInPassword.Text = "";
             tSignInUrl.Text = "";
@@ -708,22 +720,31 @@ namespace ChargedMinersLauncher {
         }
 
 
-        void LoadSignInInfo() {
+        void LoadAccounts() {
             try {
                 accounts.LoadAccounts();
                 if( File.Exists( Paths.LegacyPasswordSaveFile ) ) {
                     LoadLegacyPasswordSaveFile();
                 }
                 cSignInUsername.Items.Clear();
-                SignInAccount[] accountsByDate = accounts.GetAccountsBySignInDate();
-                foreach( SignInAccount account in accountsByDate ) {
-                    cSignInUsername.Items.Add( account.SignInUsername );
-                }
-                if( cSignInUsername.Text.Length == 0 && accountsByDate.Length > 0 ) {
-                    cSignInUsername.Text = accountsByDate[0].SignInUsername;
+                if( xMultiUser.Checked ) {
+                    SignInAccount[] accountsByDate = accounts.GetAccountsBySignInDate();
+                    foreach( SignInAccount account in accountsByDate ) {
+                        cSignInUsername.Items.Add( account.SignInUsername );
+                    }
+                    if( accountsByDate.Length > 0 ) {
+                        SelectActiveAccount( accountsByDate[0] );
+                    } else {
+                        SelectActiveAccount( null );
+                    }
+                } else {
+                    SelectActiveAccount( accounts.GetMostRecentlyUsedAccount() );
+                    if( activeAccount != null ) {
+                        cSignInUsername.Items.Add( activeAccount.SignInUsername );
+                    }
                 }
             } catch( Exception ex ) {
-                Log( "LoadSignInInfo: " + ex );
+                Log( "LoadAccounts: " + ex );
                 lSignInStatus.Text = "Could not load saved login information.";
             }
         }
@@ -753,21 +774,27 @@ namespace ChargedMinersLauncher {
             if( !accounts.HasAccount( oldAccount.SignInUsername ) ) {
                 accounts.AddAccount( oldAccount );
             }
-            accounts.SaveAccounts();
+            accounts.SaveAllAccounts();
             File.Delete( Paths.LegacyPasswordSaveFile );
         }
 
 
         void SelectActiveAccount( SignInAccount account ) {
             activeAccount = account;
-            cSignInUsername.Text = account.SignInUsername;
-            if( xRememberPassword.Checked ) {
-                tSignInPassword.Text = account.Password;
+            if( account == null ) {
+                bDeleteActiveAccount.Visible = false;
             } else {
-                tSignInPassword.Text = "";
-            }
-            if( xRememberServer.Checked ) {
-                tSignInUrl.Text = account.LastUrl;
+                bDeleteActiveAccount.Visible = true;
+                bDeleteActiveAccount.Text = "Forget account\n" + activeAccount.SignInUsername;
+                cSignInUsername.Text = account.SignInUsername;
+                if( xRememberPassword.Checked ) {
+                    tSignInPassword.Text = account.Password;
+                } else {
+                    tSignInPassword.Text = "";
+                }
+                if( xRememberServer.Checked ) {
+                    tSignInUrl.Text = account.LastUrl;
+                }
             }
         }
 
@@ -784,7 +811,12 @@ namespace ChargedMinersLauncher {
             }
 
             activeAccount.SignInDate = DateTime.UtcNow;
-            accounts.SaveAccounts();
+            if( xMultiUser.Checked ) {
+                accounts.SaveAllAccounts();
+            } else {
+                accounts.RemoveAllAccounts();
+                activeAccount.Save();
+            }
         }
 
 
@@ -794,14 +826,12 @@ namespace ChargedMinersLauncher {
             SignInAccount acct = accounts.FindAccount( givenUsername );
             if( acct != null ) {
                 SelectActiveAccount( acct );
-                bDeleteActiveAccount.Enabled = true;
-                bDeleteActiveAccount.Text = "Forget account\n" + acct.SignInUsername;
             } else {
                 if( activeAccount != null ) {
                     tSignInPassword.Text = "";
                 }
                 activeAccount = null;
-                bDeleteActiveAccount.Enabled = false;
+                bDeleteActiveAccount.Visible = false;
             }
         }
 
@@ -1132,6 +1162,8 @@ namespace ChargedMinersLauncher {
             cSignInUsername.Text = "";
             tSignInPassword.Text = "";
             tSignInUrl.Text = "";
+            LoadAccounts();
+            bDeleteActiveAccount.Visible = false;
         }
     }
 }

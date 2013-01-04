@@ -19,7 +19,8 @@ namespace ChargedMinersLauncher {
 
         public void RemoveAccount( SignInAccount account ) {
             storedAccounts.Remove( account.SignInUsername.ToLower() );
-            SaveAccounts();
+            RemoveAllAccounts();
+            SaveAllAccounts();
         }
 
 
@@ -61,19 +62,13 @@ namespace ChargedMinersLauncher {
                     MainForm.Log( "AccountManager.LoadAccounts: " + ex );
                 }
             }
-            SaveAccounts();
+            SaveAllAccounts();
         }
 
 
-        public void SaveAccounts() {
-            SettingsFile sf = new SettingsFile();
+        public void SaveAllAccounts() {
             foreach( SignInAccount account in storedAccounts.Values ) {
-                sf.Set( "SignInUsername", account.SignInUsername );
-                sf.Set( "PlayerName", account.PlayerName );
-                sf.Set( "Password", PasswordSecurity.EncryptPassword( account.Password ) );
-                sf.Set( "LastUrl", account.LastUrl );
-                sf.Set( "SignInDate", account.SignInDate.Ticks );
-                sf.Save( account.FileName );
+                account.Save();
             }
         }
 
