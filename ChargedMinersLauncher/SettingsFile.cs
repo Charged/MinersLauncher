@@ -21,6 +21,7 @@ namespace ChargedMinersLauncher {
                 var match = SettingLiteralRegex.Match( line );
                 if( match.Success ) {
                     settings.Add( match.Groups[1].Value, match.Groups[2].Value );
+                    continue;
                 }
                 match = SettingRegex.Match( line );
                 if( match.Success ) {
