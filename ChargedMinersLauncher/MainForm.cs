@@ -1069,32 +1069,33 @@ namespace ChargedMinersLauncher {
 
 
         void tabs_SelectedIndexChanged( object sender, EventArgs e ) {
-            if( tabs.Visible ) {
-                if( tabs.SelectedTab == tabSignIn ) {
-                    AcceptButton = bSignIn;
-                    if( cSignInUsername.Text.Length == 0 ) {
-                        cSignInUsername.Focus();
-                    } else if( tSignInPassword.Text.Length == 0 ) {
-                        tSignInPassword.Focus();
-                    } else {
-                        tSignInUrl.Focus();
-                    }
-                } else if( tabs.SelectedTab == tabResume ) {
-                    AcceptButton = bResume;
-                    bResume.Focus();
-                } else if( tabs.SelectedTab == tabDirect ) {
-                    AcceptButton = bDirectConnect;
-                    tDirectUrl.Focus();
+            if( !tabs.Visible ) {
+                return;
+            }
+            if( tabs.SelectedTab == tabSignIn ) {
+                AcceptButton = bSignIn;
+                if( cSignInUsername.Text.Length == 0 ) {
+                    cSignInUsername.Focus();
+                } else if( tSignInPassword.Text.Length == 0 ) {
+                    tSignInPassword.Focus();
                 } else {
-                    AcceptButton = null;
-                    if( tabs.SelectedTab == tabTools ) {
-                        SettingsFile sf = new SettingsFile();
-                        if( File.Exists( Paths.GameSettingsFile ) ) {
-                            sf.Load( Paths.GameSettingsFile );
-                        }
-                        xFailSafe.Checked = sf.GetBool( "mc.failsafe", false );
-                    }
+                    tSignInUrl.Focus();
                 }
+            } else if( tabs.SelectedTab == tabResume ) {
+                AcceptButton = bResume;
+                bResume.Focus();
+            } else if( tabs.SelectedTab == tabDirect ) {
+                AcceptButton = bDirectConnect;
+                tDirectUrl.Focus();
+            } else if( tabs.SelectedTab == tabOptions ) {
+                AcceptButton = null;
+                SettingsFile sf = new SettingsFile();
+                if( File.Exists( Paths.GameSettingsFile ) ) {
+                    sf.Load( Paths.GameSettingsFile );
+                }
+                xFailSafe.Checked = sf.GetBool( "mc.failsafe", false );
+            } else {
+                AcceptButton = null;
             }
         }
 
