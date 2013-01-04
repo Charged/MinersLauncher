@@ -20,9 +20,9 @@ namespace ChargedMinersLauncher {
             instance = this;
 
             // Start logging
-            if( File.Exists( Paths.LauncherLogPath ) ) {
-                File.Delete( Paths.LauncherLogPath + ".old" );
-                File.Move( Paths.LauncherLogPath, Paths.LauncherLogPath + ".old" );
+            if( File.Exists( Paths.LauncherLogFile ) ) {
+                File.Delete( Paths.LauncherLogFile + ".old" );
+                File.Move( Paths.LauncherLogFile, Paths.LauncherLogFile + ".old" );
             }
             Log( "---- " + DateTime.Now.ToLongDateString() + " ----" );
             Log( "Charged-Miners Launcher 1.2 dev" );
@@ -69,8 +69,8 @@ namespace ChargedMinersLauncher {
         void LoadLauncherSettings() {
             Log( "LoadLauncherSettings" );
             SettingsFile settings = new SettingsFile();
-            if( File.Exists( Paths.LauncherSettingsPath ) ) {
-                settings.Load( Paths.LauncherSettingsPath );
+            if( File.Exists( Paths.LauncherSettingsFile ) ) {
+                settings.Load( Paths.LauncherSettingsFile );
             }
             bool saveUsername = settings.GetBool( "rememberUsername", true );
             bool multiUser = settings.GetBool( "multiUser", false );
@@ -109,9 +109,9 @@ namespace ChargedMinersLauncher {
             State = FormState.AtMainForm;
 
             // Load "Resume" information from CM's settings file
-            if( File.Exists( Paths.GameSettingsPath ) ) {
+            if( File.Exists( Paths.GameSettingsFile ) ) {
                 SettingsFile gameSettings = new SettingsFile();
-                gameSettings.Load( Paths.GameSettingsPath );
+                gameSettings.Load( Paths.GameSettingsFile );
                 string resumeUri = gameSettings.GetString( "mc.lastMcUrl", "" );
                 if( resumeUri.Length > 0 ) {
                     Match match = PlayLinkDirect.Match( resumeUri );
@@ -263,8 +263,8 @@ namespace ChargedMinersLauncher {
         void bSignIn_Click( object sender, EventArgs e ) {
             Log( "[SignIn]" );
             string minecraftUsername;
-            if( xRememberUsername.Checked && xSignInUsername.Text == storedLoginUsername ) {
-                minecraftUsername = storedMinecraftUsername;
+            if( xRememberUsername.Checked && xSignInUsername.Text == activeAccount.SignInUsername ) {
+                minecraftUsername = activeAccount.PlayerName;
             } else {
                 minecraftUsername = xSignInUsername.Text;
             }
@@ -344,7 +344,7 @@ namespace ChargedMinersLauncher {
             settings.Set( "rememberServer", xRememberServer.Checked );
             settings.Set( "gameUpdateMode", (GameUpdateMode)cGameUpdates.SelectedIndex );
             settings.Set( "startingTab", (StartingTab)cStartingTab.SelectedIndex );
-            settings.Save( Paths.LauncherSettingsPath );
+            settings.Save( Paths.LauncherSettingsFile );
 
             if( sender == xRememberUsername ) {
                 lOptionsSaved.Text = "\"Remember username\" preference saved.";
@@ -367,8 +367,8 @@ namespace ChargedMinersLauncher {
         // ==== Tools tab ====
         void bResetSettings_Click( object sender, EventArgs e ) {
             Log( "[ResetSettings]" );
-            File.Delete( Paths.LauncherSettingsPath );
-            File.Delete( Paths.GameSettingsPath );
+            File.Delete( Paths.LauncherSettingsFile );
+            File.Delete( Paths.GameSettingsFile );
             settingsLoaded = false;
             LoadLauncherSettings();
             lToolStatus.Text = "Launcher and game settings were reset to defaults.";
@@ -377,13 +377,13 @@ namespace ChargedMinersLauncher {
 
         void bDeleteData_Click( object sender, EventArgs e ) {
             Log( "[DeleteData]" );
-            File.Delete( Paths.LauncherSettingsPath );
-            File.Delete( Paths.GameSettingsPath );
-            File.Delete( Paths.LauncherLogPath );
-            File.Delete( Paths.GameLogPath );
-            File.Delete( Path.Combine( Paths.DataPath, Paths.CookieContainerFile ) );
-            File.Delete( Path.Combine( Paths.DataPath, Paths.LegacyPasswordSaveFile ) );
-            File.Delete( Path.Combine( Paths.DataPath, Paths.AccountListFile ) );
+            File.Delete( Paths.LauncherSettingsFile );
+            File.Delete( Paths.GameSettingsFile );
+            File.Delete( Paths.LauncherLogFile );
+            File.Delete( Paths.GameLogFile );
+            File.Delete( Path.Combine( Paths.DataDirectory, Paths.CookieContainerFile ) );
+            File.Delete( Path.Combine( Paths.DataDirectory, Paths.LegacyPasswordSaveFile ) );
+            File.Delete( Path.Combine( Paths.DataDirectory, Paths.AccountListFile ) );
             settingsLoaded = false;
             LoadLauncherSettings();
             LoadSignInInfo();
@@ -393,25 +393,25 @@ namespace ChargedMinersLauncher {
 
         void bOpenDataDir_Click( object sender, EventArgs e ) {
             Log( "[OpenDataDir]" );
-            Process.Start( "file://" + Paths.DataPath );
+            Process.Start( "file://" + Paths.DataDirectory );
         }
 
 
         void bUploadLog_Click( object sender, EventArgs e ) {
             Log( "[UploadLog]" );
             JsonObject files = new JsonObject();
-            if( File.Exists( Paths.GameLogPath ) ) {
-                string content = File.ReadAllText( Paths.GameLogPath );
+            if( File.Exists( Paths.GameLogFile ) ) {
+                string content = File.ReadAllText( Paths.GameLogFile );
                 files.Add( "log.txt",
                            new JsonObject { { "content", content } } );
             }
-            if( File.Exists( Paths.LauncherLogPath ) ) {
-                string content = File.ReadAllText( Paths.LauncherLogPath );
+            if( File.Exists( Paths.LauncherLogFile ) ) {
+                string content = File.ReadAllText( Paths.LauncherLogFile );
                 files.Add( "launcher.log",
                            new JsonObject { { "content", content } } );
             }
-            if( File.Exists( Paths.LauncherLogPath + ".old" ) ) {
-                string content = File.ReadAllText( Paths.LauncherLogPath + ".old" );
+            if( File.Exists( Paths.LauncherLogFile + ".old" ) ) {
+                string content = File.ReadAllText( Paths.LauncherLogFile + ".old" );
                 files.Add( "launcher.log.old",
                            new JsonObject { { "content", content } } );
             }
@@ -445,13 +445,13 @@ namespace ChargedMinersLauncher {
 
         void xFailSafe_CheckedChanged( object sender, EventArgs e ) {
             SettingsFile sf = new SettingsFile();
-            if( File.Exists( Paths.GameSettingsPath ) ) {
-                sf.Load( Paths.GameSettingsPath );
+            if( File.Exists( Paths.GameSettingsFile ) ) {
+                sf.Load( Paths.GameSettingsFile );
             }
             bool failSafeEnabled = sf.GetBool( "mc.failsafe", false );
             if( failSafeEnabled != xFailSafe.Checked ) {
                 sf.Set( "mc.failsafe", xFailSafe.Checked );
-                sf.Save( Paths.GameSettingsPath );
+                sf.Save( Paths.GameSettingsFile );
             }
             lToolStatus.Text = "Fail-safe mode " + ( xFailSafe.Checked ? "enabled" : "disabled" ) + ".";
         }
@@ -582,9 +582,7 @@ namespace ChargedMinersLauncher {
 
         MinecraftNetSession signInSession;
         LaunchMode launchMode;
-
-        string storedLoginUsername,
-               storedMinecraftUsername;
+        SignInAccount activeAccount;
 
         readonly BackgroundWorker signInWorker = new BackgroundWorker();
 
@@ -613,7 +611,7 @@ namespace ChargedMinersLauncher {
             Log( "OnSignInCompleted " + signInSession.Status );
             switch( signInSession.Status ) {
                 case LoginResult.Success:
-                    SaveLoginInfo();
+                    SaveLoginInfoLegacy();
                     loginCompleted = true;
                     if( updateCheckCompleted ) {
                         OnSignInAndUpdateCheckCompleted();
@@ -673,49 +671,36 @@ namespace ChargedMinersLauncher {
         }
 
 
+        readonly AccountManager accounts = new AccountManager();
+
         void LoadLegacyPasswordSaveFile() {
-            SignInAccount account = new SignInAccount();
+            SignInAccount oldAccount = new SignInAccount();
             string[] loginData = File.ReadAllLines( Paths.LegacyPasswordSaveFile );
             if( xRememberServer.Checked ) {
-                account.LastUrl = ( loginData.Length > 3 ? loginData[3] : "" );
+                oldAccount.LastUrl = ( loginData.Length > 3 ? loginData[3] : "" );
             } else {
-                account.LastUrl = "";
+                oldAccount.LastUrl = "";
             }
             if( xRememberUsername.Checked ) {
-                account.SignInUsername = loginData[0];
-                account.PlayerName = ( loginData.Length > 2 ? loginData[2] : storedLoginUsername );
+                oldAccount.SignInUsername = loginData[0];
+                oldAccount.PlayerName = ( loginData.Length > 2 ? loginData[2] : oldAccount.SignInUsername );
             } else {
                 File.Delete( Paths.LegacyPasswordSaveFile );
                 return;
             }
             if( xRememberPassword.Checked ) {
-                account.Password = loginData[1];
+                oldAccount.Password = loginData[1];
             } else {
-                account.Password = "";
+                oldAccount.Password = "";
             }
-            AddAccount( account );
-            account.SignInDate = DateTime.UtcNow;
+            accounts.AddAccount( oldAccount );
+            activeAccount = oldAccount;
+            oldAccount.SignInDate = DateTime.UtcNow;
             File.Delete( Paths.LegacyPasswordSaveFile );
         }
 
 
-        readonly Dictionary<string, SignInAccount> storedAccounts = new Dictionary<string, SignInAccount>();
-        SignInAccount activeAccount;
-
-        void AddAccount( SignInAccount newAccount ) {
-            storedAccounts.Add( newAccount.SignInUsername.ToLowerInvariant(), newAccount );
-            SaveAccounts();
-        }
-
-
-        void RemoveActiveAccount() {
-            storedAccounts.Remove( activeAccount.SignInUsername.ToLower() );
-            SaveAccounts();
-            activeAccount = null;
-        }
-
-
-        void LoadAccount( SignInAccount account ) {
+        void LoadAccount( SignInAccount account ) { // TODO
             xSignInUsername.Text = account.SignInUsername;
             if( xRememberPassword.Checked ) {
                 tSignInPassword.Text = account.Password;
@@ -728,23 +713,7 @@ namespace ChargedMinersLauncher {
         }
 
 
-        void SaveAccounts() {
-            SettingsFile sf = new SettingsFile();
-            int i = 0;
-            foreach( SignInAccount account in storedAccounts.Values ) {
-                sf.Set( "SignInName" + i, account.SignInUsername );
-                sf.Set( "PlayerName" + i, account.PlayerName );
-                sf.Set( "Password" + i, account.Password );
-                sf.Set( "LastUrl" + i, account.LastUrl );
-                sf.Set( "SignInDate" + i, account.SignInDate.Ticks );
-                i++;
-            }
-            sf.Set( "AccountCount", i );
-            sf.Save( Paths.AccountListFile );
-        }
-
-
-        void SaveLoginInfo() {
+        void SaveLoginInfoLegacy() { // TODO
             if( xRememberUsername.Checked || xRememberPassword.Checked || xRememberServer.Checked ) {
                 File.WriteAllLines( Paths.LegacyPasswordSaveFile,
                                     new[] {
@@ -931,8 +900,8 @@ namespace ChargedMinersLauncher {
                     AcceptButton = null;
                     if( tabs.SelectedTab == tabTools ) {
                         SettingsFile sf = new SettingsFile();
-                        if( File.Exists( Paths.GameSettingsPath ) ) {
-                            sf.Load( Paths.GameSettingsPath );
+                        if( File.Exists( Paths.GameSettingsFile ) ) {
+                            sf.Load( Paths.GameSettingsFile );
                         }
                         xFailSafe.Checked = sf.GetBool( "mc.failsafe", false );
                     }
@@ -1038,7 +1007,7 @@ namespace ChargedMinersLauncher {
                     throw new Exception( "LaunchMode not set" );
             }
             if( RuntimeInfo.IsWindows ) {
-                param += String.Format( " LAUNCHER_PATH=\"{0}\"", Paths.LauncherPath );
+                param += String.Format( " LAUNCHER_PATH=\"{0}\"", Paths.LauncherBinaryFile );
             }
 
             // hide the form, to avoid stealing focus from CM window
@@ -1068,7 +1037,7 @@ namespace ChargedMinersLauncher {
 #if DEBUG
                 Debugger.Log( 0, "Debug", fullMsg );
 #endif
-                File.AppendAllText( Paths.LauncherLogPath, fullMsg );
+                File.AppendAllText( Paths.LauncherLogFile, fullMsg );
             }
         }
     }

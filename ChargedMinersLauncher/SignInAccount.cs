@@ -7,4 +7,10 @@ sealed class SignInAccount {
     public string Password { get; set; }
     public string LastUrl { get; set; }
     public DateTime SignInDate { get; set; }
+
+    public string FileName {
+        get {
+            return SignInUsername + ".account";
+        }
+    }
 }

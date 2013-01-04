@@ -65,6 +65,7 @@
     <Reference Include="System.Windows.Forms" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AccountManager.cs" />
     <Compile Include="FormState.cs" />
     <Compile Include="GameUpdateMode.cs" />
     <Compile Include="JsonObject.cs" />

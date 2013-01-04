@@ -11,35 +11,35 @@ namespace ChargedMinersLauncher {
         const string ChargeBinaryFormatWindows = "Charge.{0}.exe",
                      ChargeBinaryFormatMacOSX = "Charge.{0}.MacOSX",
                      ChargeBinaryFormatLinux = "Charge.{0}.Linux",
-                     ChargeBinaryFormat32Bit = "i386",
-                     ChargeBinaryFormat64Bit = "x86_64";
+                     ChargeBinarySuffix32Bit = "i386",
+                     ChargeBinarySuffix64Bit = "x86_64";
 
         public const string LegacyPasswordSaveFile = "saved-login.dat",
                             AccountListFile = "accounts.ini",
                             CookieContainerFile = "saved-session.dat";
 
-        public static string LauncherPath { get; private set; }
-        public static string DataPath { get; private set; }
-        public static string GameSettingsPath { get; private set; }
-        public static string GameLogPath { get; private set; }
-        public static string LauncherSettingsPath { get; private set; }
-        public static string LauncherLogPath { get; private set; }
+        public static string LauncherBinaryFile { get; private set; }
+        public static string DataDirectory { get; private set; }
+        public static string GameSettingsFile { get; private set; }
+        public static string GameLogFile { get; private set; }
+        public static string LauncherSettingsFile { get; private set; }
+        public static string LauncherLogFile { get; private set; }
 
         public static bool IsPlatformSupported { get; private set; }
 
 
         static Paths() {
-            LauncherPath = Assembly.GetExecutingAssembly().Location;
-            DataPath = Path.Combine( Environment.GetFolderPath( Environment.SpecialFolder.ApplicationData ), "charge" );
-            LauncherSettingsPath = Path.Combine( DataPath, "launcher.ini" );
-            LauncherLogPath = Path.Combine( DataPath, "launcher.log" );
-            GameSettingsPath = Path.Combine( DataPath, "settings.ini" );
-            GameLogPath = Path.Combine( DataPath, "log.txt" );
+            LauncherBinaryFile = Assembly.GetExecutingAssembly().Location;
+            DataDirectory = Path.Combine( Environment.GetFolderPath( Environment.SpecialFolder.ApplicationData ), "charge" );
+            LauncherSettingsFile = Path.Combine( DataDirectory, "launcher.ini" );
+            LauncherLogFile = Path.Combine( DataDirectory, "launcher.log" );
+            GameSettingsFile = Path.Combine( DataDirectory, "settings.ini" );
+            GameLogFile = Path.Combine( DataDirectory, "log.txt" );
 
-            if( !Directory.Exists( DataPath ) ) {
-                Directory.CreateDirectory( DataPath );
+            if( !Directory.Exists( DataDirectory ) ) {
+                Directory.CreateDirectory( DataDirectory );
             }
-            Directory.SetCurrentDirectory( DataPath );
+            Directory.SetCurrentDirectory( DataDirectory );
 
             string tmp;
             if( RuntimeInfo.IsWindows ) {
@@ -54,10 +54,10 @@ namespace ChargedMinersLauncher {
             }
 
             if( RuntimeInfo.Is32Bit ) {
-                PrimaryBinary = String.Format( tmp, ChargeBinaryFormat32Bit );
+                PrimaryBinary = String.Format( tmp, ChargeBinarySuffix32Bit );
             } else if( RuntimeInfo.Is64Bit ) {
-                PrimaryBinary = String.Format( tmp, ChargeBinaryFormat64Bit );
-                AlternativeBinary = String.Format( tmp, ChargeBinaryFormat32Bit );
+                PrimaryBinary = String.Format( tmp, ChargeBinarySuffix64Bit );
+                AlternativeBinary = String.Format( tmp, ChargeBinarySuffix32Bit );
             } else {
                 IsPlatformSupported = false;
                 return;
