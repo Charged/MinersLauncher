@@ -380,6 +380,15 @@ namespace ChargedMinersLauncher {
             if( !settingsLoaded )
                 return;
             Log( "SaveLauncherSettings" );
+
+            if( sender == xRememberUsername && !xRememberUsername.Checked &&
+                !ConfirmDialog.Show( "Forget all usernames?",
+                                     "When you uncheck \"remember usernames\", all currently-stored account information will be forgotten. Continue?" ) ) {
+                xRememberUsername.Checked = true;
+                lOptionsStatus.Text = "";
+                return;
+            }
+
             SettingsFile settings = new SettingsFile();
             settings.Set( "rememberUsername", xRememberUsername.Checked );
             settings.Set( "multiUser", xMultiUser.Checked );
@@ -391,16 +400,19 @@ namespace ChargedMinersLauncher {
 
             if( sender == xRememberUsername ) {
                 if( xRememberUsername.Checked ) {
-                    lOptionsStatus.Text = "Usernames will now be remembered.";
                     xRememberPassword.Enabled = true;
+                    lOptionsStatus.Text = "Usernames will now be remembered.";
                     xMultiUser.Enabled = true;
                 } else {
-                    lOptionsStatus.Text = "Usernames will no longer be remembered.";
                     xRememberPassword.Checked = false;
                     xRememberPassword.Enabled = false;
                     xMultiUser.Checked = false;
                     xMultiUser.Enabled = false;
+                    accounts.RemoveAllAccounts();
+                    LoadAccounts();
+                    lOptionsStatus.Text = "Usernames will no longer be remembered.";
                 }
+                SignInFieldChanged( null, EventArgs.Empty );
 
             } else if( sender == xRememberPassword ) {
                 if( xRememberPassword.Checked ) {
@@ -408,6 +420,7 @@ namespace ChargedMinersLauncher {
                 } else {
                     lOptionsStatus.Text = "Passwords will no longer be remembered.";
                 }
+                SignInFieldChanged( null, EventArgs.Empty );
 
             } else if( sender == xRememberServer ) {
                 if( xRememberServer.Checked ) {
@@ -452,6 +465,10 @@ namespace ChargedMinersLauncher {
 
         // ==== Tools tab ====
         void bResetSettings_Click( object sender, EventArgs e ) {
+            if( !ConfirmDialog.Show( "Reset settings?",
+                                    "About to reset launcher and game settings to defaults. Continue?" ) ) {
+                return;
+            }
             Log( "[ResetSettings]" );
             File.Delete( Paths.LauncherSettingsFile );
             File.Delete( Paths.GameSettingsFile );
@@ -462,6 +479,10 @@ namespace ChargedMinersLauncher {
 
 
         void bDeleteData_Click( object sender, EventArgs e ) {
+            if( !ConfirmDialog.Show( "Delete all data?",
+                                    "About to reset all settings, remembered usernames/passwords, logs, etc. Continue?" ) ) {
+                return;
+            }
             Log( "[DeleteData]" );
             File.Delete( Paths.LauncherSettingsFile );
             File.Delete( Paths.GameSettingsFile );
@@ -552,6 +573,11 @@ namespace ChargedMinersLauncher {
 
 
         void bForgetActiveAccount_Click( object sender, EventArgs e ) {
+            if( !ConfirmDialog.Show( bForgetActiveAccount.Text + "?",
+                                     "About to remove remembered username, password, and URL for account " +
+                                     activeAccount.SignInUsername + ". Continue?" ) ) {
+                return;
+            }
             Log( "[ForgetAccount]" );
             accounts.RemoveAccount( activeAccount );
             lToolStatus.Text = "Removed information for selected account.";
