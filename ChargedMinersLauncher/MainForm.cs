@@ -148,6 +148,7 @@ namespace ChargedMinersLauncher {
             ResetResumeInfo();
         }
 
+
         void ResetResumeInfo() {
             bResume.Enabled = false;
             tResumeUri.Text = "(Not Available)";
@@ -217,7 +218,9 @@ namespace ChargedMinersLauncher {
         #region UI Event Hooks
 
         static readonly Color InvalidFieldColor = Color.Yellow,
-                              ValidFieldColor = SystemColors.Window;
+                              ValidFieldColor = SystemColors.Window,
+                              StatusWarningColor = Color.Red,
+                              StatusNotifyColor = SystemColors.ControlDarkDark;
 
         // ==== Sign-In tab ====
         void SignInFieldChanged( object sender, EventArgs e ) {
@@ -281,17 +284,17 @@ namespace ChargedMinersLauncher {
             bSignIn.Enabled = canSignIn;
             if( canSignIn && lSignInStatus.Text == "" ) {
                 if( xRememberUsername.Checked ) {
-                    lSignInStatus.ForeColor = SystemColors.ControlDarkDark;
+                    lSignInStatus.ForeColor = StatusNotifyColor;
                     if( xRememberPassword.Checked ) {
                         lSignInStatus.Text = "Username and password will be remembered.";
                     } else {
                         lSignInStatus.Text = "Username will be remembered.";
                     }
                 } else {
-                    lSignInStatus.ForeColor = Color.Red;
+                    lSignInStatus.ForeColor = StatusWarningColor;
                 }
             } else {
-                lSignInStatus.ForeColor = Color.Red;
+                lSignInStatus.ForeColor = StatusWarningColor;
             }
         }
 
@@ -718,6 +721,8 @@ namespace ChargedMinersLauncher {
                 signInSession.Status = LoginResult.Error;
             }
             Log( "OnSignInCompleted " + signInSession.Status );
+            lSignInStatus.ForeColor = StatusWarningColor;
+
             switch( signInSession.Status ) {
                 case LoginResult.Success:
                     SaveAccounts();

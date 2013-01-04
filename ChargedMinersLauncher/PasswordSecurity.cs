@@ -5,7 +5,7 @@ using System.Text;
 
 namespace ChargedMinersLauncher {
     /// <summary> Provides simple symmetric AES-256 encryption for passwords. </summary>
-    class PasswordSecurity {
+    static class PasswordSecurity {
         static readonly byte[] KeySalt = {
             0x55, 0x87, 0x14, 0x54,  0x08, 0x9A, 0x40, 0x56,
             0x3C, 0xBD, 0x0A, 0x28,  0xD1, 0xC4, 0x74, 0x79,
