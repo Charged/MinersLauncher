@@ -14,6 +14,7 @@ using System.Windows.Forms;
 namespace ChargedMinersLauncher {
     public sealed partial class MainForm : Form {
         static MainForm instance;
+
         #region Startup / Shutdown
 
         public MainForm() {
@@ -65,7 +66,6 @@ namespace ChargedMinersLauncher {
 
         bool settingsLoaded;
 
-
         void LoadLauncherSettings() {
             Log( "LoadLauncherSettings" );
             SettingsFile settings = new SettingsFile();
@@ -103,12 +103,28 @@ namespace ChargedMinersLauncher {
             LoadSignInInfo();
 
             // trigger input validation
-            SignInFieldChanged( xSignInUsername, EventArgs.Empty );
+            SignInFieldChanged( cSignInUsername, EventArgs.Empty );
             tDirectUrl_TextChanged( tDirectUrl, EventArgs.Empty );
 
             State = FormState.AtMainForm;
 
             // Load "Resume" information from CM's settings file
+            LoadResumeInfo();
+
+            // To fix compatibility with Lighttpd when doing HttpWebRequests
+            ServicePointManager.Expect100Continue = false;
+            // To bypass HTTPS certificate validation
+            ServicePointManager.ServerCertificateValidationCallback += delegate { return true; };
+
+            if( (GameUpdateMode)cGameUpdates.SelectedIndex == GameUpdateMode.Never ) {
+                updateCheckCompleted = true;
+            } else {
+                versionCheckWorker.RunWorkerAsync();
+            }
+        }
+
+
+        void LoadResumeInfo() {
             if( File.Exists( Paths.GameSettingsFile ) ) {
                 SettingsFile gameSettings = new SettingsFile();
                 gameSettings.Load( Paths.GameSettingsFile );
@@ -126,25 +142,19 @@ namespace ChargedMinersLauncher {
                             tResumeServerName.Text = "?";
                         }
                         bResume.Enabled = true;
-                    } else {
-                        tResumeUri.Text = "(Not Available)";
-                        tResumeUsername.Text = "?";
-                        tResumeServerIP.Text = "?";
-                        tResumeServerName.Text = "?";
+                        return;
                     }
                 }
             }
+            ResetResumeInfo();
+        }
 
-            // To fix compatibility with Lighttpd when doing HttpWebRequests
-            ServicePointManager.Expect100Continue = false;
-            // To bypass HTTPS certificate validation
-            ServicePointManager.ServerCertificateValidationCallback += delegate { return true; };
-
-            if( (GameUpdateMode)cGameUpdates.SelectedIndex == GameUpdateMode.Never ) {
-                updateCheckCompleted = true;
-            } else {
-                versionCheckWorker.RunWorkerAsync();
-            }
+        void ResetResumeInfo() {
+            bResume.Enabled = false;
+            tResumeUri.Text = "(Not Available)";
+            tResumeUsername.Text = "?";
+            tResumeServerIP.Text = "?";
+            tResumeServerName.Text = "?";
         }
 
 
@@ -154,18 +164,21 @@ namespace ChargedMinersLauncher {
                      ToolTipSignInPassword = "Your minecraft.net password",
                      ToolTipSignInUrl = "Server's Minecraft.net URL or a DirectConnect (mc://) link. Optional.",
                      ToolTipRememberUsername = "Save your username for next time.",
-                     ToolTipRememberPassword = "Save your password for next time. Note that password is stored in plain text.",
+                     ToolTipRememberPassword =
+                         "Save your password for next time. Note that password is stored in plain text.",
                      ToolTipDirectUrl = "Server's DirectConnect (mc://) link.",
-                     ToolTipResume = "Try to reuse the last-used credentials, to connect to the most-recently-joined server.",
+                     ToolTipResume =
+                         "Try to reuse the last-used credentials, to connect to the most-recently-joined server.",
                      ToolTipResetSettings = "Resets Charged-Miners and Launcher settings to defaults.",
                      ToolTipDeleteData = "Deletes all private data: settings, logs, stored login data, etc.",
                      ToolTipOpenDataDir = "Opens up Charged-Miners' data directory.",
-                     ToolTipUploadLog = "Uploads your Charged-Miners and launcher log files, which contain debugging information, for easy sharing.";
+                     ToolTipUploadLog =
+                         "Uploads your Charged-Miners and launcher log files, which contain debugging information, for easy sharing.";
 
 
         void SetToolTips() {
             toolTip = new ToolTip();
-            toolTip.SetToolTip( xSignInUsername, ToolTipSignInUsername );
+            toolTip.SetToolTip( cSignInUsername, ToolTipSignInUsername );
             toolTip.SetToolTip( lSignInUsername, ToolTipSignInUsername );
             toolTip.SetToolTip( tSignInPassword, ToolTipSignInPassword );
             toolTip.SetToolTip( lSignInPassword, ToolTipSignInPassword );
@@ -203,11 +216,11 @@ namespace ChargedMinersLauncher {
 
             bool canSignIn = false;
             // check the username field
-            if( UsernameRegex.IsMatch( xSignInUsername.Text ) || EmailRegex.IsMatch( xSignInUsername.Text ) ) {
-                xSignInUsername.BackColor = SystemColors.Window;
+            if( UsernameRegex.IsMatch( cSignInUsername.Text ) || EmailRegex.IsMatch( cSignInUsername.Text ) ) {
+                cSignInUsername.BackColor = SystemColors.Window;
                 canSignIn = true;
             } else {
-                xSignInUsername.BackColor = Color.Yellow;
+                cSignInUsername.BackColor = Color.Yellow;
                 lSignInStatus.Text = "Invalid username/email.";
             }
 
@@ -226,7 +239,7 @@ namespace ChargedMinersLauncher {
             Match match = PlayLinkDirect.Match( tSignInUrl.Text );
             if( match.Success ) {
                 // "mc://" url
-                if( match.Groups[7].Value.Equals( xSignInUsername.Text, StringComparison.OrdinalIgnoreCase ) ) {
+                if( match.Groups[7].Value.Equals( cSignInUsername.Text, StringComparison.OrdinalIgnoreCase ) ) {
                     tSignInUrl.BackColor = SystemColors.Window;
                     launchMode = LaunchMode.SignInWithUri;
                 } else {
@@ -262,13 +275,15 @@ namespace ChargedMinersLauncher {
 
         void bSignIn_Click( object sender, EventArgs e ) {
             Log( "[SignIn]" );
+
             string minecraftUsername;
-            if( xRememberUsername.Checked && xSignInUsername.Text == activeAccount.SignInUsername ) {
+            if( xRememberUsername.Checked && activeAccount != null &&
+                cSignInUsername.Text == activeAccount.SignInUsername ) {
                 minecraftUsername = activeAccount.PlayerName;
             } else {
-                minecraftUsername = xSignInUsername.Text;
+                minecraftUsername = cSignInUsername.Text;
             }
-            signInSession = new MinecraftNetSession( xSignInUsername.Text, minecraftUsername, tSignInPassword.Text );
+            signInSession = new MinecraftNetSession( cSignInUsername.Text, minecraftUsername, tSignInPassword.Text );
 
             State = FormState.SigningIn;
             signInWorker.RunWorkerAsync();
@@ -335,7 +350,8 @@ namespace ChargedMinersLauncher {
 
         // ==== Options tab ====
         void SaveLauncherSettings( object sender, EventArgs e ) {
-            if( !settingsLoaded ) return;
+            if( !settingsLoaded )
+                return;
             Log( "SaveLauncherSettings" );
             SettingsFile settings = new SettingsFile();
             settings.Set( "rememberUsername", xRememberUsername.Checked );
@@ -384,10 +400,16 @@ namespace ChargedMinersLauncher {
             File.Delete( Path.Combine( Paths.DataDirectory, Paths.CookieContainerFile ) );
             File.Delete( Path.Combine( Paths.DataDirectory, Paths.LegacyPasswordSaveFile ) );
             File.Delete( Path.Combine( Paths.DataDirectory, Paths.AccountListFile ) );
+            accounts.RemoveAllAccounts();
             settingsLoaded = false;
             LoadLauncherSettings();
             LoadSignInInfo();
-            lToolStatus.Text = "All settings, logs, and saved data were deleted.";
+            cSignInUsername.Text = "";
+            tSignInPassword.Text = "";
+            tSignInUrl.Text = "";
+            tDirectUrl.Text = "";
+            ResetResumeInfo();
+            lToolStatus.Text = "All accounts, settings, logs, and saved data were deleted.";
         }
 
 
@@ -403,17 +425,29 @@ namespace ChargedMinersLauncher {
             if( File.Exists( Paths.GameLogFile ) ) {
                 string content = File.ReadAllText( Paths.GameLogFile );
                 files.Add( "log.txt",
-                           new JsonObject { { "content", content } } );
+                           new JsonObject {
+                               {
+                                   "content", content
+                               }
+                           } );
             }
             if( File.Exists( Paths.LauncherLogFile ) ) {
                 string content = File.ReadAllText( Paths.LauncherLogFile );
                 files.Add( "launcher.log",
-                           new JsonObject { { "content", content } } );
+                           new JsonObject {
+                               {
+                                   "content", content
+                               }
+                           } );
             }
             if( File.Exists( Paths.LauncherLogFile + ".old" ) ) {
                 string content = File.ReadAllText( Paths.LauncherLogFile + ".old" );
                 files.Add( "launcher.log.old",
-                           new JsonObject { { "content", content } } );
+                           new JsonObject {
+                               {
+                                   "content", content
+                               }
+                           } );
             }
             if( files.Count == 0 ) {
                 lToolStatus.Text = "No log files to submit";
@@ -421,9 +455,13 @@ namespace ChargedMinersLauncher {
             }
 
             JsonObject request = new JsonObject {
-                { "description", "Charged-Miners log upload" },
-                { "public", false },
-                { "files", files }
+                {
+                    "description", "Charged-Miners log upload"
+                }, {
+                    "public", false
+                }, {
+                    "files", files
+                }
             };
             WebClient logClient = new WebClient();
             string dataString = request.Serialize();
@@ -463,7 +501,7 @@ namespace ChargedMinersLauncher {
 
         readonly BackgroundWorker versionCheckWorker = new BackgroundWorker();
         string localHashString;
-        static readonly Uri UpdateUri = new Uri("http://cdn.charged-miners.com/releases/");
+        static readonly Uri UpdateUri = new Uri( "http://cdn.charged-miners.com/releases/" );
         readonly WebClient binaryDownloader = new WebClient();
         VersionInfo latestVersion;
         Exception updaterException;
@@ -491,7 +529,8 @@ namespace ChargedMinersLauncher {
                 }
 
                 // no alternative available, fail
-                if( Paths.AlternativeBinary == null ) return;
+                if( Paths.AlternativeBinary == null )
+                    return;
 
                 // check if alternative binary download is available
                 latestVersion = versionList.Get( Paths.AlternativeBinary );
@@ -532,7 +571,8 @@ namespace ChargedMinersLauncher {
                 DownloadBegin();
             }
 
-            if( loginCompleted ) OnSignInAndUpdateCheckCompleted();
+            if( loginCompleted )
+                OnSignInAndUpdateCheckCompleted();
         }
 
 
@@ -556,7 +596,8 @@ namespace ChargedMinersLauncher {
 
         void OnDownloadCompleted( object sender, AsyncCompletedEventArgs e ) {
             Log( "OnDownloadCompleted" );
-            if( e.Cancelled ) return;
+            if( e.Cancelled )
+                return;
             downloadComplete = true;
             if( State == FormState.DownloadingBinary ) {
                 ApplyUpdate();
@@ -583,20 +624,24 @@ namespace ChargedMinersLauncher {
         MinecraftNetSession signInSession;
         LaunchMode launchMode;
         SignInAccount activeAccount;
-
+        readonly AccountManager accounts = new AccountManager();
         readonly BackgroundWorker signInWorker = new BackgroundWorker();
 
-        static readonly Regex
-            UsernameRegex = new Regex( @"^[a-zA-Z0-9_\.]{2,16}$" ),
-            EmailRegex = new Regex( @"^[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@" +
-                                    @"(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?$",
-                                    RegexOptions.IgnoreCase ),
-            PlayLinkHash =
-                new Regex( @"^http://(www\.)?minecraft.net/classic/play/([0-9a-fA-F]{28,32})/?(\?override=(true|1))?$" ),
-            PlayLinkDirect =
-                new Regex( @"^mc://((localhost|(\d{1,3}\.){3}\d{1,3}|([a-zA-Z0-9\-]+\.)+([a-zA-Z0-9\-]+))(:\d{1,5})?)/([a-zA-Z0-9_\.]{2,16})/(.*)$" ),
-            PlayLinkIPPort =
-                new Regex( @"^http://(www\.)?minecraft.net/classic/play\?ip=(localhost|(\d{1,3}\.){3}\d{1,3}|([a-zA-Z0-9\-]+\.)+([a-zA-Z0-9\-]+))&port=(\d{1,5})$" );
+        static readonly Regex UsernameRegex = new Regex( @"^[a-zA-Z0-9_\.]{2,16}$" ),
+                              EmailRegex =
+                                  new Regex(
+                                      @"^[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@" +
+                                      @"(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?$",
+                                      RegexOptions.IgnoreCase ),
+                              PlayLinkHash =
+                                  new Regex(
+                                      @"^http://(www\.)?minecraft.net/classic/play/([0-9a-fA-F]{28,32})/?(\?override=(true|1))?$" ),
+                              PlayLinkDirect =
+                                  new Regex(
+                                      @"^mc://((localhost|(\d{1,3}\.){3}\d{1,3}|([a-zA-Z0-9\-]+\.)+([a-zA-Z0-9\-]+))(:\d{1,5})?)/([a-zA-Z0-9_\.]{2,16})/(.*)$" ),
+                              PlayLinkIPPort =
+                                  new Regex(
+                                      @"^http://(www\.)?minecraft.net/classic/play\?ip=(localhost|(\d{1,3}\.){3}\d{1,3}|([a-zA-Z0-9\-]+\.)+([a-zA-Z0-9\-]+))&port=(\d{1,5})$" );
 
 
         void SignIn( object sender, DoWorkEventArgs e ) {
@@ -611,7 +656,7 @@ namespace ChargedMinersLauncher {
             Log( "OnSignInCompleted " + signInSession.Status );
             switch( signInSession.Status ) {
                 case LoginResult.Success:
-                    SaveLoginInfoLegacy();
+                    SaveAccounts();
                     loginCompleted = true;
                     if( updateCheckCompleted ) {
                         OnSignInAndUpdateCheckCompleted();
@@ -623,7 +668,7 @@ namespace ChargedMinersLauncher {
                 case LoginResult.MigratedAccount:
                     State = FormState.AtMainForm;
                     lSignInStatus.Text = "Migrated account. Use your email to sign in.";
-                    xSignInUsername.Select();
+                    cSignInUsername.Select();
                     break;
 
                 case LoginResult.WrongUsernameOrPass:
@@ -662,16 +707,24 @@ namespace ChargedMinersLauncher {
 
         void LoadSignInInfo() {
             try {
+                accounts.LoadAccounts();
                 if( File.Exists( Paths.LegacyPasswordSaveFile ) ) {
                     LoadLegacyPasswordSaveFile();
                 }
-            } catch( Exception ) {
+                cSignInUsername.Items.Clear();
+                SignInAccount[] accountsByDate = accounts.GetAccountsBySignInDate();
+                foreach( SignInAccount account in accountsByDate ) {
+                    cSignInUsername.Items.Add( account.SignInUsername );
+                }
+                if( cSignInUsername.Text.Length == 0 && accountsByDate.Length > 0 ) {
+                    cSignInUsername.Text = accountsByDate[0].SignInUsername;
+                }
+            } catch( Exception ex ) {
+                Log( "LoadSignInInfo: " + ex );
                 lSignInStatus.Text = "Could not load saved login information.";
             }
         }
 
-
-        readonly AccountManager accounts = new AccountManager();
 
         void LoadLegacyPasswordSaveFile() {
             SignInAccount oldAccount = new SignInAccount();
@@ -693,15 +746,16 @@ namespace ChargedMinersLauncher {
             } else {
                 oldAccount.Password = "";
             }
-            accounts.AddAccount( oldAccount );
-            activeAccount = oldAccount;
             oldAccount.SignInDate = DateTime.UtcNow;
+            if( !accounts.HasAccount( oldAccount.SignInUsername ) ) {
+                accounts.AddAccount( oldAccount );
+            }
             File.Delete( Paths.LegacyPasswordSaveFile );
         }
 
 
-        void LoadAccount( SignInAccount account ) { // TODO
-            xSignInUsername.Text = account.SignInUsername;
+        void LoadAccount( SignInAccount account ) {
+            cSignInUsername.Text = account.SignInUsername;
             if( xRememberPassword.Checked ) {
                 tSignInPassword.Text = account.Password;
             } else {
@@ -713,19 +767,42 @@ namespace ChargedMinersLauncher {
         }
 
 
-        void SaveLoginInfoLegacy() { // TODO
-            if( xRememberUsername.Checked || xRememberPassword.Checked || xRememberServer.Checked ) {
-                File.WriteAllLines( Paths.LegacyPasswordSaveFile,
-                                    new[] {
-                                        xRememberUsername.Checked ? signInSession.LoginUsername : "",
-                                        xRememberPassword.Checked ? signInSession.Password : "",
-                                        xRememberUsername.Checked ? signInSession.MinercraftUsername : "",
-                                        xRememberServer.Checked ? tSignInUrl.Text : ""
-                                    } );
+        void SaveAccounts() {
+            if( activeAccount == null ) {
+                activeAccount = new SignInAccount {
+                    SignInUsername = cSignInUsername.Text,
+                    Password = tSignInPassword.Text,
+                    PlayerName = signInSession.MinercraftUsername,
+                    LastUrl = tSignInUrl.Text
+                };
+                accounts.AddAccount( activeAccount );
+            }
+
+            activeAccount.SignInDate = DateTime.UtcNow;
+            accounts.SaveAccounts();
+        }
+
+
+        void cSignInUsername_TextChanged( object sender, EventArgs e ) {
+            SignInFieldChanged( sender, e );
+            string givenUsername = cSignInUsername.Text;
+            SignInAccount acct = accounts.FindAccount( givenUsername );
+            if( acct != null ) {
+                activeAccount = acct;
+                LoadAccount( acct );
             } else {
-                if( File.Exists( Paths.LegacyPasswordSaveFile ) ) {
-                    File.Delete( Paths.LegacyPasswordSaveFile );
+                if( activeAccount != null ) {
+                    tSignInPassword.Text = "";
                 }
+                activeAccount = null;
+            }
+        }
+
+        void cSignInUsername_SelectedIndexChanged( object sender, EventArgs e ) {
+            if( tSignInPassword.TextLength == 0 ) {
+                tSignInPassword.Focus();
+            } else {
+                tSignInUrl.Focus();
             }
         }
 
@@ -790,7 +867,9 @@ namespace ChargedMinersLauncher {
 
 
         FormState State {
-            get { return state; }
+            get {
+                return state;
+            }
             set {
                 Log( "State = " + value );
                 switch( value ) {
@@ -806,8 +885,7 @@ namespace ChargedMinersLauncher {
                         AcceptButton = null;
                         CancelButton = bCancel;
                         lSignInStatus.Text = "";
-                        lStatus.Text = String.Format( "Signing in as {0}...",
-                                                      signInSession.LoginUsername );
+                        lStatus.Text = String.Format( "Signing in as {0}...", signInSession.LoginUsername );
                         lStatus2.Text = "";
                         pbSigningIn.Style = ProgressBarStyle.Marquee;
                         bCancel.Text = "Cancel";
@@ -883,8 +961,8 @@ namespace ChargedMinersLauncher {
             if( tabs.Visible ) {
                 if( tabs.SelectedTab == tabSignIn ) {
                     AcceptButton = bSignIn;
-                    if( xSignInUsername.Text.Length == 0 ) {
-                        xSignInUsername.Focus();
+                    if( cSignInUsername.Text.Length == 0 ) {
+                        cSignInUsername.Focus();
                     } else if( tSignInPassword.Text.Length == 0 ) {
                         tSignInPassword.Focus();
                     } else {
@@ -951,9 +1029,7 @@ namespace ChargedMinersLauncher {
 
         internal static void SetStatus( string text ) {
             if( instance.lStatus2.InvokeRequired ) {
-                instance.lStatus2.BeginInvoke( (MethodInvoker)delegate {
-                    instance.lStatus2.Text = text;
-                } );
+                instance.lStatus2.BeginInvoke( (MethodInvoker)delegate { instance.lStatus2.Text = text; } );
             } else {
                 instance.lStatus2.Text = text;
             }
@@ -1033,7 +1109,9 @@ namespace ChargedMinersLauncher {
         public static void Log( string message ) {
             lock( LogLock ) {
                 string fullMsg = String.Format( "* {0:HH':'mm':'ss'.'ff} {1}{2}",
-                                                DateTime.Now, message, Environment.NewLine );
+                                                DateTime.Now,
+                                                message,
+                                                Environment.NewLine );
 #if DEBUG
                 Debugger.Log( 0, "Debug", fullMsg );
 #endif

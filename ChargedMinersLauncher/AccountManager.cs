@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 
 namespace ChargedMinersLauncher {
     class AccountManager {
@@ -12,6 +13,11 @@ namespace ChargedMinersLauncher {
         }
 
 
+        public bool HasAccount( string signInUsername ) {
+            return storedAccounts.ContainsKey( signInUsername.ToLowerInvariant() );
+        }
+
+
         public void RemoveAccount( SignInAccount account ) {
             storedAccounts.Remove( account.SignInUsername.ToLower() );
             SaveAccounts();
@@ -19,6 +25,7 @@ namespace ChargedMinersLauncher {
 
 
         public void RemoveAllAccounts() {
+            storedAccounts.Clear();
             string[] fileNames = Directory.GetFiles( Paths.DataDirectory, "*.account" );
             foreach( string fileName in fileNames ) {
                 File.Delete( fileName );
@@ -38,10 +45,12 @@ namespace ChargedMinersLauncher {
                     Password = sf.GetString( "Password", "" ),
                     LastUrl = sf.GetString( "LastUrl", "" )
                 };
+                if( newAccount.Password.Length > 0 ) {
+                    newAccount.Password = PasswordSecurity.DecryptPassword( newAccount.Password );
+                }
                 string tickString = sf.GetString( "SignInDate", "0" );
                 long ticks;
-                if( Int64.TryParse( tickString, out ticks ) &&
-                    ticks > DateTime.MinValue.Ticks &&
+                if( Int64.TryParse( tickString, out ticks ) && ticks > DateTime.MinValue.Ticks &&
                     ticks <= DateTime.MaxValue.Ticks ) {
                     newAccount.SignInDate = new DateTime( ticks );
                 } else {
@@ -63,6 +72,23 @@ namespace ChargedMinersLauncher {
                 sf.Set( "SignInDate", account.SignInDate.Ticks );
                 sf.Save( account.FileName );
             }
+        }
+
+
+        public SignInAccount FindAccount( string signInName ) {
+            SignInAccount acct;
+            if( storedAccounts.TryGetValue( signInName.ToLowerInvariant(), out acct ) ) {
+                return acct;
+            } else {
+                return null;
+            }
+        }
+
+
+        public SignInAccount[] GetAccountsBySignInDate() {
+            return storedAccounts.Values
+                                 .OrderByDescending( acct => acct.SignInDate )
+                                 .ToArray();
         }
     }
 }

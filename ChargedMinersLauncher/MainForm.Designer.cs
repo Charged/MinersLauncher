@@ -27,7 +27,7 @@
             this.flow = new System.Windows.Forms.FlowLayoutPanel();
             this.tabs = new System.Windows.Forms.TabControl();
             this.tabSignIn = new System.Windows.Forms.TabPage();
-            this.xSignInUsername = new System.Windows.Forms.ComboBox();
+            this.cSignInUsername = new System.Windows.Forms.ComboBox();
             this.lSignInStatus = new System.Windows.Forms.Label();
             this.tSignInUrl = new System.Windows.Forms.TextBox();
             this.lSignInUrl = new System.Windows.Forms.Label();
@@ -55,6 +55,7 @@
             this.tDirectUrl = new System.Windows.Forms.TextBox();
             this.lDirectUrl = new System.Windows.Forms.Label();
             this.tabOptions = new System.Windows.Forms.TabPage();
+            this.xMultiUser = new System.Windows.Forms.CheckBox();
             this.lOptionsSaved = new System.Windows.Forms.Label();
             this.lGameUpdates = new System.Windows.Forms.Label();
             this.cGameUpdates = new System.Windows.Forms.ComboBox();
@@ -80,7 +81,6 @@
             this.bUpdateNo = new System.Windows.Forms.Button();
             this.bUpdateYes = new System.Windows.Forms.Button();
             this.lUpdatePrompt = new System.Windows.Forms.Label();
-            this.xMultiUser = new System.Windows.Forms.CheckBox();
             this.flow.SuspendLayout();
             this.tabs.SuspendLayout();
             this.tabSignIn.SuspendLayout();
@@ -121,7 +121,7 @@
             // 
             // tabSignIn
             // 
-            this.tabSignIn.Controls.Add(this.xSignInUsername);
+            this.tabSignIn.Controls.Add(this.cSignInUsername);
             this.tabSignIn.Controls.Add(this.lSignInStatus);
             this.tabSignIn.Controls.Add(this.tSignInUrl);
             this.tabSignIn.Controls.Add(this.lSignInUrl);
@@ -137,13 +137,15 @@
             this.tabSignIn.Text = "Sign In";
             this.tabSignIn.UseVisualStyleBackColor = true;
             // 
-            // xSignInUsername
+            // cSignInUsername
             // 
-            this.xSignInUsername.FormattingEnabled = true;
-            this.xSignInUsername.Location = new System.Drawing.Point(79, 6);
-            this.xSignInUsername.Name = "xSignInUsername";
-            this.xSignInUsername.Size = new System.Drawing.Size(187, 21);
-            this.xSignInUsername.TabIndex = 1;
+            this.cSignInUsername.FormattingEnabled = true;
+            this.cSignInUsername.Location = new System.Drawing.Point(79, 6);
+            this.cSignInUsername.Name = "cSignInUsername";
+            this.cSignInUsername.Size = new System.Drawing.Size(187, 21);
+            this.cSignInUsername.TabIndex = 1;
+            this.cSignInUsername.SelectedIndexChanged += new System.EventHandler(this.cSignInUsername_SelectedIndexChanged);
+            this.cSignInUsername.TextChanged += new System.EventHandler(this.cSignInUsername_TextChanged);
             // 
             // lSignInStatus
             // 
@@ -451,6 +453,17 @@
             this.tabOptions.Text = "Options";
             this.tabOptions.UseVisualStyleBackColor = true;
             // 
+            // xMultiUser
+            // 
+            this.xMultiUser.AutoSize = true;
+            this.xMultiUser.Location = new System.Drawing.Point(176, 60);
+            this.xMultiUser.Name = "xMultiUser";
+            this.xMultiUser.Size = new System.Drawing.Size(90, 17);
+            this.xMultiUser.TabIndex = 8;
+            this.xMultiUser.Text = "Multiple users";
+            this.xMultiUser.UseVisualStyleBackColor = true;
+            this.xMultiUser.CheckedChanged += new System.EventHandler(this.SaveLauncherSettings);
+            // 
             // lOptionsSaved
             // 
             this.lOptionsSaved.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
@@ -730,17 +743,6 @@
     "t?";
             this.lUpdatePrompt.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
-            // xMultiUser
-            // 
-            this.xMultiUser.AutoSize = true;
-            this.xMultiUser.Location = new System.Drawing.Point(176, 60);
-            this.xMultiUser.Name = "xMultiUser";
-            this.xMultiUser.Size = new System.Drawing.Size(90, 17);
-            this.xMultiUser.TabIndex = 8;
-            this.xMultiUser.Text = "Multiple users";
-            this.xMultiUser.UseVisualStyleBackColor = true;
-            this.xMultiUser.CheckedChanged += new System.EventHandler(this.SaveLauncherSettings);
-            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -830,7 +832,7 @@
         private System.Windows.Forms.Label lOptionsSaved;
         private System.Windows.Forms.Label lToolStatus;
         private System.Windows.Forms.CheckBox xFailSafe;
-        private System.Windows.Forms.ComboBox xSignInUsername;
+        private System.Windows.Forms.ComboBox cSignInUsername;
         private System.Windows.Forms.CheckBox xMultiUser;
     }
 }

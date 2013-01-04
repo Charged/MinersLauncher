@@ -65,7 +65,7 @@ namespace ChargedMinersLauncher {
 
 
         // Takes AES-256 encrypted, base-64 encoded password. Returns true if decryption succeeded.
-        public static bool DecryptPassword( string encryptedString, out string decryptedPassword ) {
+        public static string DecryptPassword( string encryptedString ) {
             if( encryptedString == null ) {
                 throw new ArgumentNullException( "encryptedString" );
             }
@@ -85,9 +85,9 @@ namespace ChargedMinersLauncher {
                 byte[] decryptedBytes = stream.ToArray();
 
                 // extract password from decrypted data
-                decryptedPassword = Encoding.UTF8.GetString( stream.ToArray(),
-                                                             ChecksumSize,
-                                                             decryptedBytes.Length - ChecksumSize );
+                string decryptedPassword = Encoding.UTF8.GetString( stream.ToArray(),
+                                                                    ChecksumSize,
+                                                                    decryptedBytes.Length - ChecksumSize );
 
                 // calculate expected/actual checksums
                 ushort expectedChecksum = BitConverter.ToUInt16( decryptedBytes, 0 );
@@ -96,7 +96,7 @@ namespace ChargedMinersLauncher {
                                                          decryptedBytes.Length - ChecksumSize );
                 if( expectedChecksum == actualChecksum ) {
                     // checksums match, all good
-                    return true;
+                    return decryptedPassword;
                 } else {
                     MainForm.Log( "DecryptPassword: Decryption did not succeed; prefix mismatch." );
                 }
@@ -104,8 +104,7 @@ namespace ChargedMinersLauncher {
             } catch( Exception ex ) {
                 MainForm.Log( "DecryptPassword: Error while decrypting: " + ex );
             }
-            decryptedPassword = null;
-            return false;
+            return "";
         }
 
 
