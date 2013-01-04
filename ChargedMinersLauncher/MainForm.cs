@@ -584,9 +584,9 @@ namespace ChargedMinersLauncher {
             cSignInUsername.Text = "";
             tSignInPassword.Text = "";
             tSignInUrl.Text = "";
-            LoadAccounts();
             bForgetActiveAccount.Enabled = false;
             bForgetActiveAccount.Text = "Forget account: (no account selected)";
+            LoadAccounts();
         }
 
         #endregion
