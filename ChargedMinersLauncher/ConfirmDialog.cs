@@ -7,9 +7,12 @@ namespace ChargedMinersLauncher {
         }
 
         public static bool Show( string heading, string message ) {
-            ConfirmDialog dialog = new ConfirmDialog();
-            dialog.Text = heading;
-            dialog.lMessage.Text = message;
+            ConfirmDialog dialog = new ConfirmDialog {
+                Text = heading,
+                lMessage = {
+                    Text = message
+                }
+            };
             return ( dialog.ShowDialog() == DialogResult.OK );
         }
     }

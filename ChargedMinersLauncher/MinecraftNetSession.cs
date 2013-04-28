@@ -23,7 +23,7 @@ namespace ChargedMinersLauncher {
 
         public string LoginUsername { get; private set; }
         public string MinercraftUsername { get; private set; }
-        public string Password { get; private set; }
+        string Password { get; set; }
         public LoginResult Status { get; set; }
 
         public Cookie PlaySessionCookie {

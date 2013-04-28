@@ -9,6 +9,13 @@ namespace ChargedMinersLauncher {
         readonly Dictionary<string, SignInAccount> storedAccounts = new Dictionary<string, SignInAccount>();
 
 
+        public int Count {
+            get {
+                return storedAccounts.Count;
+            }
+        }
+
+
         public void AddAccount( SignInAccount newAccount ) {
             storedAccounts.Add( newAccount.SignInUsername.ToLowerInvariant(), newAccount );
         }
@@ -98,7 +105,14 @@ namespace ChargedMinersLauncher {
 
 
         public SignInAccount GetMostRecentlyUsedAccount() {
-            return GetAccountsBySignInDate().FirstOrDefault();
+            SignInAccount account = GetAccountsBySignInDate().FirstOrDefault();
+            if( Count > 1 ) {
+                var otherAccounts = storedAccounts.Where( a => a.Value != account ).ToArray();
+                foreach( var otherAccount in otherAccounts ) {
+                    storedAccounts.Remove( otherAccount.Key );
+                }
+            }
+            return account;
         }
     }
 }

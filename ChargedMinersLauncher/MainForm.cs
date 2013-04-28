@@ -381,10 +381,22 @@ namespace ChargedMinersLauncher {
                 return;
             Log( "SaveLauncherSettings" );
 
+            // confirm erasing accounts
             if( sender == xRememberUsername && !xRememberUsername.Checked &&
                 !ConfirmDialog.Show( "Forget all usernames?",
-                                     "When you uncheck \"remember usernames\", all currently-stored account information will be forgotten. Continue?" ) ) {
+                                     "When you uncheck \"remember usernames\", all currently-stored account " + 
+                                     "information will be forgotten. Continue?" ) ) {
                 xRememberUsername.Checked = true;
+                lOptionsStatus.Text = "";
+                return;
+            }
+
+            // confirm forgetting accounts
+            if( sender == xMultiUser && !xMultiUser.Checked && accounts.Count > 1 &&
+                !ConfirmDialog.Show( "Forget all other accounts?",
+                                     "When you uncheck \"multiple accounts\", all account information other than " +
+                                     "the currently-selected user will be forgotten. Continue?" ) ) {
+                xMultiUser.Checked = true;
                 lOptionsStatus.Text = "";
                 return;
             }
@@ -430,12 +442,12 @@ namespace ChargedMinersLauncher {
                 }
 
             } else if( sender == xMultiUser ) {
-                LoadAccounts();
                 if( xMultiUser.Checked ) {
                     lOptionsStatus.Text = "All users will now be remembered.";
                 } else {
                     lOptionsStatus.Text = "Only most-recent user will now be remembered.";
                 }
+                LoadAccounts();
 
             } else if( sender == cGameUpdates ) {
                 lOptionsStatus.Text = "\"Game updates\" preference saved.";
@@ -723,21 +735,16 @@ namespace ChargedMinersLauncher {
         readonly AccountManager accounts = new AccountManager();
         readonly BackgroundWorker signInWorker = new BackgroundWorker();
 
-        static readonly Regex UsernameRegex = new Regex( @"^[a-zA-Z0-9_\.]{2,16}$" ),
-                              EmailRegex =
-                                  new Regex(
-                                      @"^[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@" +
-                                      @"(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?$",
-                                      RegexOptions.IgnoreCase ),
-                              PlayLinkHash =
-                                  new Regex(
-                                      @"^http://(www\.)?minecraft.net/classic/play/([0-9a-fA-F]{28,32})/?(\?override=(true|1))?$" ),
-                              PlayLinkDirect =
-                                  new Regex(
-                                      @"^mc://((localhost|(\d{1,3}\.){3}\d{1,3}|([a-zA-Z0-9\-]+\.)+([a-zA-Z0-9\-]+))(:\d{1,5})?)/([a-zA-Z0-9_\.]{2,16})/(.*)$" ),
-                              PlayLinkIPPort =
-                                  new Regex(
-                                      @"^http://(www\.)?minecraft.net/classic/play\?ip=(localhost|(\d{1,3}\.){3}\d{1,3}|([a-zA-Z0-9\-]+\.)+([a-zA-Z0-9\-]+))&port=(\d{1,5})$" );
+        static readonly Regex
+            UsernameRegex = new Regex( @"^[a-zA-Z0-9_\.]{2,16}$" ),
+            EmailRegex = new Regex( @"^[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@" +
+                                    @"(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?$",
+                                    RegexOptions.IgnoreCase ),
+            PlayLinkHash = new Regex( @"^http://(www\.)?minecraft.net/classic/play/([0-9a-fA-F]{28,32})/?(\?override=(true|1))?$" ),
+            PlayLinkDirect = new Regex( @"^mc://((localhost|(\d{1,3}\.){3}\d{1,3}|([a-zA-Z0-9\-]+\.)+([a-zA-Z0-9\-]+))(:\d{1,5})?)/" +
+                                        @"([a-zA-Z0-9_\.]{2,16})(/.*)$" ),
+            PlayLinkIPPort = new Regex( @"^http://(www\.)?minecraft.net/classic/play\?ip=" + 
+                                        @"(localhost|(\d{1,3}\.){3}\d{1,3}|([a-zA-Z0-9\-]+\.)+([a-zA-Z0-9\-]+))&port=(\d{1,5})$" );
 
 
         void SignIn( object sender, DoWorkEventArgs e ) {

@@ -773,7 +773,7 @@
             this.MinimumSize = new System.Drawing.Size(285, 212);
             this.Name = "MainForm";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
-            this.Text = "Charged-Miners Launcher 1.20";
+            this.Text = "Charged-Miners Launcher 1.21";
             this.flow.ResumeLayout(false);
             this.tabs.ResumeLayout(false);
             this.tabSignIn.ResumeLayout(false);
