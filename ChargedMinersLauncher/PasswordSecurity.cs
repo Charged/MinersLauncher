@@ -1,5 +1,6 @@
 ﻿// Part of ChargedMinersLauncher | Copyright (c) 2012-2013 Matvei Stefarov <me@matvei.org> | BSD-3 | See LICENSE.txt
 using System;
+using System.Diagnostics;
 using System.IO;
 using System.Security.Cryptography;
 using System.Text;
@@ -25,12 +26,10 @@ namespace ChargedMinersLauncher {
                   ChecksumSize = sizeof( ushort );
         const ushort ChecksumPolynomial = 0xA001;
 
-
         static PasswordSecurity() {
-            // derive the decryption key from current username (to make password file non-portable)
+            // derive the key from current username (to make the password file non-portable)
             Rfc2898DeriveBytes keyGen = new Rfc2898DeriveBytes( Environment.UserName, KeySalt );
             Key = keyGen.GetBytes( KeyBits/sizeof( byte ) );
-
             InitCrc16();
         }
 
@@ -136,5 +135,33 @@ namespace ChargedMinersLauncher {
                 ChecksumTable[i] = value;
             }
         }
+
+
+#if TEST_ENCRYPTION
+        public static void EncryptionTest( int runs ) {
+            int mm = 0;
+            for( int i = 0; i < runs; i++ ) {
+                string password = GetRandomString();
+                string encrypted = EncryptPassword( password );
+                string decrypted = DecryptPassword( encrypted );
+                Debug.WriteLine( password + " -> " + encrypted + " -> " + decrypted );
+                if( !password.Equals( decrypted ) ) {
+                    Debug.WriteLine( "MISMATCH!" );
+                    mm++;
+                }
+            }
+            Debug.WriteLine( "Done: " + mm + " mismatches." );
+        }
+
+        static readonly Random TestRand = new Random();
+        static string GetRandomString() {
+            StringBuilder builder = new StringBuilder();
+            int size = TestRand.Next( 1, 64 );
+            for( int i = 0; i < size; i++ ) {
+                builder.Append( (char)( 32 + TestRand.Next( 94 ) ) );
+            }
+            return builder.ToString();
+        }
+#endif
     }
 }

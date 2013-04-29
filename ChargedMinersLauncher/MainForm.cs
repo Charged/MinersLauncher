@@ -98,7 +98,10 @@ namespace ChargedMinersLauncher {
                 lStatus2.Text = UnsupportedPlatformText;
                 return;
             }
-
+            
+#if TEST_ENCRYPTION
+            PasswordSecurity.EncryptionTest( 1000 );
+#endif
             LoadAccounts();
 
             // trigger input validation
