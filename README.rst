@@ -10,14 +10,13 @@ Handles software updates and login for Charged-Miners.
 Requires Microsoft.NET Framework 3.5 (Client profile).
 Tested only on Windows, but should work with Mono.
 
-Latest binary can be found here:
-                http://cdn.charged-miners.com/launcher/ChargedMiners.exe
+Latest binary can be found here: http://cdn.charged-miners.com/launcher/ChargedMiners.exe
 
 ---------------
  Version history
 ---------------
 - 1.20
-    Multiple account support (check the “Options” tab)
+    Multiple account support (check the "Options" tab)
 
     Passwords are now stored in a safer, encrypted way.
 
