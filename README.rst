@@ -7,14 +7,24 @@ GUI launcher for Charged-Miners client: https://github.com/Charged/Miners
 .. image:: http://i.imgur.com/FNy8v.png
 
 Handles software updates and login for Charged-Miners.
-Requires Microsoft.NET Framework 3.5.
+Requires Microsoft.NET Framework 3.5 (Client profile).
 Tested only on Windows, but should work with Mono.
 
-Latest binaries can be found at https://github.com/Charged/Miners/downloads
+Latest binary can be found here:
+                http://cdn.charged-miners.com/launcher/ChargedMiners.exe
 
 ---------------
  Version history
 ---------------
+- 1.20
+    Multiple account support (check the “Options” tab)
+
+    Passwords are now stored in a safer, encrypted way.
+
+    Confirmation prompt added for potentially destructive operations (like "reset settings").
+
+    Some bugfixes and cosmetic improvements.
+
 - 1.12
     Added "Enable fail-safe mode" checkbox to "Tools" tab.
 
