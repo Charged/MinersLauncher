@@ -9,7 +9,7 @@ namespace ChargedMinersLauncher {
         public string LastUrl { get; set; }
         public DateTime SignInDate { get; set; }
 
-        public string FileName {
+        string FileName {
             get {
                 return SignInUsername.ToLowerInvariant() + ".account";
             }

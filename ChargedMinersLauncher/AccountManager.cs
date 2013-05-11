@@ -39,12 +39,13 @@ namespace ChargedMinersLauncher {
         }
 
 
-        public void RemoveAllAccountFiles() {
+        void RemoveAllAccountFiles() {
             string[] fileNames = Directory.GetFiles( Paths.DataDirectory, "*.account" );
             foreach( string fileName in fileNames ) {
                 File.Delete( fileName );
             }
         }
+
 
         public void LoadAccounts() {
             storedAccounts.Clear();
