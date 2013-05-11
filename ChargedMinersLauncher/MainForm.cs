@@ -5,6 +5,7 @@ using System.Diagnostics;
 using System.Drawing;
 using System.IO;
 using System.Net;
+using System.Net.Cache;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -13,6 +14,7 @@ using System.Windows.Forms;
 namespace ChargedMinersLauncher {
     public sealed partial class MainForm : Form {
         static MainForm instance;
+        const string WindowTitle = "Charged-Miners Launcher 1.21";
 
         #region Startup / Shutdown
 
@@ -25,13 +27,14 @@ namespace ChargedMinersLauncher {
                 File.Move( Paths.LauncherLogFile, Paths.LauncherLogFile + ".old" );
             }
             Log( "---- " + DateTime.Now.ToLongDateString() + " ----" );
-            Log( "Charged-Miners Launcher 1.2 dev" );
+            Log( WindowTitle );
 
             // Set up the GUI
             InitializeComponent();
             SetToolTips();
             lOptionsStatus.Text = "";
             lToolStatus.Text = "";
+            Text = WindowTitle;
 
             // hook up event handlers
             signInWorker.DoWork += SignIn;
@@ -615,6 +618,7 @@ namespace ChargedMinersLauncher {
         readonly WebClient binaryDownloader = new WebClient();
         VersionInfo latestVersion;
         Exception updaterException;
+        static readonly TimeSpan UpdateTimeout = TimeSpan.FromSeconds( 5 );
 
 
         void CheckUpdates( object sender, DoWorkEventArgs e ) {
@@ -623,9 +627,18 @@ namespace ChargedMinersLauncher {
                 VersionsTxt versionList;
 
                 // download and parse version.txt
-                using( WebClient updateCheckDownloader = new WebClient() ) {
-                    string versions = updateCheckDownloader.DownloadString( UpdateUri + "version.txt" );
-                    versionList = new VersionsTxt( versions.Split( '\n' ) );
+                HttpWebRequest request = (HttpWebRequest)WebRequest.Create( UpdateUri + "version.txt" );
+                request.Timeout = (int)UpdateTimeout.TotalMilliseconds;
+                request.ReadWriteTimeout = (int)UpdateTimeout.TotalMilliseconds;
+                request.CachePolicy = new RequestCachePolicy( RequestCacheLevel.BypassCache );
+                request.Method = "GET";
+                request.UserAgent = WindowTitle;
+                using( HttpWebResponse response = (HttpWebResponse)request.GetResponse() ) {
+                    using( Stream responseStream = response.GetResponseStream() ) {
+                        StreamReader reader = new StreamReader( responseStream );
+                        string updaterResponse = reader.ReadToEnd();
+                        versionList = new VersionsTxt( updaterResponse.Split( '\n' ) );
+                    }
                 }
 
                 // check if primary binary download is available
