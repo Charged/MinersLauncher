@@ -2,8 +2,8 @@
 
 namespace ChargedMinersLauncher {
     enum GameUpdateMode {
-        Always,
+        Never,
         Ask,
-        Never
+        Always
     }
 }
