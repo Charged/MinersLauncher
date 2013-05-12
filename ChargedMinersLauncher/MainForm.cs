@@ -14,7 +14,7 @@ using System.Windows.Forms;
 namespace ChargedMinersLauncher {
     public sealed partial class MainForm : Form {
         static MainForm instance;
-        const string WindowTitle = "Charged-Miners Launcher 1.21";
+        const string WindowTitle = "Charged-Miners Launcher 1.22";
 
         #region Startup / Shutdown
 

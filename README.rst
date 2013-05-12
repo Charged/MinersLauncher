@@ -15,6 +15,16 @@ Latest binary can be found here: http://cdn.charged-miners.com/launcher/ChargedM
 ---------------
  Version history
 ---------------
+- 1.22
+    Shortened the timeout for launcher update requests.
+
+    Fixed "Always" and "Never" game update preference getting mixed up (thanks Ninjacat).
+
+- 1.21
+    Added warning when unchecking "Multiple accounts", if multiple accounts are currently remembered.
+
+    Unchecking "Multiple accounts" now actually erases account info right away, from disk and memory. Before, it waited until launcher closed.
+
 - 1.20
     Multiple account support (check the "Options" tab)
 
