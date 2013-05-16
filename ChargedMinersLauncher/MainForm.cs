@@ -14,7 +14,7 @@ using System.Windows.Forms;
 namespace ChargedMinersLauncher {
     public sealed partial class MainForm : Form {
         static MainForm instance;
-        const string WindowTitle = "Charged-Miners Launcher 1.22";
+        const string VersionString = "Charged-Miners Launcher 1.23";
 
         #region Startup / Shutdown
 
@@ -27,14 +27,14 @@ namespace ChargedMinersLauncher {
                 File.Move( Paths.LauncherLogFile, Paths.LauncherLogFile + ".old" );
             }
             Log( "---- " + DateTime.Now.ToLongDateString() + " ----" );
-            Log( WindowTitle );
+            Log( VersionString );
 
             // Set up the GUI
             InitializeComponent();
             SetToolTips();
             lOptionsStatus.Text = "";
             lToolStatus.Text = "";
-            Text = WindowTitle;
+            Text = VersionString;
 
             // hook up event handlers
             signInWorker.DoWork += SignIn;
@@ -573,6 +573,7 @@ namespace ChargedMinersLauncher {
                 }
             };
             WebClient logClient = new WebClient();
+            logClient.Headers.Add( "user-agent", VersionString );
             string dataString = request.Serialize();
             byte[] data = Encoding.UTF8.GetBytes( dataString );
             try {
@@ -585,6 +586,11 @@ namespace ChargedMinersLauncher {
                 lToolStatus.Text = "Log files uploaded! Please copy the given URL.";
             } catch( WebException ex ) {
                 Log( "UploadLog ERROR: " + ex );
+                string responseBody;
+                using( Stream responseStream = ex.Response.GetResponseStream() ) {
+                    responseBody = new StreamReader( responseStream ).ReadToEnd();
+                }
+                Log( "UploadLog response: " + responseBody );
                 lToolStatus.Text = "Log file upload failed! " + ex.Message;
             }
         }
@@ -632,7 +638,7 @@ namespace ChargedMinersLauncher {
                 request.ReadWriteTimeout = (int)UpdateTimeout.TotalMilliseconds;
                 request.CachePolicy = new RequestCachePolicy( RequestCacheLevel.BypassCache );
                 request.Method = "GET";
-                request.UserAgent = WindowTitle;
+                request.UserAgent = VersionString;
                 using( HttpWebResponse response = (HttpWebResponse)request.GetResponse() ) {
                     using( Stream responseStream = response.GetResponseStream() ) {
                         StreamReader reader = new StreamReader( responseStream );
