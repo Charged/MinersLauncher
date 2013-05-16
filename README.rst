@@ -15,6 +15,9 @@ Latest binary can be found here: http://cdn.charged-miners.com/launcher/ChargedM
 ---------------
  Version history
 ---------------
+- 1.23
+    Fixed log uploading
+
 - 1.22
     Shortened the timeout for launcher update requests.
 
