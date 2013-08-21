@@ -68,6 +68,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AccountManager.cs" />
+    <Compile Include="ClassiCubeSession.cs" />
     <Compile Include="ConfirmDialog.cs">
       <SubType>Form</SubType>
     </Compile>

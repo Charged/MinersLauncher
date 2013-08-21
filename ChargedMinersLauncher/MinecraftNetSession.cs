@@ -3,7 +3,6 @@ using System;
 using System.IO;
 using System.Net;
 using System.Runtime.Serialization.Formatters.Binary;
-using System.Text;
 using System.Text.RegularExpressions;
 
 namespace ChargedMinersLauncher {
@@ -12,14 +11,13 @@ namespace ChargedMinersLauncher {
                      LoginSecureUri = "https://minecraft.net/login",
                      LogoutUri = "http://minecraft.net/logout";
 
-        volatile bool cancel;
-
         static readonly Regex
             LoginAuthToken = new Regex( @"<input type=""hidden"" name=""authenticityToken"" value=""([0-9a-f]+)"">" ),
             LoggedInAs = new Regex( @"<span class=""logged-in"">\s*Logged in as ([a-zA-Z0-9_\.]{2,16})" );
 
         const string MigratedAccountMessage = "Your account has been migrated",
                      WrongUsernameOrPasswordMessage = "Oops, unknown username or password.";
+
 
         public MinecraftNetSession( string loginUsername, string minecraftUsername ) {
             if( loginUsername == null ) {
@@ -32,25 +30,23 @@ namespace ChargedMinersLauncher {
             MinecraftUsername = minecraftUsername;
         }
 
-        public string LoginUsername { get; private set; }
-        public string MinecraftUsername { get; private set; }
-        public LoginResult Status { get; set; }
 
+        volatile bool cancel;
         Cookie PlaySessionCookie {
             get {
-                CookieCollection cookies = cookieJar.GetCookies( new Uri( MinecraftNet ) );
+                CookieCollection cookies = CookieJar.GetCookies( new Uri( MinecraftNet ) );
                 return cookies["PLAY_SESSION"];
             }
         }
 
-        public string PlaySessionString {
+        public override string SessionString {
             get {
                 return PlaySessionCookie.Value;
             }
         }
 
 
-        public void Login( string password, bool rememberSession ) {
+        public override void Login( string password, bool rememberSession ) {
             if( password == null ) throw new ArgumentNullException( "password" );
 
             bool restoredSession = LoadCookie( rememberSession );
@@ -73,7 +69,7 @@ namespace ChargedMinersLauncher {
                     MinecraftUsername.Equals( loggedInUsername, StringComparison.OrdinalIgnoreCase ) ) {
                     // If player is already logged in with the right account: reuse a previous session
                     MinecraftUsername = loggedInUsername;
-                    MainForm.Log( "Login: Restored session for " + MinecraftUsername );
+                    MainForm.Log( "MC.Login: Restored session for " + MinecraftUsername );
                     Status = LoginResult.Success;
                     SaveCookie();
                     return;
@@ -93,12 +89,12 @@ namespace ChargedMinersLauncher {
                     // restoring session failed; log out and retry
                     DownloadString( LogoutUri, MinecraftNet );
                     ResetCookies();
-                    MainForm.Log( "Login: Unrecognized page; retrying" );
+                    MainForm.Log( "MC.Login: Unrecognized page; retrying" );
                     Login( password, rememberSession );
                     return;
                 } else {
                     // something unexpected happened, panic!
-                    MainForm.Log( "Login: Unrecognized page: " + loginPage );
+                    MainForm.Log( "MC.Login: Unrecognized page: " + loginPage );
                     Status = LoginResult.UnrecognizedResponse;
                 }
                 return;
@@ -139,8 +135,8 @@ namespace ChargedMinersLauncher {
             } else if( LoggedInAs.IsMatch( loginResponse ) ) {
                 MinecraftUsername = LoggedInAs.Match( loginResponse ).Groups[1].Value;
                 if( PlaySessionCookie == null ) {
-                    CookieCollection cookies = cookieJar.GetCookies( new Uri( MinecraftNet ) );
-                    MainForm.Log( "Login: No play session. There were " + cookies.Count + " cookies served:" );
+                    CookieCollection cookies = CookieJar.GetCookies( new Uri( MinecraftNet ) );
+                    MainForm.Log( "MC.Login: No play session. There were " + cookies.Count + " cookies served:" );
                     foreach( Cookie cookie in cookies ) {
                         MainForm.Log( "  " + cookie );
                     }
@@ -154,13 +150,13 @@ namespace ChargedMinersLauncher {
                 Status = LoginResult.MigratedAccount;
 
             } else {
-                MainForm.Log( "Login: Unrecognized response: " + loginResponse );
+                MainForm.Log( "MC.Login: Unrecognized response: " + loginResponse );
                 Status = LoginResult.UnrecognizedResponse;
             }
         }
 
 
-        public void CancelAsync() {
+        public override void CancelAsync() {
             cancel = true;
         }
 
@@ -172,26 +168,26 @@ namespace ChargedMinersLauncher {
                     // load a saved session
                     BinaryFormatter formatter = new BinaryFormatter();
                     using( Stream s = File.OpenRead( Paths.CookieContainerFile ) ) {
-                        cookieJar = (CookieContainer)formatter.Deserialize( s );
+                        CookieJar = (CookieContainer)formatter.Deserialize( s );
                     }
-                    CookieCollection cookies = cookieJar.GetCookies( new Uri( MinecraftNet ) );
+                    CookieCollection cookies = CookieJar.GetCookies( new Uri( MinecraftNet ) );
                     foreach( Cookie c in cookies ) {
                         // look for a cookie that corresponds to the current minecraft username
                         int start = c.Value.IndexOf( "username%3A" + MinecraftUsername,
                                                      StringComparison.OrdinalIgnoreCase );
                         if( start != -1 ) {
-                            MainForm.Log( "LoadCookie: Loaded saved session for " + MinecraftUsername );
+                            MainForm.Log( "MC.LoadCookie: Loaded saved session for " + MinecraftUsername );
                             return true;
                         }
                     }
 
                     // if saved session was not for the current username, discard it
-                    MainForm.Log( "LoadCookie: Discarded a saved session (username mismatch)" );
+                    MainForm.Log( "MC.LoadCookie: Discarded a saved session (username mismatch)" );
                     ResetCookies();
 
                 } else {
                     // discard a saved session
-                    MainForm.Log( "LoadCookie: Discarded a saved session" );
+                    MainForm.Log( "MC.LoadCookie: Discarded a saved session" );
                     ResetCookies();
                 }
 
@@ -205,67 +201,15 @@ namespace ChargedMinersLauncher {
 
         void ResetCookies() {
             File.Delete( Paths.CookieContainerFile );
-            cookieJar = new CookieContainer();
+            CookieJar = new CookieContainer();
         }
 
 
         void SaveCookie() {
             BinaryFormatter formatter = new BinaryFormatter();
             using( Stream s = File.Create( Paths.CookieContainerFile ) ) {
-                formatter.Serialize( s, cookieJar );
+                formatter.Serialize( s, CookieJar );
             }
         }
-
-
-        #region Networking
-
-        const string UserAgent = "Charged-Miners Launcher";
-        const int Timeout = 15000;
-        CookieContainer cookieJar;
-
-
-        HttpWebResponse MakeRequest( string uri, string referer, string dataToPost ) {
-            var request = (HttpWebRequest)WebRequest.Create( uri );
-            request.UserAgent = UserAgent;
-            request.ReadWriteTimeout = Timeout;
-            request.Timeout = Timeout;
-            request.Referer = referer;
-            request.KeepAlive = true;
-            request.CookieContainer = cookieJar;
-            if( dataToPost != null ) {
-                request.Method = "POST";
-                request.ContentType = "application/x-www-form-urlencoded";
-                byte[] data = Encoding.UTF8.GetBytes( dataToPost );
-                request.ContentLength = data.Length;
-                using( Stream stream = request.GetRequestStream() ) {
-                    stream.Write( data, 0, data.Length );
-                }
-            }
-            return (HttpWebResponse)request.GetResponse();
-        }
-
-
-        string DownloadString( string uri, string referer ) {
-            var response = MakeRequest( uri, referer, null );
-            using( Stream stream = response.GetResponseStream() ) {
-                if( stream == null ) throw new IOException( "Null response stream for " + uri );
-                using( StreamReader reader = new StreamReader( stream ) ) {
-                    return reader.ReadToEnd();
-                }
-            }
-        }
-
-
-        string UploadString( string uri, string referer, string dataToPost ) {
-            var response = MakeRequest( uri, referer, dataToPost );
-            using( Stream stream = response.GetResponseStream() ) {
-                if( stream == null ) throw new IOException( "Null response stream after posting to " + uri );
-                using( StreamReader reader = new StreamReader( stream ) ) {
-                    return reader.ReadToEnd();
-                }
-            }
-        }
-
-        #endregion
     }
 }

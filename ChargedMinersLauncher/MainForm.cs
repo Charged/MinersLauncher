@@ -316,7 +316,8 @@ namespace ChargedMinersLauncher {
             } else {
                 minecraftUsername = cSignInUsername.Text;
             }
-            signInSession = new MinecraftNetSession( cSignInUsername.Text, minecraftUsername );
+            //signInSession = new MinecraftNetSession( cSignInUsername.Text, minecraftUsername );
+            signInSession = new ClassiCubeSession( cSignInUsername.Text );
 
             State = FormState.SigningIn;
             signInWorker.RunWorkerAsync();
@@ -751,7 +752,7 @@ namespace ChargedMinersLauncher {
 
         #region Sign-In and Accounts
 
-        MinecraftNetSession signInSession;
+        IPlaySession signInSession;
         LaunchMode launchMode;
         SignInAccount activeAccount;
         readonly AccountManager accounts = new AccountManager();
@@ -1242,11 +1243,11 @@ namespace ChargedMinersLauncher {
                     param = tResumeUri.Text;
                     break;
                 case LaunchMode.SignIn:
-                    param = "PLAY_SESSION=" + signInSession.PlaySessionString;
+                    param = "PLAY_SESSION=" + signInSession.SessionString;
                     break;
                 case LaunchMode.SignInWithUri:
                     param = String.Format( "PLAY_SESSION={0} {1}",
-                                           signInSession.PlaySessionString,
+                                           signInSession.SessionString,
                                            tSignInUrl.Text );
                     break;
                 default:
