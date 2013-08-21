@@ -316,7 +316,7 @@ namespace ChargedMinersLauncher {
             } else {
                 minecraftUsername = cSignInUsername.Text;
             }
-            signInSession = new MinecraftNetSession( cSignInUsername.Text, minecraftUsername, tSignInPassword.Text );
+            signInSession = new MinecraftNetSession( cSignInUsername.Text, minecraftUsername );
 
             State = FormState.SigningIn;
             signInWorker.RunWorkerAsync();
@@ -770,7 +770,8 @@ namespace ChargedMinersLauncher {
 
 
         void SignIn( object sender, DoWorkEventArgs e ) {
-            signInSession.Login( xRememberUsername.Checked && xRememberPassword.Checked );
+            bool rememberPass = xRememberUsername.Checked && xRememberPassword.Checked;
+            signInSession.Login( tSignInPassword.Text, rememberPass );
         }
 
 
@@ -938,7 +939,7 @@ namespace ChargedMinersLauncher {
                 activeAccount = new SignInAccount {
                     SignInUsername = cSignInUsername.Text,
                     Password = tSignInPassword.Text,
-                    PlayerName = signInSession.MinercraftUsername,
+                    PlayerName = signInSession.MinecraftUsername,
                     LastUrl = tSignInUrl.Text
                 };
                 accounts.AddAccount( activeAccount );
@@ -1241,11 +1242,11 @@ namespace ChargedMinersLauncher {
                     param = tResumeUri.Text;
                     break;
                 case LaunchMode.SignIn:
-                    param = "PLAY_SESSION=" + signInSession.PlaySessionCookie.Value;
+                    param = "PLAY_SESSION=" + signInSession.PlaySessionString;
                     break;
                 case LaunchMode.SignInWithUri:
                     param = String.Format( "PLAY_SESSION={0} {1}",
-                                           signInSession.PlaySessionCookie.Value,
+                                           signInSession.PlaySessionString,
                                            tSignInUrl.Text );
                     break;
                 default:

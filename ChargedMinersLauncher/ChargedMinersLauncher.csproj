@@ -79,6 +79,7 @@
     <Compile Include="JsonObject.cs" />
     <Compile Include="LaunchMode.cs" />
     <Compile Include="Paths.cs" />
+    <Compile Include="IPlaySession.cs" />
     <Compile Include="RuntimeInfo.cs" />
     <Compile Include="SettingsFile.cs" />
     <Compile Include="SignInAccount.cs" />

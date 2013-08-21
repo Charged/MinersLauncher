@@ -7,7 +7,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 
 namespace ChargedMinersLauncher {
-    sealed class MinecraftNetSession {
+    sealed class MinecraftNetSession : IPlaySession {
         const string MinecraftNet = "http://minecraft.net/",
                      LoginSecureUri = "https://minecraft.net/login",
                      LogoutUri = "http://minecraft.net/logout";
@@ -21,29 +21,38 @@ namespace ChargedMinersLauncher {
         const string MigratedAccountMessage = "Your account has been migrated",
                      WrongUsernameOrPasswordMessage = "Oops, unknown username or password.";
 
+        public MinecraftNetSession( string loginUsername, string minecraftUsername ) {
+            if( loginUsername == null ) {
+                throw new ArgumentNullException( "loginUsername" );
+            }
+            if( minecraftUsername == null ) {
+                throw new ArgumentNullException( "minecraftUsername" );
+            }
+            LoginUsername = loginUsername;
+            MinecraftUsername = minecraftUsername;
+        }
+
         public string LoginUsername { get; private set; }
-        public string MinercraftUsername { get; private set; }
-        string Password { get; set; }
+        public string MinecraftUsername { get; private set; }
         public LoginResult Status { get; set; }
 
-        public Cookie PlaySessionCookie {
+        Cookie PlaySessionCookie {
             get {
                 CookieCollection cookies = cookieJar.GetCookies( new Uri( MinecraftNet ) );
                 return cookies["PLAY_SESSION"];
             }
         }
 
-
-        public MinecraftNetSession( string loginUsername, string minercraftUsername, string password ) {
-            if( loginUsername == null ) throw new ArgumentNullException( "loginUsername" );
-            if( password == null ) throw new ArgumentNullException( "password" );
-            LoginUsername = loginUsername;
-            MinercraftUsername = minercraftUsername;
-            Password = password;
+        public string PlaySessionString {
+            get {
+                return PlaySessionCookie.Value;
+            }
         }
 
 
-        public void Login( bool rememberSession ) {
+        public void Login( string password, bool rememberSession ) {
+            if( password == null ) throw new ArgumentNullException( "password" );
+
             bool restoredSession = LoadCookie( rememberSession );
             MainForm.SetSignInStatus( "Connecting to Minecraft.net..." );
 
@@ -61,10 +70,10 @@ namespace ChargedMinersLauncher {
             if( LoggedInAs.IsMatch( loginPage ) ) {
                 string loggedInUsername = LoggedInAs.Match( loginPage ).Groups[1].Value;
                 if( rememberSession && PlaySessionCookie != null &&
-                    MinercraftUsername.Equals( loggedInUsername, StringComparison.OrdinalIgnoreCase ) ) {
+                    MinecraftUsername.Equals( loggedInUsername, StringComparison.OrdinalIgnoreCase ) ) {
                     // If player is already logged in with the right account: reuse a previous session
-                    MinercraftUsername = loggedInUsername;
-                    MainForm.Log( "Login: Restored session for " + MinercraftUsername );
+                    MinecraftUsername = loggedInUsername;
+                    MainForm.Log( "Login: Restored session for " + MinecraftUsername );
                     Status = LoginResult.Success;
                     SaveCookie();
                     return;
@@ -85,7 +94,7 @@ namespace ChargedMinersLauncher {
                     DownloadString( LogoutUri, MinecraftNet );
                     ResetCookies();
                     MainForm.Log( "Login: Unrecognized page; retrying" );
-                    Login( rememberSession );
+                    Login( password, rememberSession );
                     return;
                 } else {
                     // something unexpected happened, panic!
@@ -99,7 +108,7 @@ namespace ChargedMinersLauncher {
             // Build up form data
             string loginString = String.Format( "username={0}&password={1}&authenticityToken={2}",
                                                 Uri.EscapeDataString( LoginUsername ),
-                                                Uri.EscapeDataString( Password ),
+                                                Uri.EscapeDataString( password ),
                                                 Uri.EscapeDataString( authToken ) );
             if( rememberSession ) {
                 loginString += "&remember=true";
@@ -128,7 +137,7 @@ namespace ChargedMinersLauncher {
                 Status = LoginResult.WrongUsernameOrPass;
 
             } else if( LoggedInAs.IsMatch( loginResponse ) ) {
-                MinercraftUsername = LoggedInAs.Match( loginResponse ).Groups[1].Value;
+                MinecraftUsername = LoggedInAs.Match( loginResponse ).Groups[1].Value;
                 if( PlaySessionCookie == null ) {
                     CookieCollection cookies = cookieJar.GetCookies( new Uri( MinecraftNet ) );
                     MainForm.Log( "Login: No play session. There were " + cookies.Count + " cookies served:" );
@@ -168,10 +177,10 @@ namespace ChargedMinersLauncher {
                     CookieCollection cookies = cookieJar.GetCookies( new Uri( MinecraftNet ) );
                     foreach( Cookie c in cookies ) {
                         // look for a cookie that corresponds to the current minecraft username
-                        int start = c.Value.IndexOf( "username%3A" + MinercraftUsername,
+                        int start = c.Value.IndexOf( "username%3A" + MinecraftUsername,
                                                      StringComparison.OrdinalIgnoreCase );
                         if( start != -1 ) {
-                            MainForm.Log( "LoadCookie: Loaded saved session for " + MinercraftUsername );
+                            MainForm.Log( "LoadCookie: Loaded saved session for " + MinecraftUsername );
                             return true;
                         }
                     }
